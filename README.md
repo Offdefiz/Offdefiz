@@ -1,6 +1,4 @@
-- 👋 Hi, I’m @Offdefiz
-- 👀 I’m interested in beer
-- 🌱 I’m currently learning py
-- 📫 How to reach me? Don1t reach me
-- 😄 Pronouns: yes
-- ⚡ Fun fact: 🍄‍🟫
+👋 Hi, I’m Daniel
+👀 I’m interested in beer, Games and old cars
+🌱 I’m currently learning py
+📫 How to reach me? IG/@Dan_flps
