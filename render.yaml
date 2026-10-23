@@ -1,0 +1,26 @@
+# Ambiente de avaliação: sem persistência; NÃO usar para dados reais.
+# A criação a partir deste Blueprint é opcional: não contrate upgrades pagos.
+services:
+  - type: web
+    name: telegram-ops-avaliacao
+    runtime: docker
+    plan: free
+    region: ohio
+    autoDeploy: false
+    dockerContext: .
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /health
+    envVars:
+      - key: OPS_HOST
+        value: 0.0.0.0
+      - key: OPS_PASSWORD
+        sync: false
+      - key: OPS_SESSION_SECRET
+        generateValue: true
+      - key: OPS_DB_PATH
+        value: /tmp/telegram-ops-avaliacao.sqlite3
+      - key: OPS_REPORT_TIMEZONE
+        value: America/Sao_Paulo
+      - key: OPS_DAILY_REPORT_HOUR
+        value: "8"
+# Sem TELEGRAM_BOT_TOKEN por padrão: operação real só após persistência.
