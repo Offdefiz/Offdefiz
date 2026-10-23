@@ -27,4 +27,5 @@
  back.addEventListener('click',()=>{save();step=Math.max(0,step-1);draw()});
  stage.addEventListener('change',e=>{if(e.target.name==='presenca'){save();next.textContent=state.presenca==='nao'?'ENVIAR RESPOSTA ↗':'CONTINUAR ↗'}});
  draw();
+ fetch('/api/health',{cache:'no-store'}).then(r=>{if(!r.ok){next.disabled=true;error.textContent='Estamos concluindo a ligação com o banco de respostas. Aguarde antes de enviar.'}}).catch(()=>{next.disabled=true;error.textContent='O formulário está temporariamente indisponível. Tente mais tarde.'});
 })();
