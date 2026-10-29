@@ -1,0 +1,1 @@
+{"name":"caixa-juridico","private":true,"version":"0.3.0","engines":{"node":">=22"},"scripts":{"start":"node server.cjs","test":"node --test domain.test.cjs incrementos.test.cjs server.test.cjs","build":"node --check server.cjs && node --check app.js && node --check enhancements.js"}}
