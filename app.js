@@ -96,10 +96,12 @@
     if(a==='sendProposal'||a==='acceptProposal'){const p=state.proposals.find(x=>x.id===id);await mutate('proposal',{oppId:p.oppId,id,operation:a==='sendProposal'?'send':'accept'});render();proposalView(p.oppId);return notify(a==='sendProposal'?'Apresentação registrada manualmente.':'Aceite registrado manualmente.');}
   }catch(err){notify(err.message,true);}}
   window.addEventListener('storage',ev=>{if(ev.key===KEY){try{if(!ev.newValue){storageError='Os dados foram removidos em outra aba. Reinicie a demonstração em Sobre para continuar.';}else{state=C.validate(JSON.parse(ev.newValue));storageError='';}$('#dialog').close();render();notify('Dados atualizados por outra aba. Formulários abertos foram fechados.');}catch(_){storageError='Outra aba gravou dados incompatíveis. Reinicie em Sobre para continuar.';render();}}});
-  window.addEventListener('caixa-theme-saved',ev=>{revision=ev.detail.revision;});
+  window.addEventListener('caixa-theme-saved',ev=>{revision=ev.detail.revision;render();});
   shell();
   if(window.CLOUD){setInterval(async()=>{if(document.querySelector('dialog[open]')||document.activeElement?.matches('input,textarea,select'))return;try{const d=await request('/api/state');if(d.revision!==revision){state=C.validate(d.data);revision=d.revision;window.CJ_THEME=d.theme;render();}}catch(_){}},20000);}
 
 })();
+
+
 
 
