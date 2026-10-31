@@ -65,9 +65,9 @@
         assert(!pr||pr.status!=='aceita','A proposta aceita segue para assinatura.');
       }
       o.next=required(p.next,'Próxima ação');o.due=date(p.due);o.owner=p.owner;o.stage=desired;
-      o.unanswered=p.outcome==='sem_resposta'?(o.unanswered||0)+1:0;o.escalated=o.unanswered>=2;
+      o.unanswered=p.outcome==='sem_resposta'?(o.unanswered||0)+1:0;o.escalated=o.unanswered>=2;if(p.outcome==='sem_resposta'&&o.unanswered>=3){o.recallRecommendation='Avaliar pausa, novo canal ou encerramento fundamentado';}else if(p.outcome!=='sem_resposta'){o.recallRecommendation=null;}
       const entry={id:uid('ret'),outcome:p.outcome,note:required(p.note,'Registro do contato'),at:day,next:o.next,due:o.due,owner:o.owner};
-      o.contacts=o.contacts||[];o.contacts.push(entry);result=o;description='Retorno registrado: '+p.outcome+(o.escalated?' · requer atenção do gestor':'');
+      o.contacts=o.contacts||[];o.contacts.push(entry);if(p.outcome==='sem_resposta'&&o.unanswered===2){const exists=s.tasks.some(t=>t.oppId===o.id&&!t.done&&t.kind==='escalation');if(!exists)s.tasks.push({id:uid('task'),oppId:o.id,kind:'escalation',title:'Gestor: revisar negociação sem resposta e definir estratégia',owner:'gestor',due:day,done:false,created:day});}if(p.outcome!=='sem_resposta'){s.tasks.filter(t=>t.oppId===o.id&&!t.done&&t.kind==='escalation').forEach(t=>{t.done=true;t.closedReason='Cliente respondeu';});}result=o;description='Retorno registrado: '+p.outcome+(o.escalated?' · requer atenção do gestor':'');
     } else if(action==='meeting') {
       if(p.id && p.operation==='reschedule') {
         const m=get(s.meetings,p.id);assert(['agendada','confirmada','nao_compareceu'].includes(m.status),'Esta reunião não pode ser reagendada.');
