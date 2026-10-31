@@ -26,7 +26,7 @@ test('UI: registrar retorno exige resultado explícito e adapta próxima ação 
  const d={querySelector:k=>({'#f-outcome':result,'#f-nextChoice':choice,'#f-next':next})[k]};
  let body='';
  const o={id:'ficticio',stage:'proposta',next:next.value,due:'2026-11-02',owner:'especialista'};
- const sandbox={opp:()=>o,C:{latest:()=>({status:'apresentada'}),stages:{proposta:'Proposta',nutricao:'Recall',negociacao:'Negociação'}},name:()=> 'Pessoa fictícia',hidden:()=>'',select:(label,key,opts)=>{if(key==='outcome')assert.equal(opts[0][0],'');return ''},textarea:()=>'',field:()=>'',form:(title,subtitle,markup)=>{body=markup;return d},e:v=>String(v),mutate:()=>{}};
+ const sandbox={state:{},opp:()=>o,C:{latest:()=>({status:'apresentada'}),stages:{proposta:'Proposta',nutricao:'Recall',negociacao:'Negociação'}},name:()=> 'Pessoa fictícia',hidden:()=>'',select:(label,key,opts)=>{if(key==='outcome')assert.equal(opts[0][0],'');return ''},textarea:()=>'',field:()=>'',form:(title,subtitle,markup)=>{body=markup;return d},e:v=>String(v),mutate:()=>{}};
  isolated('followup','reschedule',sandbox)('ficticio');
  assert.match(body,/Próxima ação sugerida/);
  result.value='objecao';result.fire('change');
@@ -38,7 +38,7 @@ test('UI: registrar retorno exige resultado explícito e adapta próxima ação 
 });
 test('UI: simulador mantém precificação orientativa e valida margem',()=>{
  const fields={hours:ctrl('20'),hourCost:ctrl('150'),expenses:ctrl('0'),margin:ctrl('30'),contracts:ctrl('1'),risk:ctrl('1'),complexity:ctrl('1'),priceResult:ctrl()};
- const form=ctrl(),d={querySelector:k=>k==='#pricingForm'?form:fields[k.slice(3)]};
+ const form=ctrl(),d={querySelector:k=>k==='#pricingForm'?form:k==='#priceResult'?fields.priceResult:fields[k.slice(3)]};
  const sandbox={field:()=>'',select:()=>'',dialog:()=>d,C:{money:cents=>String(cents)}};
  isolated('pricingInterview','newContract',sandbox)();
  assert.match(fields.priceResult.textContent,/428571/);
