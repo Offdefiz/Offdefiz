@@ -12,3 +12,51 @@ test('reagendamento preserva histórico, precisa de nova confirmação e recusa 
 test('fechamento agendado exige proposta apresentada e aceite segue para assinatura',()=>{const f=fixture(),p=run(f,'proposal',{oppId:f.id,...terms});run(f,'proposal',{oppId:f.id,id:p.id,operation:'send'});run(f,'meeting',{oppId:f.id,date:day,time:'17:00',owner:'especialista',subject:'Fechamento'});assert.equal(f.state.opportunities[0].stage,'fechamento');run(f,'proposal',{oppId:f.id,id:p.id,operation:'accept'});assert.equal(f.state.opportunities[0].stage,'assinatura');assert.throws(()=>run(f,'followup',{oppId:f.id,outcome:'data',note:'Teste',owner:'especialista',next:'Retomar',due:day,stage:'nutricao'}),/aceita/);});
 
 test('recall cria uma escalada única, recomenda revisão após terceira tentativa e fecha escalada com resposta',()=>{const f=fixture(),p={oppId:f.id,outcome:'sem_resposta',note:'Sem retorno fictício',next:'Tentar outro canal',owner:'secretaria',due:'2026-11-02',stage:'triagem'};run(f,'followup',p);assert.equal(f.state.tasks.filter(t=>t.kind==='escalation').length,0);run(f,'followup',p);assert.equal(f.state.tasks.filter(t=>t.kind==='escalation'&&!t.done).length,1);assert.equal(f.state.tasks.find(t=>t.kind==='escalation').owner,'gestor');run(f,'followup',p);assert.equal(f.state.tasks.filter(t=>t.kind==='escalation'&&!t.done).length,1);assert.match(f.state.opportunities[0].recallRecommendation,/Avaliar pausa/);run(f,'followup',{...p,outcome:'objecao',note:'Cliente respondeu'});assert.equal(f.state.tasks.filter(t=>t.kind==='escalation'&&!t.done).length,0);assert.equal(f.state.opportunities[0].recallRecommendation,null);});
+
+const vm=require('node:vm'),fs=require('node:fs');
+const ui=fs.readFileSync(require('node:path').join(__dirname,'app.js'),'utf8');
+function isolated(name,next,context){
+ const a=ui.indexOf('function '+name+'('),b=ui.indexOf('function '+next+'(',a+10);
+ assert.ok(a>=0&&b>a,'UI functions found: '+name);
+ return vm.runInNewContext('('+ui.slice(a,b).trim()+')',context);
+}
+function ctrl(value=''){const events={};return {value,textContent:'',innerHTML:'',focus(){},addEventListener(type,fn){events[type]=fn;},fire(type){assert.ok(events[type]);events[type]();}};}
+test('UI: registrar retorno exige resultado explícito e adapta próxima ação à objeção e falta de resposta',()=>{
+ const result=ctrl(''),choice=ctrl(),next=ctrl('Apresentar proposta V1');
+ const d={querySelector:k=>({'#f-outcome':result,'#f-nextChoice':choice,'#f-next':next})[k]};
+ let body='';
+ const o={id:'ficticio',stage:'proposta',next:next.value,due:'2026-11-02',owner:'especialista'};
+ const sandbox={opp:()=>o,C:{latest:()=>({status:'apresentada'}),stages:{proposta:'Proposta',nutricao:'Recall',negociacao:'Negociação'}},name:()=> 'Pessoa fictícia',hidden:()=>'',select:(label,key,opts)=>{if(key==='outcome')assert.equal(opts[0][0],'');return ''},textarea:()=>'',field:()=>'',form:(title,subtitle,markup)=>{body=markup;return d},e:v=>String(v),mutate:()=>{}};
+ isolated('followup','reschedule',sandbox)('ficticio');
+ assert.match(body,/Próxima ação sugerida/);
+ result.value='objecao';result.fire('change');
+ assert.match(next.value,/Reavaliar honorários/);
+ choice.value='Encaminhar para recall futuro';choice.fire('change');
+ assert.equal(next.value,'Encaminhar para recall futuro');
+ result.value='sem_resposta';result.fire('change');
+ assert.equal(next.value,'Realizar nova tentativa de contato');
+});
+test('UI: simulador mantém precificação orientativa e valida margem',()=>{
+ const fields={hours:ctrl('20'),hourCost:ctrl('150'),expenses:ctrl('0'),margin:ctrl('30'),contracts:ctrl('1'),risk:ctrl('1'),complexity:ctrl('1'),priceResult:ctrl()};
+ const form=ctrl(),d={querySelector:k=>k==='#pricingForm'?form:fields[k.slice(3)]};
+ const sandbox={field:()=>'',select:()=>'',dialog:()=>d,C:{money:cents=>String(cents)}};
+ isolated('pricingInterview','newContract',sandbox)();
+ assert.match(fields.priceResult.textContent,/428571/);
+ fields.margin.value='100';form.fire('input');
+ assert.equal(fields.priceResult.textContent,'Revise os parâmetros.');
+});
+test('UI: proposta imprimível tem comando visível e conteúdo escapado',()=>{
+ let printed='',opened=false;
+ const p={version:2,scope:'<script>alert(1)</script>',amount:120000,terms:null,validUntil:'2026-11-02'};
+ const sandbox={C:{latest:()=>p,money:cents=>String(cents)},state:{},client:()=>({name:'Cliente fictício'}),opp:()=>({}),window:{open:()=>{opened=true;return {document:{write:s=>{printed=s},close(){}},focus(){}}}},notify:()=>{},termsText:()=>'',fmt:()=>'',e:v=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))};
+ isolated('printProposal','pricingInterview',sandbox)('id');
+ assert.ok(opened);
+ assert.match(printed,/Imprimir ou salvar como PDF/);
+ assert.match(printed,/window.print\(\)/);
+ assert.ok(!printed.includes('<script>alert'));
+ assert.match(printed,/&lt;script&gt;/);
+});
+test('UI: recomendações de recall e honorários aparecem na ficha',()=>{
+ assert.match(ui,/o\.recallRecommendation\?'/);
+ assert.match(ui,/Honorários propostos/);
+});
