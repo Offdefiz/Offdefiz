@@ -6,3 +6,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:radial-gradient(elli
 @media(max-width:650px){.topbar{padding:0 12px}.top-actions{gap:5px}.top-actions .role-warning{display:none}.profile-select{max-width:120px}.demo-tag{font-size:8px;padding:5px 7px}.content{padding:22px 14px}.heading h1{font-size:26px}.hero{padding:20px}.btn{min-height:44px}.topbar .btn{min-height:36px}.chart-card{padding:19px}.chart-card canvas{height:120px}.hero p{display:none}.metrics{margin-bottom:18px}.task{padding:14px}.task .btn{min-height:36px}.bar-row{grid-template-columns:90px 1fr 22px}.chart-grid{gap:14px}.dialog .action-row{display:grid;grid-template-columns:1fr 1fr}.dialog .action-row .btn{white-space:normal}.bottom-note{font-size:10px}.side-note{display:none}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 @media(max-width:650px){.chart-card:first-child{display:none}.chart-card{padding:16px}.chart-card p{margin-bottom:12px}.bar-row{margin:9px 0}.top-actions{flex-wrap:nowrap}.demo-tag{display:none}.topbar{height:65px}.profile-select{max-width:105px}.top-actions .compact{padding:5px 8px}.topbar .brand-tools{gap:3px}}
+
+/* UX: available actions are not a funnel or completed steps. */
+.dialog .action-row{display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding-top:14px;border-top:1px solid var(--line)}
+.dialog .action-row .btn:not(.primary){background:transparent;color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.dialog .action-row .btn.primary{order:-1}
+.dialog .action-row .btn[data-action="lose"]{margin-left:auto;color:#a34b46;border-color:color-mix(in srgb,#a34b46 35%,var(--line))}
+#nextHelp{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5}
+@media(max-width:650px){.dialog .action-row{display:flex;flex-wrap:wrap}.dialog .action-row .btn{flex:1 1 44%}.dialog .action-row .btn.primary{flex-basis:100%}.dialog .action-row .btn[data-action="lose"]{margin-left:0}}
