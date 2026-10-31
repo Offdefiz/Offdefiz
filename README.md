@@ -32,3 +32,12 @@ Antes de dados reais: segurança independente, modelo relacional com entidades e
 4. Atualizar PUBLIC_APP_URL, DNS e configurações de redirecionamento Auth se forem usadas.
 
 As senhas temporárias, nonce de provisionamento, dados pessoais de clientes e documentos do acervo não pertencem ao repositório.
+
+## Melhorias operacionais (incrementais)
+
+- **Meu Dia** organiza as tarefas já existentes em inegociáveis (hoje, vencidas ou escaladas), negociações de alta alavanca e próximos passos. A classificação é determinística e não usa IA nem cria cobranças repetitivas.
+- **Financeiro** inclui faixas de atraso (1–7, 8–30 e acima de 30 dias) e projeção de parcelas abertas por mês. Os indicadores são previsões e registros manuais, sem conciliação ou movimentação financeira real.
+- **Agenda** oferece abertura manual de um compromisso genérico no Google Calendar e download local de arquivo `.ics`, sempre por ação explícita. **Não é sincronização**: não consulta nem altera automaticamente calendários externos. Os títulos exportados não contêm nomes de clientes; cada evento usa 60 minutos por padrão.
+- As melhorias usam o mesmo estado do aplicativo, preservando os fluxos de atendimento, contrato e parcelas. Não há APIs externas, cobrança ou novos serviços contratados.
+
+Para ativar sincronização real com Google Calendar será necessário OAuth por escritório/usuário, armazenamento protegido de tokens, tratamento de conflitos e autorização específica dos participantes.

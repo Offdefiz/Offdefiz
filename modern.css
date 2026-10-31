@@ -14,3 +14,6 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:radial-gradient(elli
 .dialog .action-row .btn[data-action="lose"]{margin-left:auto;color:#a34b46;border-color:color-mix(in srgb,#a34b46 35%,var(--line))}
 #nextHelp{display:block;margin-top:6px;color:var(--muted);font-size:12px;line-height:1.5}
 @media(max-width:650px){.dialog .action-row{display:flex;flex-wrap:wrap}.dialog .action-row .btn{flex:1 1 44%}.dialog .action-row .btn.primary{flex-basis:100%}.dialog .action-row .btn[data-action="lose"]{margin-left:0}}
+
+/* Prioridades do painel Meu Dia */
+.priority-section{padding:12px 0;border-bottom:1px solid var(--line)}.priority-section:last-child{border-bottom:0}.priority-section h3{margin:0 0 10px;font-size:14px}.priority-section h3 small{font-weight:400;color:var(--muted)}
