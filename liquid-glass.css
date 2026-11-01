@@ -1,0 +1,225 @@
+/*
+Partelís · Liquid Glass 1.0 | Interface oficial — 2026-11-01
+A1 SVG unchanged: #30145F + #8D59FF. Aplicar após partelis.css.
+O vidro é uma camada de MATERIAL; o conteúdo mantém contraste alto e legibilidade.
+*/
+:root{
+  --glass-fill:rgba(255,255,255,.73);
+  --glass-fill-strong:rgba(255,255,255,.85);
+  --glass-border:rgba(255,255,255,.90);
+  --glass-frost:blur(18px) saturate(145%);
+  --glass-shadow:0 16px 42px rgba(48,20,95,.085),0 2px 7px rgba(48,20,95,.045);
+  --glass-highlight:inset 0 1px 0 rgba(255,255,255,.90);
+  --glass-radius:20px;
+}
+body:not(.presentation-page):not(.brand-doc) {
+  background:radial-gradient(ellipse at 85% 10%,rgba(141,89,255,.17),transparent 39%),
+             radial-gradient(ellipse at 15% 87%,rgba(81,42,155,.09),transparent 39%),
+             linear-gradient(154deg,#F9F7FF 0%,#F7F3FC 49%,#FCFBFF 100%);
+  background-attachment:fixed;
+}
+.sidebar{
+  background:rgba(255,255,255,.81);
+  -webkit-backdrop-filter:blur(26px) saturate(160%);
+  backdrop-filter:blur(26px) saturate(160%);
+  border-right:1px solid rgba(194,175,222,.55);
+  box-shadow:8px 0 35px rgba(48,20,95,.055),inset -1px 0 rgba(255,255,255,.65);
+}
+.topbar{
+  background:rgba(255,255,255,.70);
+  -webkit-backdrop-filter:blur(26px) saturate(155%);
+  backdrop-filter:blur(26px) saturate(155%);
+  border-bottom:1px solid rgba(194,175,222,.50);
+  box-shadow:0 3px 20px rgba(48,20,95,.035);
+}
+.glass-surface,.metric,.panel,.opp-card,.chart-card,.login-card,
+.workspace,.flow-step,.detail-block,.version,.lane{
+  background:var(--glass-fill);
+  border:1px solid var(--glass-border);
+  -webkit-backdrop-filter:var(--glass-frost);
+  backdrop-filter:var(--glass-frost);
+  box-shadow:var(--glass-shadow),var(--glass-highlight);
+}
+.panel,.chart-card,.login-card,.metric {border-radius:var(--glass-radius)}
+.opp-card,.workspace,.flow-step,.detail-block,.version {border-radius:15px}
+.lane{border-radius:17px}
+.panel-head,.task,.agenda-item{border-color:rgba(133,112,166,.15)}
+.metric,.opp-card,.btn,.panel{
+  transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease,background-color .22s ease;
+}
+.metric:hover,.opp-card:hover{
+  transform:translateY(-2px);
+  border-color:rgba(161,119,239,.45);
+  box-shadow:0 21px 48px rgba(48,20,95,.12),inset 0 1px 0 rgba(255,255,255,.93);
+}
+.hero,.dark .hero{
+  background:linear-gradient(115deg,#241042 0%,#30145F 58%,#4B2492 100%);
+  border:1px solid rgba(212,186,255,.20);
+  box-shadow:0 18px 42px rgba(48,20,95,.19),inset 0 1px 0 rgba(255,255,255,.14);
+  isolation:isolate;
+}
+.hero::after{
+  border-color:rgba(255,255,255,.16);
+  box-shadow:0 0 0 44px rgba(255,255,255,.035),0 0 0 88px rgba(255,255,255,.02);
+}
+nav button{border:1px solid transparent;transition:background .2s ease,border-color .2s ease}
+nav button.active,.tabs button.active {
+  background:rgba(141,89,255,.15);
+  border-color:rgba(141,89,255,.22);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75);
+  color:#30145F;
+}
+nav button:hover:not(.active){background:rgba(141,89,255,.085)}
+.btn.primary,.dark .btn.primary{
+  background:linear-gradient(175deg,#7740EF 0%,#6230CE 100%);
+  color:#FFFFFF;
+  border:1px solid rgba(63,24,139,.28);
+  box-shadow:0 7px 17px rgba(88,45,183,.22),inset 0 1px 0 rgba(255,255,255,.20);
+}
+.btn.primary:hover,.dark .btn.primary:hover{
+  background:linear-gradient(175deg,#6835D8 0%,#5324BA 100%);
+  box-shadow:0 10px 22px rgba(88,45,183,.30),inset 0 1px 0 rgba(255,255,255,.18);
+}
+.btn:not(.primary){
+  background:rgba(255,255,255,.66);
+  border-color:rgba(194,175,222,.58);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.80),0 3px 10px rgba(48,20,95,.035);
+}
+.btn:not(.primary):hover{background:rgba(242,233,255,.9);border-color:rgba(141,89,255,.35)}
+.btn:active{transform:translateY(1px) scale(.99)}
+.btn:disabled{box-shadow:none;opacity:.53;cursor:not-allowed}
+input,select,textarea,.search input,.field input,.field select,.field textarea,.profile-select{
+  background:rgba(255,255,255,.83);
+  border:1px solid rgba(171,155,202,.48);
+  color:#241042;
+  box-shadow:inset 0 1px 2px rgba(48,20,95,.045);
+}
+input:focus-visible,select:focus-visible,textarea:focus-visible{
+  outline:3px solid rgba(141,89,255,.60);
+  outline-offset:2px;
+  border-color:#8D59FF;
+}
+.dialog,.dialog[open]{
+  background:rgba(255,255,255,.93);
+  -webkit-backdrop-filter:blur(30px) saturate(150%);
+  backdrop-filter:blur(30px) saturate(150%);
+  border:1px solid rgba(255,255,255,.95);
+  box-shadow:0 35px 96px rgba(28,10,53,.25),inset 0 1px 0 rgba(255,255,255,.95);
+}
+.dialog::backdrop{background:rgba(20,10,36,.52);-webkit-backdrop-filter:blur(7px);backdrop-filter:blur(7px)}
+.side-note{background:rgba(237,230,251,.58);border:1px solid rgba(141,89,255,.13)}
+.badge{border:1px solid rgba(133,112,166,.14)}
+.login-page{background:radial-gradient(ellipse at 14% 15%,rgba(141,89,255,.23),transparent 52%),radial-gradient(ellipse at 96% 86%,rgba(48,20,95,.11),transparent 48%),#F8F7FC}
+.login-card{
+  background:rgba(255,255,255,.76);
+  -webkit-backdrop-filter:blur(28px) saturate(148%);
+  backdrop-filter:blur(28px) saturate(148%);
+  border:1px solid rgba(255,255,255,.97);
+  box-shadow:0 28px 78px rgba(48,20,95,.11),inset 0 1px 0 rgba(255,255,255,.95);
+}
+.story-flow span{
+  background:rgba(255,255,255,.62);
+  border:1px solid rgba(255,255,255,.87);
+  -webkit-backdrop-filter:blur(12px);
+  backdrop-filter:blur(12px);
+  box-shadow:0 8px 20px rgba(48,20,95,.075);
+}
+.bar-track{background:rgba(141,89,255,.14)}
+.bar-fill{background:linear-gradient(90deg,#6230CE,#8D59FF)}
+/* Tema escuro: vidro temperado, sem sacrificar legibilidade */
+body.dark{
+  --glass-fill:rgba(35,22,57,.83);
+  --glass-fill-strong:rgba(40,25,66,.92);
+  --glass-border:rgba(170,136,222,.26);
+  --glass-shadow:0 15px 44px rgba(5,2,15,.28),0 2px 8px rgba(0,0,0,.12);
+  --glass-highlight:inset 0 1px 0 rgba(255,255,255,.085);
+  background:radial-gradient(ellipse at 90% 7%,rgba(141,89,255,.18),transparent 42%),linear-gradient(145deg,#140D25,#201233 65%,#100A1D);
+}
+.dark .sidebar,.dark .topbar{
+  background:rgba(30,18,50,.80);
+  border-color:rgba(170,136,222,.20);
+}
+.dark .glass-surface,.dark .metric,.dark .panel,.dark .opp-card,
+.dark .chart-card,.dark .workspace,.dark .flow-step,.dark .detail-block,
+.dark .version,.dark .lane,.dark .login-card,.dark .dialog{
+  background:var(--glass-fill);
+  border-color:var(--glass-border);
+  box-shadow:var(--glass-shadow),var(--glass-highlight);
+  color:#F8F5FF;
+}
+.dark .btn:not(.primary){
+  background:rgba(66,45,96,.70);
+  color:#F8F5FF;
+  border-color:rgba(170,136,222,.3);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+}
+.dark .btn:not(.primary):hover{background:rgba(88,57,137,.75)}
+.dark nav button.active,.dark .tabs button.active{
+  background:rgba(141,89,255,.24);
+  color:#F0E7FF;
+  border-color:rgba(173,134,245,.30);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.10);
+}
+.dark nav button:hover:not(.active){background:rgba(141,89,255,.12)}
+.dark input,.dark select,.dark textarea,.dark .search input,.dark .field input,
+.dark .field select,.dark .field textarea,.dark .profile-select{
+  background:rgba(42,26,66,.92);color:#F8F5FF;border-color:rgba(170,136,222,.32);
+}
+.dark .side-note{background:rgba(75,46,115,.32);border-color:rgba(173,134,245,.19)}
+.dark .bar-track{background:rgba(141,89,255,.18)}
+.dark .login-card{background:rgba(36,23,58,.88)}
+.dark .login-page{background:radial-gradient(ellipse at 15% 16%,rgba(141,89,255,.20),transparent 54%),#140D25}
+.dark .story-flow span{background:rgba(48,29,78,.8);border-color:rgba(176,141,233,.25)}
+/* Composição de vídeo: o mesmo material nos elementos de apresentação */
+.presentation-page .ad{
+  background:radial-gradient(ellipse at 88% 10%,rgba(141,89,255,.27),transparent 44%),linear-gradient(135deg,#140A2A,#30145F 70%,#23103C);
+}
+.presentation-page .stage{
+  background:rgba(255,255,255,.84);
+  border:1px solid rgba(255,255,255,.65);
+  -webkit-backdrop-filter:blur(22px);
+  backdrop-filter:blur(22px);
+  box-shadow:0 24px 76px rgba(2,1,13,.38),inset 0 1px 0 rgba(255,255,255,.55);
+}
+.presentation-page .pill,.presentation-page .outro .url{
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.26);
+  -webkit-backdrop-filter:blur(14px);
+  backdrop-filter:blur(14px);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.18);
+}
+/* Documentação pública: amostras reais sem dados de clientes */
+.brand-doc{background:radial-gradient(ellipse at 85% 8%,#EEE5FF,transparent 47%),#F8F7FC}
+.brand-doc .doc-glass{
+  background:var(--glass-fill);
+  border:1px solid var(--glass-border);
+  -webkit-backdrop-filter:var(--glass-frost);
+  backdrop-filter:var(--glass-frost);
+  box-shadow:var(--glass-shadow),var(--glass-highlight);
+}
+/* Performance e acessibilidade */
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .sidebar,.topbar,.glass-surface,.metric,.panel,.opp-card,.chart-card,.login-card,
+  .workspace,.flow-step,.detail-block,.version,.lane,.dialog{background:#FFFFFF}
+  .dark .sidebar,.dark .topbar,.dark .glass-surface,.dark .metric,.dark .panel,
+  .dark .opp-card,.dark .chart-card,.dark .login-card,.dark .workspace,.dark .lane,
+  .dark .dialog{background:#211434}
+}
+@media(max-width:650px){
+  .sidebar.open{-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);background:rgba(255,255,255,.94)}
+  .dark .sidebar.open{background:rgba(30,18,50,.96)}
+  .metric,.panel,.opp-card,.chart-card,.lane{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
+  .chart-card:first-child{display:block}
+  .login-card{border-radius:23px}
+}
+@media(prefers-reduced-transparency:reduce){
+  .sidebar,.topbar,.glass-surface,.metric,.panel,.opp-card,.chart-card,
+  .login-card,.workspace,.flow-step,.detail-block,.version,.lane,.dialog{
+    -webkit-backdrop-filter:none;backdrop-filter:none;background:#FFFFFF}
+  .dark .sidebar,.dark .topbar,.dark .glass-surface,.dark .metric,.dark .panel,
+  .dark .opp-card,.dark .chart-card,.dark .login-card,.dark .workspace,.dark .lane,
+  .dark .dialog{background:#211434}
+}
+@media(prefers-reduced-motion:reduce){
+  .metric,.opp-card,.btn,.panel{transition:none!important;transform:none!important}
+}

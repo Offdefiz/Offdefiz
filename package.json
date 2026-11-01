@@ -7,7 +7,7 @@
   },
   "scripts": {
     "start": "node server.cjs",
-    "test": "node --test domain.test.cjs incrementos.test.cjs server.test.cjs insights.test.cjs brand.test.cjs",
+    "test": "node --test domain.test.cjs incrementos.test.cjs server.test.cjs insights.test.cjs brand.test.cjs glass.test.cjs",
     "build": "node --check server.cjs && node --check app.js && node --check enhancements.js && node --check insights.js"
   }
 }
