@@ -17,3 +17,12 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:radial-gradient(elli
 
 /* Prioridades do painel Meu Dia */
 .priority-section{padding:12px 0;border-bottom:1px solid var(--line)}.priority-section:last-child{border-bottom:0}.priority-section h3{margin:0 0 10px;font-size:14px}.priority-section h3 small{font-weight:400;color:var(--muted)}
+
+/* Dark blue-petrol default, with existing user-selectable brand colors. */
+.dark{--paper:#14242d;--ink:#e3ebeb;--muted:#aabbb9;--line:#304a4a;--glass:rgba(25,43,51,.92)}
+.dark .panel,.dark .metric,.dark .opp-card,.dark .lane,.dark .workspace,.dark .profile-select{background:#1b3038;border-color:#324b49}
+.dark .sidebar,.dark .topbar{background:rgba(23,40,48,.96)}
+.cj-welcome{max-width:min(480px,calc(100vw - 28px));border-radius:20px}
+.cj-welcome .dialog-body{font-size:14px;line-height:1.7}
+.cj-welcome .dialog-body p{margin:0 0 14px}
+.cj-welcome .dialog-foot{display:flex;justify-content:flex-end}
