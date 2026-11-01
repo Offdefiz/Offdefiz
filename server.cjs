@@ -13,6 +13,21 @@ function page(demo=false){return '<!doctype html><html lang="pt-BR"><head><meta 
 const server=http.createServer(async(req,res)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('X-Frame-Options','SAMEORIGIN');res.setHeader('Cache-Control','no-store');res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'");
 try{const route=new URL(req.url,'http://local').pathname;
 if(req.method!=='GET'&&req.method!=='HEAD'){const origin=req.headers.origin,expected=process.env.PUBLIC_APP_URL||'http://'+req.headers.host;if(!origin||new URL(origin).origin!==new URL(expected).origin)throw new Fault(403,'Origem não autorizada.');}
+
+if(route==='/ativar'&&req.method==='GET'){
+res.setHeader('Referrer-Policy','no-referrer');
+res.setHeader('Content-Type','text/html; charset=utf-8');
+return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Criar senha · Partelís</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><body class="login-page"><main class="login-shell"><section class="login-story"><img src="/brand-horizontal.svg" alt="Partelís" width="220"><h1>Bem-vinda ao Partelís.</h1><p>Seu convite pessoal para testar o escritório com dados fictícios.</p></section><section class="login-card"><h2>Crie sua senha</h2><p>Continue para validar seu convite e escolher uma senha exclusiva.</p><button id="activate" class="btn primary">Criar minha senha</button><p id="message" role="status"></p></section></main><script>const params=new URLSearchParams(location.hash.slice(1));const token=params.get("token_hash");history.replaceState(null,"","/ativar");document.querySelector("#activate").onclick=async function(){this.disabled=true;try{const r=await fetch("/auth/activate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token_hash:token})});const d=await r.json();if(!r.ok)throw new Error(d.error);location.replace("/conta");}catch(e){document.querySelector("#message").textContent=e.message;this.disabled=false;}};</script></body></html>');
+}
+if(route==='/auth/activate'&&req.method==='POST'){
+limit(req);const p=await body(req);
+if(typeof p.token_hash!=='string'||!/^[a-f0-9]{40,128}$/i.test(p.token_hash))throw new Fault(400,'Convite inválido. Abra o link completo recebido.');
+let d;try{d=await supa('/auth/v1/verify',{method:'POST',body:{token_hash:p.token_hash,type:'email'}});}catch{throw new Fault(400,'Este convite expirou ou já foi utilizado. Solicite um novo link.');}
+const member=await supa('/rest/v1/cj_memberships?user_id=eq.'+encodeURIComponent(d.user.id)+'&select=workspace_id',{token:d.access_token});
+if(!member?.length)throw new Fault(403,'Este acesso ainda não foi liberado para os testes.');
+session(res,d,secureRequest(req));return send(res,200,{ok:true});
+}
+
 if(route==='/health')return send(res,200,{status:'ok',configured:Boolean(url&&key)});
 if(route==='/auth/login'&&req.method==='POST'){limit(req);const p=await body(req);const d=await supa('/auth/v1/token?grant_type=password',{method:'POST',body:{email:p.email,password:p.password}});session(res,d,secureRequest(req));return send(res,200,{ok:true});}
 if(route==='/auth/signup'&&req.method==='POST'){limit(req);const p=await body(req);const allowed=(process.env.ALLOWED_EMAILS||'').toLowerCase().split(',').map(x=>x.trim());if(!allowed.includes(String(p.email).toLowerCase())&&String(p.email).toLowerCase()!==String(process.env.TESTER_EMAIL||'').toLowerCase())throw new Fault(403,'Solicite a liberação do seu e-mail ao administrador.');if(String(p.password||'').length<8)throw new Fault(400,'Use uma senha com pelo menos 8 caracteres.');await supa('/auth/v1/signup',{method:'POST',body:{email:p.email,password:p.password}});return send(res,200,{ok:true,message:'Confira seu e-mail para confirmar a conta. Depois, retorne e entre com sua senha.'});}
