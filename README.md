@@ -1,6 +1,6 @@
-# Caixa Jurídico
+# Partelís
 
-Aplicativo piloto para testes com dados fictícios. Interface e regras em JavaScript, servidor Node.js 22 e Supabase separado para autenticação e persistência. Não depende de Render para executar: o servidor aceita PORT e pode rodar em Docker ou outro provedor. Domínio próprio exige apontamento DNS, HTTPS e atualização de PUBLIC_APP_URL.
+Partelís A1 — identidade oficial. Aplicativo piloto para testes com dados fictícios. Interface e regras em JavaScript, servidor Node.js 22 e Supabase separado para autenticação e persistência. Não depende de Render para executar: o servidor aceita PORT e pode rodar em Docker ou outro provedor. Domínio próprio exige apontamento DNS, HTTPS e atualização de PUBLIC_APP_URL.
 
 ## Executar
 
@@ -41,3 +41,7 @@ As senhas temporárias, nonce de provisionamento, dados pessoais de clientes e d
 - As melhorias usam o mesmo estado do aplicativo, preservando os fluxos de atendimento, contrato e parcelas. Não há APIs externas, cobrança ou novos serviços contratados.
 
 Para ativar sincronização real com Google Calendar será necessário OAuth por escritório/usuário, armazenamento protegido de tokens, tratamento de conflitos e autorização específica dos participantes.
+
+## Identidade oficial Partelís A1
+
+Logo: duas faixas diagonais arredondadas com os caminhos SVG aprovados; cores fixas #30145F e #8D59FF. Arquivos públicos `/brand-symbol.svg`, `/brand-horizontal.svg`, `/brand-horizontal-white.svg` e `/favicon.svg`; paleta e UI em `/partelis.css` (carregada após estilos legados), metadados, manifest, impressão e apresentação incorporados. Personalização por escritório (`cj_state.theme`) não modifica mais o logotipo ou a paleta oficial do SaaS. URLs, branch `caixa-juridico`, IDs de banco e chaves legadas de localStorage permanecem intocados para evitar perda de dados e falhas de autenticação. PNGs de ícones para iOS podem ser adicionados posteriormente; o manifest atual utiliza SVG.

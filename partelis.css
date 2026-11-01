@@ -1,0 +1,78 @@
+/* Partelís A1 — identidade oficial. Não redesenhar as faixas aprovadas. */
+:root {
+  color-scheme: light;
+  --brand-deep:#30145F; --brand-violet:#8D59FF; --brand-action:#6A32DE;
+  --brand-hover:#5425BC; --brand-soft:#EDE6FB; --workspace-accent:#30145F;
+  --green:#30145F; --deep:#241042; --ink:#241042; --muted:#625571;
+  --paper:#F8F7FC; --line:#E4DCF4; --gold:#B45309; --red:#B91C1C;
+  --mint:#F0E9FF; --glass:rgba(255,255,255,.95);
+  --shadow:0 4px 20px rgba(36,16,66,.045);
+  --font-brand:Manrope,Inter,system-ui,sans-serif;
+  --font-ui:Inter,system-ui,sans-serif;
+}
+html {accent-color:var(--brand-action)}
+body {font-family:var(--font-ui);background:var(--paper);color:var(--ink)}
+h1,h2,h3,.brand b {font-family:var(--font-brand)}
+.sidebar {background:#FFFFFF;box-shadow:none;border-color:var(--line)}
+.topbar {background:rgba(255,255,255,.96);box-shadow:none}
+.brand {gap:10px;align-items:center}
+.brand .brand-mark {width:43px;height:43px;min-width:43px;object-fit:contain;border:0;border-radius:0;background:transparent;display:block}
+.brand b {color:var(--brand-deep);font-size:22px;font-weight:800;letter-spacing:-.9px}
+.brand small {color:var(--muted);font-size:9px;letter-spacing:.75px}
+.mobile-brand {display:none;align-items:center;gap:8px;font:800 17px/1 var(--font-brand);color:var(--brand-deep)}
+.mobile-brand img {width:29px;height:29px;object-fit:contain}
+nav button {color:#665975;border-radius:11px}
+nav button.active,.tabs button.active {background:var(--brand-soft);color:var(--brand-deep);box-shadow:none}
+nav button:hover {background:#F3EDFF}
+.btn {border-radius:11px}
+.btn.primary,.dark .btn.primary {background:var(--brand-action);border-color:var(--brand-action);color:#FFFFFF;box-shadow:none}
+.btn.primary:hover,.dark .btn.primary:hover {background:var(--brand-hover)}
+.btn:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,a:focus-visible {outline:3px solid var(--brand-violet);outline-offset:3px}
+input,select,textarea {accent-color:var(--brand-action)}
+.hero,.dark .hero {background:var(--brand-deep);color:white;border-radius:16px;box-shadow:none}
+.hero p,.hero-stat span {color:#E3D9F6}
+.hero:after {border-color:#FFFFFF15;box-shadow:none}
+.metric,.panel,.opp-card,.chart-card {box-shadow:var(--shadow)}
+.link,.agenda-time {color:var(--brand-action)}
+.bar-fill {background:var(--brand-action)}
+.bar-track {background:var(--brand-soft)}
+.avatar {background:var(--brand-soft);color:var(--brand-deep)}
+.check:hover {background:var(--brand-soft)}
+.lane.drop-target {background:#F0E8FF;outline-color:var(--brand-action)}
+.login-page {background:radial-gradient(ellipse at 15% 8%,#EEE6FE,transparent 55%),#F8F7FC}
+.login-story {color:var(--ink)}
+.login-story h1 {font-family:var(--font-brand);font-weight:750}
+.login-card {background:#FFFFFF;border:1px solid var(--line);box-shadow:0 16px 55px #30145F0B}
+.login-logo {display:block;width:min(220px,65vw);height:auto;max-height:65px;object-fit:contain;object-position:left}
+.login-story .eyebrow {margin-top:25px}
+.login-card input {border-color:var(--line)}
+.story-flow span {background:#FFF;border:1px solid var(--line);box-shadow:none}
+.dialog {background:#FFFFFF;border:1px solid var(--line);box-shadow:0 20px 60px rgba(36,16,66,.18)}
+.dialog::backdrop {background:#140D2588}
+.dark {
+  color-scheme:dark;--paper:#140D25;--ink:#F8F5FF;--muted:#CEC1E3;
+  --line:#493460;--glass:rgba(29,18,47,.96);--brand-soft:#35214F;
+  --green:#A783FF;--deep:#A783FF;--mint:#35214F;
+}
+.dark .sidebar,.dark .topbar {background:#211434}
+.dark .panel,.dark .metric,.dark .opp-card,.dark .lane,.dark .workspace,.dark .profile-select,.dark .chart-card,
+.dark .field input,.dark .field select,.dark .field textarea,.dark .search input,.dark .dialog {background:#211434;color:var(--ink);border-color:var(--line)}
+.dark .brand b,.dark .mobile-brand {color:#F8F5FF}
+.dark nav button.active,.dark .tabs button.active {background:#35214F;color:#E2D3FF;box-shadow:none}
+.dark nav button:hover {background:#35214F}
+.dark .hero {background:#30145F}
+.dark .avatar {background:#35214F;color:#E2D3FF}
+.dark .login-story {color:var(--ink)}
+.dark .login-card {background:#211434;border-color:var(--line)}
+.dark .login-card input {background:#2B1B42;color:#F8F5FF}
+.dark .story-flow span {background:#211434;border-color:var(--line)}
+.dark .btn:not(.primary) {background:#2B1B42;color:#F8F5FF;border-color:var(--line)}
+@media(max-width:650px){
+  .mobile-brand {display:flex;margin-right:auto;min-width:0}
+  .sidebar.open {background:#FFFFFF}
+  .dark .sidebar.open {background:#211434}
+  .topbar .top-actions {margin-left:auto}
+  .login-shell {gap:20px}
+  .brand .brand-mark {width:39px;height:39px;min-width:39px}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}

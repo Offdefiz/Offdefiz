@@ -1,0 +1,19 @@
+{
+  "name": "Partelís — Gestão Jurídica Inteligente",
+  "short_name": "Partelís",
+  "description": "Gestão jurídica integrada para escritórios",
+  "start_url": "/demo",
+  "scope": "/",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "background_color": "#F8F7FC",
+  "theme_color": "#30145F",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
