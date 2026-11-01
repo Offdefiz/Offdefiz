@@ -24,3 +24,13 @@ test('não é possível pular diretamente para contrato pelo funil',()=>{const f
 test('encerramento exige motivo e fecha reuniões, propostas e tarefas pendentes',()=>{const f=fixture(),p=proposal(f);run(f,'meeting',{oppId:f.id,date:DAY,time:'15:00',owner:'especialista',subject:'Diagnóstico'});assert.throws(()=>run(f,'stage',{oppId:f.id,stage:'perdido'}),/obrigatório/);run(f,'stage',{oppId:f.id,stage:'perdido',reason:'Sem interesse neste momento'});assert.equal(f.state.proposals[0].status,'retirada');assert.equal(f.state.meetings[0].status,'cancelada');assert.ok(f.state.tasks.every(t=>t.done));});
 test('pagamento futuro é rejeitado e indicadores de atraso usam apenas saldo aberto',()=>{const f=fixture();contract(f,{firstDue:'2026-10-28'});const i=f.state.installments[0];assert.equal(C.metrics(f.state,DAY).overdue,10000);assert.throws(()=>run(f,'payment',{id:i.id,paidAt:'2026-10-30'}),/futuro/);run(f,'payment',{id:i.id,paidAt:DAY});assert.equal(C.metrics(f.state,DAY).overdue,0);});
 test('seed contém somente dados declaradamente fictícios e vínculos íntegros',()=>{const s=C.seed(DAY);assert.equal(s.clients.length,8);assert.ok(s.clients.every(c=>c.name.includes('Exemplo')));assert.ok(s.debts.every(d=>d.creditor.startsWith('Banco Exemplo')));s.contracts.forEach(c=>assert.equal(s.installments.filter(i=>i.contractId===c.id).reduce((n,i)=>n+i.amount,0),c.amount));assert.doesNotThrow(()=>C.validate(s));});
+
+
+test('reuniões pendentes entram em atraso pelo horário de Brasília sem alterar comparecimento',()=>{
+ const m={date:'2026-11-01',time:'14:00',status:'confirmada'};
+ assert.equal(C.meetingOverdue(m,new Date('2026-11-01T16:59:59Z')),false);
+ assert.equal(C.meetingOverdue(m,new Date('2026-11-01T17:00:01Z')),true);
+ assert.equal(m.status,'confirmada');
+ for(const status of ['realizada','cancelada','reagendada','nao_compareceu'])assert.equal(C.meetingOverdue({...m,status},new Date('2026-11-02T17:00:00Z')),false);
+ assert.equal(C.meetingOverdue({...m,status:'agendada'},new Date('2026-11-02T17:00:00Z')),true);
+});

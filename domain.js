@@ -144,6 +144,12 @@
       if(i===7)s=execute(s,'gestor','stage',{oppId:id,stage:'diagnostico',next:'Concluir análise e definir escopo',due:day},day).state;
     });return s;
   }
+  function meetingOverdue(m, now = new Date()) {
+    if (!['agendada','confirmada'].includes(m.status)) return false;
+    const scheduled = new Date(m.date+'T'+m.time+':00-03:00').getTime();
+    return Number.isFinite(scheduled) && scheduled < new Date(now).getTime();
+  }
   function validate(s) {assert(s&&s.schema===1,'Formato de dados incompatível.');['clients','debts','opportunities','meetings','proposals','contracts','installments','cases','tasks','audit'].forEach(k=>assert(Array.isArray(s[k]),'Dados incompletos: '+k));return s;}
-  return {roles,stages,can,today,shift,month,cents,money,latest,execute,metrics,seed,validate};
+  return {meetingOverdue,roles,stages,can,today,shift,month,cents,money,latest,execute,metrics,seed,validate};
 });
+

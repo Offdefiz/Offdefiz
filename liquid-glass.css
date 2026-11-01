@@ -223,3 +223,51 @@ body.dark{
 @media(prefers-reduced-motion:reduce){
   .metric,.opp-card,.btn,.panel{transition:none!important;transform:none!important}
 }
+
+/* Workspace appearance: the approved A1 logo remains independent of UI colors. */
+body.office-ui{
+ --green:var(--workspace-accent);--deep:var(--workspace-accent);--ink:#202630;--muted:#5d6675;
+ --paper:#f6f7f9;--line:#dce1e8;--surface:#fff;--glass-fill:rgba(255,255,255,.88);
+ --glass-border:#e0e4eb;--mint:color-mix(in srgb,var(--workspace-accent) 10%,var(--surface));
+ --ui-accent:color-mix(in srgb,var(--workspace-accent) 78%,#000);
+ --ui-button:color-mix(in srgb,var(--workspace-accent) 65%,#000);
+ --glass-shadow:0 8px 24px #11182709;--glass-highlight:inset 0 1px 0 #ffffff60;
+ background:radial-gradient(ellipse at 85% 10%,color-mix(in srgb,var(--workspace-accent) 8%,transparent),transparent 42%),var(--paper);color:var(--ink)
+}
+body.office-ui.dark{color-scheme:dark;--ink:#edf0f5;--muted:#b3bdca;--paper:#141820;--surface:#202630;--line:#3d4654;--glass-fill:rgba(32,38,48,.95);--glass-border:#3d4654;--ui-accent:color-mix(in srgb,var(--workspace-accent) 45%,#fff);--green:var(--ui-accent);--deep:var(--ui-accent);--glass-shadow:0 8px 24px #0003;--glass-highlight:inset 0 1px 0 #ffffff0a}
+.office-ui .sidebar,.office-ui .topbar,.office-ui .sidebar.open{background:var(--glass-fill);border-color:var(--line)}
+.office-ui .panel,.office-ui .metric,.office-ui .opp-card,.office-ui .chart-card,.office-ui .workspace,.office-ui .flow-step,.office-ui .detail-block,.office-ui .version,.office-ui .lane,.office-ui .dialog[open]{background:var(--glass-fill);color:var(--ink);border-color:var(--line)}
+.office-ui nav button{color:var(--muted)}
+.office-ui nav button.active,.office-ui .tabs button.active,.office-ui .avatar,.office-ui .portal-launch{background:var(--mint);color:var(--ui-accent);border-color:var(--line)}
+.office-ui nav button:hover,.office-ui .btn:not(.primary):hover,.office-ui .check:hover{background:var(--mint)}
+.office-ui .btn.primary{background:var(--ui-button);color:#fff;border-color:var(--ui-button);box-shadow:0 5px 14px #0001}
+.office-ui .btn.primary:hover{background:color-mix(in srgb,var(--ui-button) 85%,#000)}
+.office-ui .btn:not(.primary),.office-ui input,.office-ui select,.office-ui textarea,.office-ui .field input,.office-ui .field select,.office-ui .field textarea,.office-ui .search input,.office-ui .profile-select{background:var(--surface);color:var(--ink);border-color:var(--line)}
+.office-ui .hero{background:linear-gradient(115deg,color-mix(in srgb,var(--workspace-accent) 55%,#000),var(--ui-button));color:#fff}
+.office-ui .hero p,.office-ui .hero-stat span{color:#ffffffe0}
+.office-ui .bar-fill{background:var(--ui-accent)}
+.office-ui .bar-track,.office-ui .side-note,.office-ui .callout,.office-ui th,.office-ui .lane-head span{background:var(--mint);color:var(--ink);border-color:var(--line)}
+.office-ui .link,.office-ui .agenda-time,.office-ui a{color:var(--ui-accent)}
+.office-ui .portal-launch small,.office-ui .bottom-note{color:var(--muted)}
+.office-ui .badge:not(.red):not(.gold):not(.blue){background:var(--mint);color:var(--ink)}
+.office-ui.dark .badge.red,.office-ui.dark .error{background:#48242c;color:#ffb4be}
+.office-ui.dark .badge.gold,.office-ui.dark .callout.gold{background:#42351d;color:#f8d88f}
+.office-ui .lane.drop-target{background:var(--mint);outline-color:var(--ui-accent)}
+.office-ui :is(button,a,input,select,textarea):focus-visible{outline:3px solid var(--ui-accent);outline-offset:3px}
+.office-ui .mobile-menu{display:inline-flex}
+.sidebar-close{display:none}
+@media(min-width:651px){
+ .office-ui.sidebar-collapsed .sidebar{width:76px;padding:24px 9px;overflow-y:auto}
+ .office-ui.sidebar-collapsed .shell{margin-left:76px}
+ .sidebar-collapsed .brand{padding:0 6px 24px}
+ .sidebar-collapsed .brand>div,.sidebar-collapsed .workspace,.sidebar-collapsed .nav-title,.sidebar-collapsed nav button span,.sidebar-collapsed .side-end{display:none}
+ .sidebar-collapsed nav button{justify-content:center;padding:12px}
+}
+@media(max-width:650px){
+ .office-ui .sidebar{overflow-y:auto;padding-top:55px;max-height:100dvh}
+ .office-ui .sidebar-close{display:inline-flex;position:absolute;top:10px;right:12px}
+ .office-ui .topbar{flex-wrap:wrap;height:auto;min-height:65px;gap:8px;padding:10px 12px}
+ .office-ui .top-actions{flex-wrap:wrap;gap:5px}
+ .office-ui .mobile-brand{font-size:15px}
+}
+@media(prefers-reduced-transparency:reduce){.office-ui .sidebar,.office-ui .topbar,.office-ui .panel,.office-ui .dialog[open]{background:var(--surface);backdrop-filter:none;-webkit-backdrop-filter:none}}
