@@ -1,0 +1,27 @@
+{
+  "version": "0.4.0",
+  "published": "2026-11-01",
+  "title": "Novidades do Partelís",
+  "notes": [
+    {
+      "type": "new",
+      "title": "Tour guiado do aplicativo",
+      "description": "Conheça a lógica de cada módulo, os botões e as etapas do funil."
+    },
+    {
+      "type": "new",
+      "title": "Central de atualizações",
+      "description": "Consulte as melhorias, correções e novas funções do Partelís."
+    },
+    {
+      "type": "improvement",
+      "title": "Identidade do escritório",
+      "description": "Personalização de aparência e identidade visual do espaço de trabalho."
+    },
+    {
+      "type": "fix",
+      "title": "Navegação e tarefas",
+      "description": "Melhorias no menu retrátil, feedback de salvamento e reuniões atrasadas."
+    }
+  ]
+}
