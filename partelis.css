@@ -76,3 +76,6 @@ input,select,textarea {accent-color:var(--brand-action)}
   .brand .brand-mark {width:39px;height:39px;min-width:39px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* Link para o protótipo independente de acesso ao cliente */
+.portal-launch{display:block;margin:0 6px 15px;padding:12px 13px;border-radius:12px;background:rgba(141,89,255,.1);border:1px solid rgba(141,89,255,.2);color:#30145F;text-decoration:none;font-weight:750;font-size:12px}.portal-launch small{display:block;margin-top:3px;color:#625571;font-weight:550;font-size:10px}.portal-launch:hover{background:rgba(141,89,255,.18)}.dark .portal-launch{background:rgba(141,89,255,.16);color:#EBE0FF}.dark .portal-launch small{color:#CFC0E5}

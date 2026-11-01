@@ -51,3 +51,7 @@ Logo: duas faixas diagonais arredondadas com os caminhos SVG aprovados; cores fi
 Camada `liquid-glass.css` carregada após `partelis.css` nas páginas da plataforma, login, conta e apresentação animada. Painéis, sidebar, topbar, modais, botões e formulários têm transparência, blur, realces de borda e sombras controladas; em tema escuro há tokens específicos. Fallback para browsers sem backdrop-filter, redução de transparência e prefers-reduced-motion. Mantidas as proporções exatas do SVG A1.
 
 Página pública de documentação para criação de vídeos: `/identidade`. CSS servido em `/liquid-glass.css`. Não usar dados reais no vídeo.
+
+## Novo módulo: Área do Cliente (protótipo)
+
+Abrir `/cliente/demo` para a experiência responsiva de acompanhamento do cliente: casos e etapas, eventos informativos, honorários/parcelas fictícios, mensagens locais não enviadas e preferências de boletim. O escritório é personalizável dentro de uma identidade Partelís A1 estável; demonstração usa dois clientes e dois escritórios fictícios. O link também está na sidebar do aplicativo. **Nenhuma conexão com os dados reais da tabela `cj_state` foi adicionada.** O login real de clientes, RLS, upload de documentos e troca real de mensagens ainda não existem. Antes do lançamento ver `portal-architecture.md`.
