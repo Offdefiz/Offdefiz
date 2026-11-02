@@ -1,8 +1,28 @@
 {
-  "version": "0.6.0",
+  "version": "0.7.1",
   "published": "2026-11-02",
-  "title": "Partelís · Clientes, funil e propostas visuais",
+  "title": "Partelís · Propostas bancárias e segurança",
   "notes": [
+    {
+      "type": "security",
+      "title": "Gráficos de proposta protegidos",
+      "description": "Rótulos inseridos nos gráficos não podem injetar HTML na apresentação."
+    },
+    {
+      "type": "new",
+      "title": "Quatro modelos de proposta com sete slides",
+      "description": "Passivo bancário, ação revisional, superendividamento e holding; escopo, diagnóstico e parcelamento personalizados, PDF em paisagem."
+    },
+    {
+      "type": "improvement",
+      "title": "Identidade das propostas por escritório",
+      "description": "Foto de capa, logotipo otimizado, OAB e cores próprias da apresentação, sem alterar o tema do CRM."
+    },
+    {
+      "type": "improvement",
+      "title": "Migração visual para Partelís",
+      "description": "Nomes e arquivos visíveis ajustados com compatibilidade para os identificadores técnicos e sessões existentes."
+    },
     {
       "type": "new",
       "title": "Cadastro de clientes",
@@ -15,8 +35,8 @@
     },
     {
       "type": "new",
-      "title": "Proposta visual em seis páginas",
-      "description": "Modelo institucional imprimível em PDF, com escopo e condições de parcelamento personalizadas."
+      "title": "Proposta visual em sete páginas",
+      "description": "Quatro apresentações institucionais de sete slides, com gráficos quando houver dados, escopo e parcelamento."
     },
     {
       "type": "improvement",
