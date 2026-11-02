@@ -76,6 +76,11 @@ function buildValues({proposal,client,office,settings,debts}){
  superendividamento:{DIVIDA_TOTAL:totalDebt?money(totalDebt):'Não informado',RENDA_COMPROMETIDA:'Não informada',QTD_CREDORES:new Set((debts||[]).map(d=>d.creditor)).size||'Não informado'},
  holding:{PATRIMONIO_ESTIMADO:'Não informado',QTD_BENS:'Não informado',REGIME_ATUAL:'Não informado',NOME_HOLDING:'A definir',QUOTISTAS:'A definir'}
  };
+ if(kind==='revisional'&&chart.meses[0]!=='—'){
+  const asPct=v=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(v)+'% a.m.';
+  extras.revisional.TAXA_CONTRATADA=asPct(chart.contratada.at(-1));extras.revisional.TAXA_REFERENCIA=asPct(chart.referencia.at(-1));
+ }
+ if(kind==='superendividamento'&&chart.renda.length){const items=chart.renda.filter(x=>/d[ií]vid|parcel|comprometid/i.test(x.l));if(items.length)extras.superendividamento.RENDA_COMPROMETIDA=new Intl.NumberFormat('pt-BR',{maximumFractionDigits:1}).format(items.reduce((a,x)=>a+x.v,0)/(chart.renda.reduce((a,x)=>a+x.v,0)||1)*100)+'% (estimado)';}
  const optional=visual.fields&&typeof visual.fields==='object'?visual.fields:{};
  for(const [key,value] of Object.entries({...extras[kind],...optional})){
   if(typeof value==='string'||typeof value==='number')data[key]=String(value).slice(0,300);
