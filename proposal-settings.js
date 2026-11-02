@@ -13,7 +13,13 @@ const encodePhoto=async(file,type)=>{
  if(!file)return null;const limit=type==='cover'?5*1024*1024:2*1024*1024;
  if(file.size>limit)throw Error(type==='cover'?'A foto pode ter até 5 MB.':'O logotipo pode ter até 2 MB.');
  if(!['image/png','image/jpeg','image/svg+xml','image/webp'].includes(file.type))throw Error('Formato inválido. Use PNG, JPG ou SVG.');
- const img=new Image(),blobUrl=URL.createObjectURL(file);
+ let source=file;
+ if(file.type==='image/svg+xml'){
+  const svg=await file.text();
+  if(!/<svg[\s>]/i.test(svg)||/<(?:script|foreignObject|iframe|object|embed|image)\b|\son[a-z]+\s*=|(?:xlink:)?href\s*=|url\s*\(|@import/i.test(svg))throw Error('SVG contém recursos externos ou código não permitido. Envie um arquivo SVG simples.');
+  source=new Blob([svg],{type:'image/svg+xml'});
+ }
+ const img=new Image(),blobUrl=URL.createObjectURL(source);
  try{await new Promise((resolve,reject)=>{img.onload=resolve;img.onerror=()=>reject(Error('Não foi possível abrir esta imagem.'));img.src=blobUrl;});
  const origW=img.naturalWidth,origH=img.naturalHeight;if(!origW||!origH)throw Error('Imagem inválida.');
  const max=type==='cover'?1280:500;let scale=Math.min(1,max/Math.max(origW,origH));
