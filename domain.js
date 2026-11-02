@@ -1,6 +1,6 @@
 (function(root, factory) {
   if (typeof module === 'object' && module.exports) module.exports = factory();
-  else root.Caixa = factory();
+  else { root.Partelis = factory(); root.Caixa = root.Partelis; }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function() {
   'use strict';
   const roles = {gestor:'Gestor',secretaria:'SDR / secretaria',especialista:'Especialista',juridico:'Jurídico',financeiro:'Financeiro'};
