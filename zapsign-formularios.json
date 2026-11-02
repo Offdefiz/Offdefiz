@@ -1,0 +1,2510 @@
+[
+  {
+    "arquivo": "contrato_passivo_bancario.docx",
+    "tipo": "contrato",
+    "modalidade": "passivo_bancario",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      },
+      {
+        "papel": "contratado",
+        "ancora": "<<signer2>>",
+        "rubrica": "<<signer2Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "EMAIL DO CLIENTE",
+      "TELEFONE DO CLIENTE",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ADVOGADO EMAIL",
+      "QUANTIDADE CONTRATOS",
+      "INSTITUICOES ENVOLVIDAS",
+      "PASSIVO ESTIMADO",
+      "HONORARIO FIXO VALOR",
+      "HONORARIO FIXO EXTENSO",
+      "QUANTIDADE PARCELAS",
+      "VALOR PARCELA",
+      "PRIMEIRO VENCIMENTO",
+      "FORMA DE PAGAMENTO",
+      "EXITO PERCENTUAL",
+      "EXITO BASE",
+      "EXITO CONDICOES",
+      "VIGENCIA",
+      "FORO COMARCA",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{EMAIL DO CLIENTE}}",
+          "input_type": "email",
+          "label": "E-mail do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{TELEFONE DO CLIENTE}}",
+          "input_type": "phone_br",
+          "label": "Telefone com DDD",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{ADVOGADO EMAIL}}",
+          "input_type": "email",
+          "label": "E-mail do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        },
+        {
+          "variable": "{{QUANTIDADE CONTRATOS}}",
+          "input_type": "input",
+          "label": "Quantidade de contratos",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 16
+        },
+        {
+          "variable": "{{INSTITUICOES ENVOLVIDAS}}",
+          "input_type": "input",
+          "label": "Instituições envolvidas",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 17
+        },
+        {
+          "variable": "{{PASSIVO ESTIMADO}}",
+          "input_type": "dinheiro",
+          "label": "Passivo estimado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 18
+        },
+        {
+          "variable": "{{HONORARIO FIXO VALOR}}",
+          "input_type": "dinheiro",
+          "label": "Honorário fixo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 19
+        },
+        {
+          "variable": "{{HONORARIO FIXO EXTENSO}}",
+          "input_type": "input",
+          "label": "Honorário fixo por extenso",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 20
+        },
+        {
+          "variable": "{{QUANTIDADE PARCELAS}}",
+          "input_type": "input",
+          "label": "Quantidade de parcelas",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 21
+        },
+        {
+          "variable": "{{VALOR PARCELA}}",
+          "input_type": "dinheiro",
+          "label": "Valor da parcela",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 22
+        },
+        {
+          "variable": "{{PRIMEIRO VENCIMENTO}}",
+          "input_type": "date",
+          "label": "Primeiro vencimento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 23
+        },
+        {
+          "variable": "{{FORMA DE PAGAMENTO}}",
+          "input_type": "input",
+          "label": "Forma de pagamento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 24
+        },
+        {
+          "variable": "{{EXITO PERCENTUAL}}",
+          "input_type": "input",
+          "label": "Percentual de êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 25
+        },
+        {
+          "variable": "{{EXITO BASE}}",
+          "input_type": "input",
+          "label": "Base do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 26
+        },
+        {
+          "variable": "{{EXITO CONDICOES}}",
+          "input_type": "input",
+          "label": "Condições do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 27
+        },
+        {
+          "variable": "{{VIGENCIA}}",
+          "input_type": "input",
+          "label": "Vigência",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 28
+        },
+        {
+          "variable": "{{FORO COMARCA}}",
+          "input_type": "input",
+          "label": "Foro (comarca)",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 29
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 30
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 31
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "procuracao_passivo_bancario.docx",
+    "tipo": "procuracao",
+    "modalidade": "passivo_bancario",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "INSTITUICOES ENVOLVIDAS",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{INSTITUICOES ENVOLVIDAS}}",
+          "input_type": "input",
+          "label": "Instituições envolvidas",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "declaracao_hipossuficiencia_passivo_bancario.docx",
+    "tipo": "declaracao_hipossuficiencia",
+    "modalidade": "passivo_bancario",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "RENDA MENSAL",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{RENDA MENSAL}}",
+          "input_type": "dinheiro",
+          "label": "Renda mensal",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "contrato_acao_revisional.docx",
+    "tipo": "contrato",
+    "modalidade": "acao_revisional",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      },
+      {
+        "papel": "contratado",
+        "ancora": "<<signer2>>",
+        "rubrica": "<<signer2Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "EMAIL DO CLIENTE",
+      "TELEFONE DO CLIENTE",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ADVOGADO EMAIL",
+      "CONTRATO BANCARIO",
+      "INSTITUICAO FINANCEIRA",
+      "COMARCA ACAO",
+      "HONORARIO FIXO VALOR",
+      "HONORARIO FIXO EXTENSO",
+      "QUANTIDADE PARCELAS",
+      "VALOR PARCELA",
+      "PRIMEIRO VENCIMENTO",
+      "FORMA DE PAGAMENTO",
+      "EXITO PERCENTUAL",
+      "EXITO BASE",
+      "EXITO CONDICOES",
+      "VIGENCIA",
+      "FORO COMARCA",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{EMAIL DO CLIENTE}}",
+          "input_type": "email",
+          "label": "E-mail do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{TELEFONE DO CLIENTE}}",
+          "input_type": "phone_br",
+          "label": "Telefone com DDD",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{ADVOGADO EMAIL}}",
+          "input_type": "email",
+          "label": "E-mail do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        },
+        {
+          "variable": "{{CONTRATO BANCARIO}}",
+          "input_type": "input",
+          "label": "Contrato bancário",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 16
+        },
+        {
+          "variable": "{{INSTITUICAO FINANCEIRA}}",
+          "input_type": "input",
+          "label": "Instituição financeira",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 17
+        },
+        {
+          "variable": "{{COMARCA ACAO}}",
+          "input_type": "input",
+          "label": "Comarca da ação",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 18
+        },
+        {
+          "variable": "{{HONORARIO FIXO VALOR}}",
+          "input_type": "dinheiro",
+          "label": "Honorário fixo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 19
+        },
+        {
+          "variable": "{{HONORARIO FIXO EXTENSO}}",
+          "input_type": "input",
+          "label": "Honorário fixo por extenso",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 20
+        },
+        {
+          "variable": "{{QUANTIDADE PARCELAS}}",
+          "input_type": "input",
+          "label": "Quantidade de parcelas",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 21
+        },
+        {
+          "variable": "{{VALOR PARCELA}}",
+          "input_type": "dinheiro",
+          "label": "Valor da parcela",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 22
+        },
+        {
+          "variable": "{{PRIMEIRO VENCIMENTO}}",
+          "input_type": "date",
+          "label": "Primeiro vencimento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 23
+        },
+        {
+          "variable": "{{FORMA DE PAGAMENTO}}",
+          "input_type": "input",
+          "label": "Forma de pagamento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 24
+        },
+        {
+          "variable": "{{EXITO PERCENTUAL}}",
+          "input_type": "input",
+          "label": "Percentual de êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 25
+        },
+        {
+          "variable": "{{EXITO BASE}}",
+          "input_type": "input",
+          "label": "Base do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 26
+        },
+        {
+          "variable": "{{EXITO CONDICOES}}",
+          "input_type": "input",
+          "label": "Condições do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 27
+        },
+        {
+          "variable": "{{VIGENCIA}}",
+          "input_type": "input",
+          "label": "Vigência",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 28
+        },
+        {
+          "variable": "{{FORO COMARCA}}",
+          "input_type": "input",
+          "label": "Foro (comarca)",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 29
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 30
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 31
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "procuracao_acao_revisional.docx",
+    "tipo": "procuracao",
+    "modalidade": "acao_revisional",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "CONTRATO BANCARIO",
+      "INSTITUICAO FINANCEIRA",
+      "COMARCA ACAO",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{CONTRATO BANCARIO}}",
+          "input_type": "input",
+          "label": "Contrato bancário",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{INSTITUICAO FINANCEIRA}}",
+          "input_type": "input",
+          "label": "Instituição financeira",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{COMARCA ACAO}}",
+          "input_type": "input",
+          "label": "Comarca da ação",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 16
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 17
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "declaracao_hipossuficiencia_acao_revisional.docx",
+    "tipo": "declaracao_hipossuficiencia",
+    "modalidade": "acao_revisional",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "RENDA MENSAL",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{RENDA MENSAL}}",
+          "input_type": "dinheiro",
+          "label": "Renda mensal",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "contrato_superendividamento.docx",
+    "tipo": "contrato",
+    "modalidade": "superendividamento",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      },
+      {
+        "papel": "contratado",
+        "ancora": "<<signer2>>",
+        "rubrica": "<<signer2Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "EMAIL DO CLIENTE",
+      "TELEFONE DO CLIENTE",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ADVOGADO EMAIL",
+      "QUANTIDADE CREDORES",
+      "RELACAO CREDORES",
+      "DIVIDA TOTAL",
+      "RENDA MENSAL",
+      "HONORARIO FIXO VALOR",
+      "HONORARIO FIXO EXTENSO",
+      "QUANTIDADE PARCELAS",
+      "VALOR PARCELA",
+      "PRIMEIRO VENCIMENTO",
+      "FORMA DE PAGAMENTO",
+      "EXITO PERCENTUAL",
+      "EXITO BASE",
+      "EXITO CONDICOES",
+      "VIGENCIA",
+      "FORO COMARCA",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{EMAIL DO CLIENTE}}",
+          "input_type": "email",
+          "label": "E-mail do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{TELEFONE DO CLIENTE}}",
+          "input_type": "phone_br",
+          "label": "Telefone com DDD",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{ADVOGADO EMAIL}}",
+          "input_type": "email",
+          "label": "E-mail do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        },
+        {
+          "variable": "{{QUANTIDADE CREDORES}}",
+          "input_type": "input",
+          "label": "Quantidade credores",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 16
+        },
+        {
+          "variable": "{{RELACAO CREDORES}}",
+          "input_type": "input",
+          "label": "Relação de credores",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 17
+        },
+        {
+          "variable": "{{DIVIDA TOTAL}}",
+          "input_type": "dinheiro",
+          "label": "Dívida total",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 18
+        },
+        {
+          "variable": "{{RENDA MENSAL}}",
+          "input_type": "dinheiro",
+          "label": "Renda mensal",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 19
+        },
+        {
+          "variable": "{{HONORARIO FIXO VALOR}}",
+          "input_type": "dinheiro",
+          "label": "Honorário fixo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 20
+        },
+        {
+          "variable": "{{HONORARIO FIXO EXTENSO}}",
+          "input_type": "input",
+          "label": "Honorário fixo por extenso",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 21
+        },
+        {
+          "variable": "{{QUANTIDADE PARCELAS}}",
+          "input_type": "input",
+          "label": "Quantidade de parcelas",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 22
+        },
+        {
+          "variable": "{{VALOR PARCELA}}",
+          "input_type": "dinheiro",
+          "label": "Valor da parcela",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 23
+        },
+        {
+          "variable": "{{PRIMEIRO VENCIMENTO}}",
+          "input_type": "date",
+          "label": "Primeiro vencimento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 24
+        },
+        {
+          "variable": "{{FORMA DE PAGAMENTO}}",
+          "input_type": "input",
+          "label": "Forma de pagamento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 25
+        },
+        {
+          "variable": "{{EXITO PERCENTUAL}}",
+          "input_type": "input",
+          "label": "Percentual de êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 26
+        },
+        {
+          "variable": "{{EXITO BASE}}",
+          "input_type": "input",
+          "label": "Base do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 27
+        },
+        {
+          "variable": "{{EXITO CONDICOES}}",
+          "input_type": "input",
+          "label": "Condições do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 28
+        },
+        {
+          "variable": "{{VIGENCIA}}",
+          "input_type": "input",
+          "label": "Vigência",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 29
+        },
+        {
+          "variable": "{{FORO COMARCA}}",
+          "input_type": "input",
+          "label": "Foro (comarca)",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 30
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 31
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 32
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "procuracao_superendividamento.docx",
+    "tipo": "procuracao",
+    "modalidade": "superendividamento",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "RELACAO CREDORES",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{RELACAO CREDORES}}",
+          "input_type": "input",
+          "label": "Relação de credores",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "declaracao_hipossuficiencia_superendividamento.docx",
+    "tipo": "declaracao_hipossuficiencia",
+    "modalidade": "superendividamento",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "RENDA MENSAL",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{RENDA MENSAL}}",
+          "input_type": "dinheiro",
+          "label": "Renda mensal",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "contrato_holding.docx",
+    "tipo": "contrato",
+    "modalidade": "holding",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      },
+      {
+        "papel": "contratado",
+        "ancora": "<<signer2>>",
+        "rubrica": "<<signer2Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "EMAIL DO CLIENTE",
+      "TELEFONE DO CLIENTE",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ADVOGADO EMAIL",
+      "NOME HOLDING",
+      "MODELO HOLDING",
+      "CAPITAL SOCIAL",
+      "PATRIMONIO ESTIMADO",
+      "BENS INTEGRALIZADOS",
+      "HONORARIO FIXO VALOR",
+      "HONORARIO FIXO EXTENSO",
+      "QUANTIDADE PARCELAS",
+      "VALOR PARCELA",
+      "PRIMEIRO VENCIMENTO",
+      "FORMA DE PAGAMENTO",
+      "EXITO PERCENTUAL",
+      "EXITO BASE",
+      "EXITO CONDICOES",
+      "VIGENCIA",
+      "FORO COMARCA",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{EMAIL DO CLIENTE}}",
+          "input_type": "email",
+          "label": "E-mail do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{TELEFONE DO CLIENTE}}",
+          "input_type": "phone_br",
+          "label": "Telefone com DDD",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{ADVOGADO EMAIL}}",
+          "input_type": "email",
+          "label": "E-mail do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        },
+        {
+          "variable": "{{NOME HOLDING}}",
+          "input_type": "input",
+          "label": "Nome da holding",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 16
+        },
+        {
+          "variable": "{{MODELO HOLDING}}",
+          "input_type": "input",
+          "label": "Modelo da holding",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 17
+        },
+        {
+          "variable": "{{CAPITAL SOCIAL}}",
+          "input_type": "dinheiro",
+          "label": "Capital social",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 18
+        },
+        {
+          "variable": "{{PATRIMONIO ESTIMADO}}",
+          "input_type": "dinheiro",
+          "label": "Patrimônio estimado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 19
+        },
+        {
+          "variable": "{{BENS INTEGRALIZADOS}}",
+          "input_type": "input",
+          "label": "Bens integralizados",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 20
+        },
+        {
+          "variable": "{{HONORARIO FIXO VALOR}}",
+          "input_type": "dinheiro",
+          "label": "Honorário fixo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 21
+        },
+        {
+          "variable": "{{HONORARIO FIXO EXTENSO}}",
+          "input_type": "input",
+          "label": "Honorário fixo por extenso",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 22
+        },
+        {
+          "variable": "{{QUANTIDADE PARCELAS}}",
+          "input_type": "input",
+          "label": "Quantidade de parcelas",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 23
+        },
+        {
+          "variable": "{{VALOR PARCELA}}",
+          "input_type": "dinheiro",
+          "label": "Valor da parcela",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 24
+        },
+        {
+          "variable": "{{PRIMEIRO VENCIMENTO}}",
+          "input_type": "date",
+          "label": "Primeiro vencimento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 25
+        },
+        {
+          "variable": "{{FORMA DE PAGAMENTO}}",
+          "input_type": "input",
+          "label": "Forma de pagamento",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 26
+        },
+        {
+          "variable": "{{EXITO PERCENTUAL}}",
+          "input_type": "input",
+          "label": "Percentual de êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 27
+        },
+        {
+          "variable": "{{EXITO BASE}}",
+          "input_type": "input",
+          "label": "Base do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 28
+        },
+        {
+          "variable": "{{EXITO CONDICOES}}",
+          "input_type": "input",
+          "label": "Condições do êxito",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 29
+        },
+        {
+          "variable": "{{VIGENCIA}}",
+          "input_type": "input",
+          "label": "Vigência",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 30
+        },
+        {
+          "variable": "{{FORO COMARCA}}",
+          "input_type": "input",
+          "label": "Foro (comarca)",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 31
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 32
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 33
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "procuracao_holding.docx",
+    "tipo": "procuracao",
+    "modalidade": "holding",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "RG DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "ADVOGADO NOME",
+      "ADVOGADO OAB",
+      "ESCRITORIO NOME",
+      "ESCRITORIO CNPJ",
+      "ESCRITORIO ENDERECO",
+      "NOME HOLDING",
+      "BENS INTEGRALIZADOS",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{RG DO CLIENTE}}",
+          "input_type": "input",
+          "label": "RG do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{ADVOGADO NOME}}",
+          "input_type": "input",
+          "label": "Nome do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{ADVOGADO OAB}}",
+          "input_type": "input",
+          "label": "OAB do advogado",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        },
+        {
+          "variable": "{{ESCRITORIO NOME}}",
+          "input_type": "input",
+          "label": "Nome do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 10
+        },
+        {
+          "variable": "{{ESCRITORIO CNPJ}}",
+          "input_type": "cnpj",
+          "label": "CNPJ do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 11
+        },
+        {
+          "variable": "{{ESCRITORIO ENDERECO}}",
+          "input_type": "input",
+          "label": "Endereço do escritório",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 12
+        },
+        {
+          "variable": "{{NOME HOLDING}}",
+          "input_type": "input",
+          "label": "Nome da holding",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 13
+        },
+        {
+          "variable": "{{BENS INTEGRALIZADOS}}",
+          "input_type": "input",
+          "label": "Bens integralizados",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 14
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 15
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 16
+        }
+      ]
+    }
+  },
+  {
+    "arquivo": "declaracao_hipossuficiencia_holding.docx",
+    "tipo": "declaracao_hipossuficiencia",
+    "modalidade": "holding",
+    "assinantes": [
+      {
+        "papel": "contratante",
+        "ancora": "<<signer1>>",
+        "rubrica": "<<signer1Rubrica>>"
+      }
+    ],
+    "variaveis": [
+      "NOME COMPLETO",
+      "NACIONALIDADE",
+      "ESTADO CIVIL",
+      "PROFISSAO",
+      "CPF DO CLIENTE",
+      "ENDERECO COMPLETO",
+      "RENDA MENSAL",
+      "CIDADE CONTRATO",
+      "DATA CONTRATO"
+    ],
+    "update_form_payload": {
+      "custom_intro": "Confira os dados antes de assinar.",
+      "inputs": [
+        {
+          "variable": "{{NOME COMPLETO}}",
+          "input_type": "signer_fullname",
+          "label": "Nome completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 1
+        },
+        {
+          "variable": "{{NACIONALIDADE}}",
+          "input_type": "input",
+          "label": "Nacionalidade",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 2
+        },
+        {
+          "variable": "{{ESTADO CIVIL}}",
+          "input_type": "input",
+          "label": "Estado civil",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 3
+        },
+        {
+          "variable": "{{PROFISSAO}}",
+          "input_type": "input",
+          "label": "Profissão",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 4
+        },
+        {
+          "variable": "{{CPF DO CLIENTE}}",
+          "input_type": "cpf",
+          "label": "CPF do cliente",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 5
+        },
+        {
+          "variable": "{{ENDERECO COMPLETO}}",
+          "input_type": "input",
+          "label": "Endereço completo",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 6
+        },
+        {
+          "variable": "{{RENDA MENSAL}}",
+          "input_type": "dinheiro",
+          "label": "Renda mensal",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 7
+        },
+        {
+          "variable": "{{CIDADE CONTRATO}}",
+          "input_type": "input",
+          "label": "Cidade do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 8
+        },
+        {
+          "variable": "{{DATA CONTRATO}}",
+          "input_type": "date",
+          "label": "Data do contrato",
+          "help_text": "",
+          "options": "",
+          "required": true,
+          "order": 9
+        }
+      ]
+    }
+  }
+]

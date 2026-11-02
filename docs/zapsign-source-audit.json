@@ -1,0 +1,182 @@
+{
+  "catalog_sha256": "9ab30040f6a5fbd43f800274ad0c0ba48a25da4a364d8ca38f52d2aedd2871e3",
+  "source_audit_ok": false,
+  "production_enabled": false,
+  "models": [
+    {
+      "arquivo": "contrato_passivo_bancario.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "d2490e83b6a7ea7dfadd6218083ac0cb5d57ff2d982f9ab46877843bea2ff8d6",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [],
+      "extra_anchors": [],
+      "literal_currency_prefix": [
+        "HONORARIO FIXO VALOR",
+        "PASSIVO ESTIMADO",
+        "VALOR PARCELA"
+      ],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "procuracao_passivo_bancario.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "d2e534fcd1ec9560ad60209d0f0c23375fe94d47ceda63d485faa8febfc9ad18",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "declaracao_hipossuficiencia_passivo_bancario.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "0df2cbbbce9233882a0cad04403c81c97bd27d8acc24d631eed719c050a3b0e7",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [
+        "RENDA MENSAL"
+      ],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "contrato_acao_revisional.docx",
+      "status": "missing_source",
+      "sandbox": "pending"
+    },
+    {
+      "arquivo": "procuracao_acao_revisional.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "e167a65d6c0f12a79e03d6c862cc3d7e7827e9f9c15b645e75a9fd64f24f3468",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "declaracao_hipossuficiencia_acao_revisional.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "138345d33df36bb4e896baf680e180a8477f7769dce38f3c7d38ff7469ddcdef",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [
+        "RENDA MENSAL"
+      ],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "contrato_superendividamento.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "8d81bc7fe58f441e5496c49c40efe6ce24ca82d02443c061a0c5a695211d8a73",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [],
+      "extra_anchors": [],
+      "literal_currency_prefix": [
+        "DIVIDA TOTAL",
+        "HONORARIO FIXO VALOR",
+        "RENDA MENSAL",
+        "VALOR PARCELA"
+      ],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "procuracao_superendividamento.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "bc5da6ea2465020202a9978022ce7d6c80d570f471ed61c5b6b2585be661f251",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "declaracao_hipossuficiencia_superendividamento.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "53082e7305df2a16c3ef79b63947e76442da9a7574f4bd355149468ebe599b1b",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [
+        "RENDA MENSAL"
+      ],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "contrato_holding.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "4d1b910a00b7a3ca16643776cb124f18cd191d30a68d9aaa1142506b53b800f3",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [],
+      "extra_anchors": [],
+      "literal_currency_prefix": [
+        "CAPITAL SOCIAL",
+        "HONORARIO FIXO VALOR",
+        "PATRIMONIO ESTIMADO",
+        "VALOR PARCELA"
+      ],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "procuracao_holding.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "57ad0577271834252e1859a6bdc1daae72dc145e72fa777b6fee547c8277275c",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [],
+      "unsupported_content": []
+    },
+    {
+      "arquivo": "declaracao_hipossuficiencia_holding.docx",
+      "status": "audited",
+      "sandbox": "pending",
+      "sha256": "068fe5e138250d1a0c2ad35c76136c651aeb1800d07a1fe881e375fb6be846a9",
+      "missing_variables": [],
+      "extra_variables": [],
+      "missing_anchors": [
+        "<<signer1Rubrica>>"
+      ],
+      "extra_anchors": [],
+      "literal_currency_prefix": [
+        "RENDA MENSAL"
+      ],
+      "unsupported_content": []
+    }
+  ]
+}

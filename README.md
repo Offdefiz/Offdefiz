@@ -55,3 +55,7 @@ Página pública de documentação para criação de vídeos: `/identidade`. CSS
 ## Novo módulo: Área do Cliente (protótipo)
 
 Abrir `/cliente/demo` para a experiência responsiva de acompanhamento do cliente: casos e etapas, eventos informativos, honorários/parcelas fictícios, mensagens locais não enviadas e preferências de boletim. O escritório é personalizável dentro de uma identidade Partelís A1 estável; demonstração usa dois clientes e dois escritórios fictícios. O link também está na sidebar do aplicativo. **Nenhuma conexão com os dados reais da tabela `cj_state` foi adicionada.** O login real de clientes, RLS, upload de documentos e troca real de mensagens ainda não existem. Antes do lançamento ver `portal-architecture.md`.
+
+## Gerador de contratos: pré-validação
+
+`POST /api/contracts/preflight` valida os campos do catálogo com sessão e permissão de contratação, sem criar documentos, alterar o funil ou enviar assinaturas. Produção permanece bloqueada. Auditoria dos 11 originais disponíveis, divergências e sequência para validar os 12 modelos: [plano de sandbox](docs/zapsign-sandbox-plan.md). A interface e a integração remota ainda estão pendentes. `npm test` executa também os testes ZapSign; Python 3 é necessário para os testes do auditor de DOCX.
