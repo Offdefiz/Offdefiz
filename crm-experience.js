@@ -160,4 +160,5 @@ window.addEventListener('caixa-render',ev=>{
  if(lastPage==='profile')renderProfile();
  if($('#crm-popover'))closePopover();
 });
+ if($('#nav')){lastRole=$('#roleSelect')?.value||'gestor';moveChrome();loadProfile();}
 })();
