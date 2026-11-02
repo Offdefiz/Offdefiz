@@ -52,6 +52,7 @@ function chartFor(kind,values,debts){
 function buildValues({proposal,client,office,settings,debts}){
  const p=proposal||{},t=p.terms||{},visual=p.visual||{},brand={...DEFAULT,...(settings||{})};
  if(!client?.name||!office?.name)throw Error('Informe o cliente e a identidade do escritório antes de gerar a proposta.');
+ if(!brand.responsible?.trim()||!brand.oab?.trim())throw Error('Configure o advogado responsável e sua OAB nas Configurações → Propostas.');
  const amount=Number(p.amount),count=Number(t.count),down=Number(t.down||0);
  if(!Number.isSafeInteger(amount)||amount<1)throw Error('Honorários não informados. Preencha a proposta.');
  if(!Number.isFinite(Number(t.successPercent))||Number(t.successPercent)<0||Number(t.successPercent)>100||!t.successBase)throw Error('Informe o percentual e a base do êxito (use 0% e Não previsto quando não houver).');
@@ -114,7 +115,8 @@ function renderTemplate(source,opts,parse){
  const script=scripts[scripts.length-1],raw=script.textContent;
  if(!/\/\*DADOS_INICIO\*\/[\s\S]*?\/\*DADOS_FIM\*\//.test(raw))throw Error('Modelo sem marcadores DADOS.');
  script.textContent=raw.replace(/\/\*DADOS_INICIO\*\/[\s\S]*?\/\*DADOS_FIM\*\//,'/*DADOS_INICIO*/'+chartText+'/*DADOS_FIM*/');
- const chartAvailability=model.kind==='passivo'?{donut:model.chart.composicao.length,legend:model.chart.composicao.length,cenarios:model.chart.cenarios.length}:model.kind==='revisional'?{grafico:model.chart.meses[0]!=='—',recuperar:model.chart.recuperar.length}:model.kind==='superendividamento'?{renda:model.chart.renda.length,quitacao:Array.isArray((opts.proposal.visual||{}).chartJson?.quitacao),cenarios:model.chart.cenarios.length}:{patrimonio:model.chart.patrimonio.length,tributacao:model.chart.tributacao.length};
+ if(model.kind==='holding'&&!doc.getElementById('donut'))script.textContent=script.textContent.replace("donut('#donut',DADOS.patrimonio,'R$ 2,4 mi','patrimônio');",''); // Original holding template references a nonexistent chart.
+ const chartAvailability=model.kind==='passivo'?{donut:model.chart.composicao.length,legend:model.chart.composicao.length,cenarios:model.chart.cenarios.length}:model.kind==='revisional'?{grafico:model.chart.meses[0]!=='—',recuperar:model.chart.recuperar.length}:model.kind==='superendividamento'?{renda:model.chart.renda.length,quitacao:Array.isArray(rawChart(opts.proposal?.visual?.chartJson)?.quitacao?.labels),cenarios:model.chart.cenarios.length}:{patrimonio:model.chart.patrimonio.length,tributacao:model.chart.tributacao.length};
  // The static SVG templates remain unchanged. Empty charts are clearly labelled as lacking supporting evidence.
  const blank=[];
  for(const [key,available] of Object.entries(chartAvailability))if(!available)blank.push(key);
@@ -130,7 +132,8 @@ function renderTemplate(source,opts,parse){
  const controls=make('script');controls.textContent="document.querySelectorAll('.partelis-proposal-toolbar button').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();if(b.id==='partelis-proposal-print'){window.print();return;}document.dispatchEvent(new KeyboardEvent('keydown',{key:b.id==='partelis-proposal-next'?'ArrowRight':'ArrowLeft',bubbles:true}));}));";
  doc.body.append(controls);
  // ensure the generated document never contains example placeholder values from the original HTML.
- for(const [placeholder,replacement] of [['Maria Oliveira',model.data.CLIENTE_NOME],['Seu Escritório',model.office.name],['SUA MARCA',model.office.name],['Dr. Nome do Responsável',model.data.RESPONSAVEL],['MG 000.000',model.data.OAB]]){if(root.outerHTML.includes(placeholder))throw Error('Valor de demonstração ainda presente: '+placeholder);}
+ for(const node of doc.querySelectorAll('[data-t]:not(img)'))if(!node.textContent?.trim())throw Error('Campo obrigatório não preenchido: '+node.getAttribute('data-t'));
+ for(const node of doc.querySelectorAll('img[data-t]'))if(node.getAttribute('src')?.includes('SUA MARCA'))throw Error('Logotipo de exemplo não pode ser usado.');
  return '<!DOCTYPE html>\n'+root.outerHTML;
 }
 async function generate(options){
