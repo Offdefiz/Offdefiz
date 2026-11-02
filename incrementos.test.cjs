@@ -16,7 +16,7 @@ test('recall cria uma escalada única, recomenda revisão após terceira tentati
 const vm=require('node:vm'),fs=require('node:fs');
 const ui=fs.readFileSync(require('node:path').join(__dirname,'app.js'),'utf8');
 function isolated(name,next,context){
- const a=ui.indexOf('function '+name+'('),b=ui.indexOf('function '+next+'(',a+10);
+ const functionAt=ui.indexOf('function '+name+'('),a=ui.slice(Math.max(0,functionAt-6),functionAt)==='async '?functionAt-6:functionAt,b=ui.indexOf('function '+next+'(',functionAt+10);
  assert.ok(a>=0&&b>a,'UI functions found: '+name);
  return vm.runInNewContext('('+ui.slice(a,b).trim()+')',context);
 }
