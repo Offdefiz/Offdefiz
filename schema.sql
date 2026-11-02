@@ -26,6 +26,3 @@ $$;
 revoke all on function cj_private.admit_user() from public,anon,authenticated;
 create trigger cj_user_admitted after insert on auth.users for each row execute function cj_private.admit_user();
 insert into public.cj_workspaces(slug,name) values('partelis-teste','Partelís • Teste');
-
--- Trigger helper is not a public API endpoint. Remove RPC execute permission.
-revoke execute on function public.cj_enroll_verified_tester() from public, anon, authenticated;
