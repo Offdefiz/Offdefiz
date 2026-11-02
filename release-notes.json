@@ -1,8 +1,38 @@
 {
-  "version": "0.5.0",
-  "published": "2026-11-01",
-  "title": "Partelís · Experiência CRM 0.5",
+  "version": "0.6.0",
+  "published": "2026-11-02",
+  "title": "Partelís · Clientes, funil e propostas visuais",
   "notes": [
+    {
+      "type": "new",
+      "title": "Cadastro de clientes",
+      "description": "Perfil por pessoa ou empresa com telefone, e-mail, documento e data de entrada, vinculado aos atendimentos e dívidas."
+    },
+    {
+      "type": "improvement",
+      "title": "Kanban com validações",
+      "description": "Arrastar entre etapas iniciais exige reunião agendada ou diagnóstico realizado; etapas posteriores preservam o fluxo de propostas e contratos."
+    },
+    {
+      "type": "new",
+      "title": "Proposta visual em seis páginas",
+      "description": "Modelo institucional imprimível em PDF, com escopo e condições de parcelamento personalizadas."
+    },
+    {
+      "type": "improvement",
+      "title": "Experiência CRM e modo escuro",
+      "description": "Transições de página, animação de gráficos, sombras e ajustes de superfícies escuras."
+    },
+    {
+      "type": "new",
+      "title": "Questionário pré-contratação",
+      "description": "Diagnóstico inicial para escritórios individuais e equipes em /conhecer."
+    },
+    {
+      "type": "improvement",
+      "title": "Painel do proprietário",
+      "description": "Nova organização visual responsiva do centro de comando."
+    },
     {
       "type": "improvement",
       "title": "Navegação organizada como CRM",
