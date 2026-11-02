@@ -44,7 +44,7 @@ Para ativar sincronização real com Google Calendar será necessário OAuth por
 
 ## Identidade oficial Partelís A1
 
-Logo: duas faixas diagonais arredondadas com os caminhos SVG aprovados; cores fixas #30145F e #8D59FF. Arquivos públicos `/brand-symbol.svg`, `/brand-horizontal.svg`, `/brand-horizontal-white.svg` e `/favicon.svg`; paleta e UI em `/partelis.css` (carregada após estilos legados), metadados, manifest, impressão e apresentação incorporados. Personalização por escritório (`cj_state.theme`) não modifica mais o logotipo ou a paleta oficial do SaaS. URLs, branch `caixa-juridico`, IDs de banco e chaves legadas de localStorage permanecem intocados para evitar perda de dados e falhas de autenticação. PNGs de ícones para iOS podem ser adicionados posteriormente; o manifest atual utiliza SVG.
+Logo: duas faixas diagonais arredondadas com os caminhos SVG aprovados; cores fixas #30145F e #8D59FF. Arquivos públicos `/brand-symbol.svg`, `/brand-horizontal.svg`, `/brand-horizontal-white.svg` e `/favicon.svg`; paleta e UI em `/partelis.css` (carregada após estilos legados), metadados, manifest, impressão e apresentação incorporados. Personalização por escritório (`cj_state.theme`) não modifica mais o logotipo ou a paleta oficial do SaaS. Os nomes internos de branch de publicação, IDs do Supabase e chaves legadas de localStorage são preservados por compatibilidade até a migração verificada para evitar perda de dados e falhas de autenticação. PNGs de ícones para iOS podem ser adicionados posteriormente; o manifest atual utiliza SVG.
 
 ## Liquid Glass — interface da Partelís
 
