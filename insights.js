@@ -51,14 +51,14 @@
   // Por privacidade, o evento externo não leva nome nem dados do cliente.
   function googleCalendarUrl(meeting){
     const {start,end}=calendarRange(meeting);
-    const args=new URLSearchParams({action:'TEMPLATE',text:'Reunião do escritório',dates:start+'/'+end,ctz:'America/Sao_Paulo',details:'Evento adicionado manualmente pelo Caixa Jurídico. Confirme os dados antes de salvar.'});
+    const args=new URLSearchParams({action:'TEMPLATE',text:'Reunião do escritório',dates:start+'/'+end,ctz:'America/Sao_Paulo',details:'Evento adicionado manualmente pelo Partelís. Confirme os dados antes de salvar.'});
     return 'https://calendar.google.com/calendar/render?'+args.toString();
   }
   function calendarIcs(meeting){
     const {start,end}=calendarRange(meeting);
-    const uid='cj-'+String(meeting.id||'evento').replace(/[^a-z0-9_-]/gi,'')+'@caixa-juridico';
+    const uid='cj-'+String(meeting.id||'evento').replace(/[^a-z0-9_-]/gi,'')+'@partelis';
     const stamp=new Date().toISOString().replace(/[-:]/g,'').replace(/\.\d{3}/,'');
-    return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Caixa Juridico//Agenda Manual//PT-BR','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:'+uid,'DTSTAMP:'+stamp,'DTSTART;TZID=America/Sao_Paulo:'+start,'DTEND;TZID=America/Sao_Paulo:'+end,'SUMMARY:Reunião do escritório','DESCRIPTION:Evento demonstrativo. Revise antes de importar.','END:VEVENT','END:VCALENDAR',''].join('\r\n');
+    return ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Partelis//Agenda Manual//PT-BR','CALSCALE:GREGORIAN','BEGIN:VEVENT','UID:'+uid,'DTSTAMP:'+stamp,'DTSTART;TZID=America/Sao_Paulo:'+start,'DTEND;TZID=America/Sao_Paulo:'+end,'SUMMARY:Reunião do escritório','DESCRIPTION:Evento demonstrativo. Revise antes de importar.','END:VEVENT','END:VCALENDAR',''].join('\r\n');
   }
   return {daily,financial,googleCalendarUrl,calendarIcs,daysBetween};
 });
