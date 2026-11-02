@@ -110,7 +110,13 @@
       } else {
         assert(!prev || prev.status!=='aceita','A versão aceita já segue para contratação.');const valid=date(p.validUntil);assert(valid>=day,'A validade não pode estar no passado.');
         const terms=p.down!==undefined?proposalTerms(p):null;
-        result={id:uid('prop'),oppId:o.id,version:prev?prev.version+1:1,scope:required(p.scope,'Escopo'),amount:terms?terms.down+terms.count*terms.unit:cents(p.amount),terms,validUntil:valid,status:'rascunho',created:day};
+        const visual=p.visual||{},validTemplate=['passivo','revisional','superendividamento','holding'];
+        const text=(v,max)=>String(v||'').trim().slice(0,max);
+        const lines=(input,sep=false,max=8)=>text(input,2500).split(/\n+/).map(v=>v.trim()).filter(Boolean).slice(0,max).map(v=>sep?{title:text(v.split('|')[0],70),deadline:text(v.split('|').slice(1).join('|'),110)||'A definir'}:v.slice(0,200));
+        let chartJson=text(visual.chartJson,10000);if(chartJson){try{const parsed=JSON.parse(chartJson);assert(parsed&&typeof parsed==='object'&&!Array.isArray(parsed),'JSON inválido');}catch{throw new Error('Confira os dados dos gráficos (JSON).');}}
+        const proposalVisual={template:validTemplate.includes(visual.template)?visual.template:'passivo',diagnosis:text(visual.diagnosis,1000),firstDue:text(visual.firstDue,10),successConditions:text(visual.successConditions,500),steps:lines(visual.stepsText,true,8),nextSteps:lines(visual.nextText,false,8),chartJson};
+        if(proposalVisual.firstDue)date(proposalVisual.firstDue);
+        result={id:uid('prop'),oppId:o.id,version:prev?prev.version+1:1,scope:required(p.scope,'Escopo'),amount:terms?terms.down+terms.count*terms.unit:cents(p.amount),terms,visual:proposalVisual,validUntil:valid,status:'rascunho',created:day};
         if(prev)prev.status='substituida';s.proposals.push(result);o.stage='proposta';o.next='Apresentar proposta v'+result.version;o.due=day;description='Proposta v'+result.version+' criada; versões anteriores preservadas';
       }
     } else if(action==='contract') {
