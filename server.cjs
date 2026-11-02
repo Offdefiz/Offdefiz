@@ -1,4 +1,5 @@
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),C=require('./domain.js');
+const {preflight}=require('./zapsign-preflight.cjs');
 const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_PUBLISHABLE_KEY;
 class Fault extends Error{constructor(status,message){super(message);this.status=status;}}
 async function supa(route,{token,method='GET',body,prefer}={}){if(!url||!key)throw new Fault(503,'O acesso está sendo configurado. A demonstração pública continua disponível.');const r=await fetch(url+route,{method,headers:{apikey:key,...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{}),...(prefer?{Prefer:prefer}:{})},body:body?JSON.stringify(body):undefined});const d=await r.json().catch(()=>null);if(!r.ok)throw new Fault(r.status===401||r.status===403?401:400,'Não foi possível concluir a operação. Confira seu acesso e tente novamente.');return d;}
@@ -51,6 +52,14 @@ if(route==='/auth/signup'&&req.method==='POST'){limit(req);const p=await body(re
 if(route==='/auth/logout'&&req.method==='POST'){const token=cookies(req).cj_access;if(token)await supa('/auth/v1/logout',{token,method:'POST'}).catch(()=>{});res.setHeader('Set-Cookie',['cj_access=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/','cj_refresh=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/']);return send(res,200,{ok:true});}
 if(route.startsWith('/api/')){const who=await identity(req,res);const base='/rest/v1/cj_state?workspace_id=eq.'+who.membership.workspace_id;const rows=await supa(base+'&select=revision,data,theme',{token:who.token});let row=rows[0];
 if(!row)throw new Fault(503,'O escritório precisa ser inicializado pelo administrador.');
+if(route==='/api/contracts/preflight'&&req.method==='POST'){
+ if(!C.can(who.membership.role,'contract'))throw new Fault(403,'Este perfil não pode preparar contratos.');
+ const p=await body(req);
+ if(!p||typeof p!=='object'||Array.isArray(p))throw new Fault(400,'Dados de pré-validação inválidos.');
+ let result;
+ try{result=preflight(p.modalidade,p.tipo,p.values);}catch{throw new Fault(400,'Modelo não encontrado.');}
+ return send(res,result.ok?200:422,result);
+}
 if(route==='/api/password'&&req.method==='POST'){const p=await body(req);if(String(p.password||'').length<8)throw new Fault(400,'Use pelo menos 8 caracteres.');await supa('/auth/v1/user',{token:who.token,method:'PUT',body:{password:p.password}});return send(res,200,{ok:true});}
 if(route==='/api/support/status'&&req.method==='GET'){const grants=await adminDb('cj_support_grants?workspace_id=eq.'+encodeURIComponent(who.membership.workspace_id));const g=grants[0];return send(res,200,{allowed:who.membership.role==='gestor',active:!!(g&&!g.revoked_at&&new Date(g.expires_at)>new Date()),expires_at:g&&!g.revoked_at?g.expires_at:null});}
 if(route==='/api/support/grant'&&req.method==='POST'){if(who.membership.role!=='gestor')throw new Fault(403,'Somente o gestor autoriza o suporte.');const p=await body(req);if(p.action==='revoke'){await adminDb('cj_support_grants',{method:'PATCH',query:'?workspace_id=eq.'+encodeURIComponent(who.membership.workspace_id),body:{revoked_at:new Date().toISOString()},prefer:'return=minimal'});return send(res,200,{ok:true});}if(p.action!=='approve'||p.confirm!==true)throw new Fault(400,'Confirme a autorização.');await adminDb('cj_support_grants',{method:'POST',body:{workspace_id:who.membership.workspace_id,approved_by:who.user.id,expires_at:new Date(Date.now()+60*60*1000).toISOString(),revoked_at:null,reason:'Suporte técnico solicitado'},prefer:'resolution=merge-duplicates,return=minimal'});return send(res,200,{ok:true,expires_in_minutes:60});}

@@ -14,9 +14,14 @@ function validDate(s) {
 }
 function validate(modalidade, tipo, values) {
   const model = template(modalidade,tipo), errors = [];
+  if (!values || typeof values !== 'object' || Array.isArray(values) || ![Object.prototype,null].includes(Object.getPrototypeOf(values))) {
+    return {ok:false,errors:['Valores: informe um objeto de campos do modelo.']};
+  }
+  // Não ecoar chaves desconhecidas: também podem conter dados pessoais.
+  if (Object.keys(values).some(name => !model.variaveis.includes(name))) errors.push('Valores: há campos fora do catálogo deste modelo.');
   const inputs = new Map(model.update_form_payload.inputs.map(x => [x.variable.slice(2,-2),x]));
   for (const name of model.variaveis) {
-    const raw = values?.[name];
+    const raw = Object.hasOwn(values,name) ? values[name] : undefined;
     const value = typeof raw === 'string' ? raw.trim() : '';
     const field = inputs.get(name), label = field?.label || name;
     if (!value) { errors.push(`${label}: preenchimento obrigatório.`); continue; }
@@ -27,12 +32,24 @@ function validate(modalidade, tipo, values) {
     else if (field?.input_type === 'email' || name === 'ADVOGADO EMAIL') ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     else if (field?.input_type === 'phone_br') ok = /^\(\d{2}\) \d{5}-\d{4}$/.test(value);
     else if (field?.input_type === 'date') ok = validDate(value);
-    else if (field?.input_type === 'dinheiro') ok = /^R\$ (?:\d{1,3}(?:\.\d{3})*|\d+),\d{2}$/.test(value);
-    if (name === 'QUANTIDADE PARCELAS' || name === 'QUANTIDADE CONTRATOS') ok = /^[1-9]\d*$/.test(value);
+    else if (field?.input_type === 'dinheiro') ok = moneyCents(value) !== null;
+    if (name === 'QUANTIDADE PARCELAS' || name === 'QUANTIDADE CONTRATOS') ok = /^[1-9]\d*$/.test(value) && Number.isSafeInteger(Number(value));
     if (name === 'EXITO PERCENTUAL') ok = /^(?:\d{1,2}(?:[,.]\d+)?|100(?:[,.]0+)?)%$/.test(value);
     if (!ok) errors.push(`${label}: formato inválido.`);
   }
+  if (!errors.length && tipo === 'contrato') {
+    const total=moneyCents(values['HONORARIO FIXO VALOR'].trim()), count=Number(values['QUANTIDADE PARCELAS']);
+    try {
+      const schedule=installments(total,count);
+      if (moneyCents(values['VALOR PARCELA'].trim()) !== schedule.regularCents) errors.push('Valor da parcela: não corresponde ao honorário dividido pela quantidade de parcelas.');
+    } catch { errors.push('Honorário ou quantidade de parcelas inválidos.'); }
+  }
   return {ok: errors.length === 0, errors};
+}
+function moneyCents(value) {
+  if (typeof value !== 'string' || !/^R\$ (?:\d{1,3}(?:\.\d{3})*|\d+),\d{2}$/.test(value)) return null;
+  const cents=Number(value.slice(3).replace(/[.,]/g,''));
+  return Number.isSafeInteger(cents) ? cents : null;
 }
 function substitutions(modalidade,tipo,values) {
   const result = validate(modalidade,tipo,values);
@@ -46,4 +63,4 @@ function installments(totalCents,count) {
   if (last < 1) throw new Error('A quantidade gera uma última parcela inválida.');
   return {regularCents:regular,lastCents:last,count};
 }
-module.exports = {template,validate,substitutions,installments};
+module.exports = {template,validate,substitutions,installments,moneyCents};

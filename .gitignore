@@ -5,3 +5,4 @@ node_modules/
 evidencias/
 recordings/
 *.log
+__pycache__/
