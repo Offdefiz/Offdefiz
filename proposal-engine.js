@@ -16,7 +16,7 @@ function toWords(cents){
  if(milhao)parts.push(trip(milhao)+(milhao===1?' milhão':' milhões'));
  if(milhar)parts.push(milhar===1?'mil':trip(milhar)+' mil');
  if(rest)parts.push(trip(rest));
- const complete=parts.length?parts.join(rest&&rest<100?' e ':', '):'zero';
+ const complete=parts.length?parts.join(' e '):'zero';
  const currency=integer===1?'real':'reais';
  return complete+' '+currency+(cent?' e '+trip(cent)+(cent===1?' centavo':' centavos'):'');
 }
