@@ -47,8 +47,8 @@
       const c=get(s.clients,p.clientId);
       const clean=(value,max)=>String(value||'').trim().slice(0,max);
       const email=clean(p.email,150),phone=clean(p.phone,24),taxId=clean(p.taxId,18).replace(/[^0-9]/g,'');
-      assert(!email||/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email),'E-mail inválido.');
-      assert(!phone||phone.replace(/\\D/g,'').length>=10,'Telefone deve conter DDD.');
+      assert(!email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),'E-mail inválido.');
+      assert(!phone||phone.replace(/\D/g,'').length>=10,'Telefone deve conter DDD.');
       assert(!taxId||[11,14].includes(taxId.length),'CPF ou CNPJ deve conter 11 ou 14 dígitos.');
       c.name=required(p.name,'Nome do cliente').slice(0,150);
       c.email=email;c.phone=phone;c.taxId=taxId;c.type=taxId.length===14?'PJ':taxId.length===11?'PF':(p.type==='PJ'?'PJ':'PF');
