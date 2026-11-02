@@ -6,7 +6,7 @@
   const roles = {gestor:'Gestor',secretaria:'SDR / secretaria',especialista:'Especialista',juridico:'Jurídico',financeiro:'Financeiro'};
   const stages = {triagem:'Lead novo',agendamento:'Agendado',diagnostico:'Diagnóstico realizado',proposta:'Proposta',negociacao:'Negociação',fechamento:'Fechamento agendado',assinatura:'Aguardando assinatura',nutricao:'Nutrição / recall',contratado:'Ganho / contratado',perdido:'Perdido'};
   const rights = {
-    client:['gestor','secretaria','especialista'], debt:['gestor','secretaria','especialista'],
+    client:['gestor','secretaria','especialista'], clientUpdate:['gestor','secretaria','especialista'], debt:['gestor','secretaria','especialista'],
     stage:['gestor','secretaria','especialista'], meeting:['gestor','secretaria','especialista'],
     proposal:['gestor','especialista'], contract:['gestor','especialista'], payment:['gestor','financeiro'], followup:['gestor','secretaria','especialista'],
     legal:['gestor','juridico'], task:['gestor','secretaria','especialista','juridico','financeiro']
@@ -43,13 +43,29 @@
       const o={id:uid('opp'),clientId:c.id,area:required(p.area,'Área'),owner:required(p.owner,'Responsável'),stage:'triagem',next:required(p.next,'Próxima ação'),due:date(p.due),created:day};
       assert(roles[o.owner],'Responsável inválido.');s.opportunities.push(o);
       s.tasks.push({id:uid('task'),oppId:o.id,kind:'followup',title:o.next,owner:o.owner,due:o.due,done:false,created:day});result=o;description='Atendimento criado com próxima ação e responsável';
+    } else if(action==='clientUpdate') {
+      const c=get(s.clients,p.clientId);
+      const clean=(value,max)=>String(value||'').trim().slice(0,max);
+      const email=clean(p.email,150),phone=clean(p.phone,24),taxId=clean(p.taxId,18).replace(/[^0-9]/g,'');
+      assert(!email||/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email),'E-mail inválido.');
+      assert(!phone||phone.replace(/\\D/g,'').length>=10,'Telefone deve conter DDD.');
+      assert(!taxId||[11,14].includes(taxId.length),'CPF ou CNPJ deve conter 11 ou 14 dígitos.');
+      c.name=required(p.name,'Nome do cliente').slice(0,150);
+      c.email=email;c.phone=phone;c.taxId=taxId;c.type=taxId.length===14?'PJ':taxId.length===11?'PF':(p.type==='PJ'?'PJ':'PF');
+      c.city=clean(p.city,80);c.state=clean(p.state,2).toUpperCase();c.updated=day;
+      result=c;description='Perfil do cliente atualizado';
     } else if(action==='debt') {
       const o=opportunity(p.oppId);result={id:uid('deb'),clientId:o.clientId,creditor:required(p.creditor,'Credor'),kind:required(p.kind,'Modalidade'),amount:cents(p.amount),situation:required(p.situation,'Situação'),created:day};s.debts.push(result);description='Dívida registrada para diagnóstico';
     } else if(action==='stage') {
       const o=opportunity(p.oppId);assert(!['contratado','perdido'].includes(o.stage),'Atendimento encerrado não pode ser movido.');
       assert(['triagem','agendamento','diagnostico','perdido'].includes(p.stage),'Proposta, fechamento e contrato avançam pelo fluxo correspondente.');
       if(p.stage==='perdido') {assert(!s.proposals.some(x=>x.oppId===o.id && x.status==='aceita'),'Há uma proposta aceita; resolva a contratação antes de encerrar.');o.reason=required(p.reason,'Motivo do encerramento');s.tasks.filter(t=>t.oppId===o.id&&!t.done).forEach(t=>{t.done=true;t.closedReason='Atendimento encerrado';});s.meetings.filter(m=>m.oppId===o.id&&['agendada','confirmada'].includes(m.status)).forEach(m=>m.status='cancelada');s.proposals.filter(x=>x.oppId===o.id && ['rascunho','apresentada'].includes(x.status)).forEach(x=>x.status='retirada');}
-      else { assert(!latest(s,o.id),'Após criar proposta, acompanhe pelo módulo Propostas.');o.next=required(p.next,'Próxima ação');o.due=date(p.due); }
+      else {
+        assert(!latest(s,o.id),'Após criar proposta, acompanhe pelo módulo Propostas.');
+        if(p.stage==='agendamento')assert(s.meetings.some(m=>m.oppId===o.id&&['agendada','confirmada','realizada'].includes(m.status)),'Agende uma reunião antes de mover para Agendado.');
+        if(p.stage==='diagnostico')assert(s.meetings.some(m=>m.oppId===o.id&&m.status==='realizada'),'Registre a reunião como realizada antes de concluir o diagnóstico.');
+        o.next=required(p.next,'Próxima ação');o.due=date(p.due);
+      }
       o.stage=p.stage;result=o;description='Etapa atualizada: '+stages[p.stage];
     } else if(action==='followup') {
       const o=opportunity(p.oppId);assert(!['contratado','perdido'].includes(o.stage),'Atendimento encerrado.');
@@ -141,7 +157,7 @@
           if(i===6){const c=s.contracts.find(c=>c.oppId===id),ins=s.installments.find(x=>x.contractId===c.id);s=execute(s,'gestor','payment',{id:ins.id,paidAt:shift(day,-1)},day).state;}
         }
       }
-      if(i===7)s=execute(s,'gestor','stage',{oppId:id,stage:'diagnostico',next:'Concluir análise e definir escopo',due:day},day).state;
+      if(i===7){s=execute(s,'gestor','meeting',{oppId:id,date:day,time:'09:00',owner:'especialista',subject:'Diagnóstico do passivo bancário'},day).state;const m=s.meetings.find(x=>x.oppId===id);s=execute(s,'gestor','meeting',{id:m.id,status:'realizada'},day).state;}
     });return s;
   }
   function meetingOverdue(m, now = new Date()) {
