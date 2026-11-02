@@ -18,7 +18,7 @@ test('CRM app serves actual settings, profile, search and style assets',async()=
 });
 test('profile operations require a real authenticated user',async()=>{
  assert.equal((await fetch(origin+'/api/profile')).status,401);
- const r=await fetch(origin+'/api/profile',{method:'POST',headers:{origin,'Content-Type':'application/json'},body:JSON.stringify({display_name:'Teste fictício',avatar_data:null})});
+ const r=await fetch(origin+'/api/profile',{method:'POST',headers:{origin:process.env.PUBLIC_APP_URL||origin,'Content-Type':'application/json'},body:JSON.stringify({display_name:'Teste fictício',avatar_data:null})});
  assert.equal(r.status,401);
 });
 test('support status rejects unauthenticated access',async()=>{
