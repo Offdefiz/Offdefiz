@@ -45,16 +45,20 @@ test('UI: simulador mantém precificação orientativa e valida margem',()=>{
  fields.margin.value='100';form.fire('input');
  assert.equal(fields.priceResult.textContent,'Revise os parâmetros.');
 });
-test('UI: proposta imprimível tem comando visível e conteúdo escapado',()=>{
- let printed='',opened=false;
- const p={version:2,scope:'<script>alert(1)</script>',amount:120000,terms:null,validUntil:'2026-11-02'};
- const sandbox={C:{latest:()=>p,money:cents=>String(cents)},state:{},client:()=>({name:'Cliente fictício'}),opp:()=>({}),window:{open:()=>{opened=true;return {document:{write:s=>{printed=s},close(){}},focus(){}}}},notify:()=>{},termsText:()=>'',fmt:()=>'',e:v=>String(v).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))};
- isolated('printProposal','pricingInterview',sandbox)('id');
- assert.ok(opened);
- assert.match(printed,/Imprimir ou salvar como PDF/);
- assert.match(printed,/window.print\(\)/);
- assert.ok(!printed.includes('<script>alert'));
- assert.match(printed,/&lt;script&gt;/);
+test('UI: proposta usa gerador de sete slides com dados vinculados ao atendimento',async()=>{
+ let printed='',opened=false,model=null;
+ const p={version:2,scope:'<script>alert(1)</script>',amount:120000,terms:{count:2,unit:60000,down:0,successPercent:0,successBase:'Não previsto'},visual:{template:'passivo'},validUntil:'2026-11-02'};
+ const doc={title:'',body:{innerHTML:''},open(){},write(s){printed=s},close(){}};
+ const sandbox={C:{latest:()=>p},state:{debts:[]},client:()=>({id:'cli',name:'Cliente fictício'}),opp:()=>({clientId:'cli',area:'Passivo bancário'}),window:{
+  PartelisProposal:{generate:async d=>{model=d;return '<!doctype html><html><body>Imprimir ou salvar como PDF</body></html>'}},
+  PartelisProposalSettings:{current:()=>({responsible:'Dr. Fictício',oab:'MG 123456'})},
+  CJ_THEME:{name:'Escritório Exemplo'},
+  CLOUD:true,
+  open:()=>{opened=true;return {document:doc,close(){},focus(){}}}
+ },notify:()=>{},localStorage:{getItem:()=>null}};
+ await isolated('printProposal','pricingInterview',sandbox)('id');
+ assert.ok(opened);assert.equal(model.proposal.amount,120000);assert.equal(model.client.name,'Cliente fictício');
+ assert.equal(model.office.name,'Escritório Exemplo');assert.match(printed,/Imprimir ou salvar como PDF/);
 });
 test('UI: recomendações de recall e honorários aparecem na ficha',()=>{
  assert.match(ui,/o\.recallRecommendation\?'/);
