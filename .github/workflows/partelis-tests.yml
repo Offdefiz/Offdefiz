@@ -1,9 +1,9 @@
-name: Caixa Jurídico - testes
+name: Partelís · testes de integração
 on:
   push:
     branches:
       - caixa-juridico
-      - caixa-juridico-melhorias-**
+      - 'feature/partelis-*'
   pull_request:
     branches:
       - caixa-juridico
