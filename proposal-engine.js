@@ -28,7 +28,7 @@ function installments(total,count,down=0){
 }
 function rawChart(input){if(!input)return null;let o=typeof input==='string'?JSON.parse(input):input;if(!o||Array.isArray(o)||typeof o!=='object')throw Error('Dados dos gráficos precisam ser um objeto JSON.');return o;}
 function chartFor(kind,values,debts){
- const safeEntries=a=>Array.isArray(a)?a.slice(0,25).filter(x=>x&&typeof x.l==='string'&&x.l.length<=60&&Number.isFinite(x.v)&&x.v>=0).map(x=>({l:x.l,v:x.v})):[];
+ const safeEntries=a=>Array.isArray(a)?a.slice(0,25).filter(x=>x&&typeof x.l==='string'&&x.l.length<=60&&Number.isFinite(x.v)&&x.v>=0).map(x=>({l:x.l.replace(/[<>&"'`]/g,'').slice(0,60),v:x.v})):[];
  const result={};
  if(kind==='passivo'){
   const groups=new Map();for(const d of debts||[]){const key=String(d.kind||'Não classificado').slice(0,60),v=number(d.amount)/100;if(v>0)groups.set(key,(groups.get(key)||0)+v);}

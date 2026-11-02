@@ -35,3 +35,11 @@ test('proposal assets are public templates only and traversal cannot read privat
  assert.equal((await fetch(base+'/templates/../schema.sql')).status,404);
  }finally{await new Promise(resolve=>server.close(resolve));}
 });
+
+test('gráficos descartam HTML potencialmente executável em rótulos',()=>{
+ const input={composicao:[{l:'Cartão <img src=x onerror=alert(1)>',v:42},{l:'Financiamento',v:58}],cenarios:[{l:'<svg onload=alert(1)>',v:12}]};
+ const charts=P.chartFor('passivo',input,[]);
+ assert.equal(charts.composicao.length,2);
+ assert.doesNotMatch(charts.composicao[0].l,/[<>&"'\x60]/);
+ assert.doesNotMatch(charts.cenarios[0].l,/[<>&"'\x60]/);
+});
