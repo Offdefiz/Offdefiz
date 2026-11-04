@@ -67,7 +67,7 @@ runuser -u partelis -- env NODE_PATH=/usr/share/nodejs npm --prefix "$CANDIDATE"
 echo "[3/8] Testes multi-escritório no banco descartável"
 runuser -u postgres -- createdb -O partelis "$VERIFY_DB"
 runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$CANDIDATE/ops/native/schema.sql"
-runuser -u postgres -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql"
+runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql"
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs PGDATABASE="$VERIFY_DB" /usr/bin/node "$CANDIDATE/ops/native/verify.cjs"
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs PGDATABASE="$VERIFY_DB" /usr/bin/node "$CANDIDATE/ops/native/commercial.verify.cjs"
 
