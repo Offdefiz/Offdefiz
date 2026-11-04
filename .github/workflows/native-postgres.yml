@@ -27,6 +27,8 @@ jobs:
           npm install --no-save --package-lock=false --ignore-scripts pg@8.13.1
       - name: Existing behavior and seven independent offices
         run: |
+          npm run build
+          bash -n ops/vps/deploy-commercial.sh
           npm test
           node ops/native/verify.cjs
           node ops/native/commercial.verify.cjs
