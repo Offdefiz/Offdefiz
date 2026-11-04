@@ -9,7 +9,7 @@
     client:['gestor','secretaria','especialista'], clientUpdate:['gestor','secretaria','especialista'], debt:['gestor','secretaria','especialista'],
     stage:['gestor','secretaria','especialista'], meeting:['gestor','secretaria','especialista'],
     proposal:['gestor','especialista'], contract:['gestor','especialista'], payment:['gestor','financeiro'], followup:['gestor','secretaria','especialista'],
-    legal:['gestor','juridico'], task:['gestor','secretaria','especialista','juridico','financeiro']
+    legal:['gestor','juridico'], financeExtra:['gestor','financeiro'], task:['gestor','secretaria','especialista','juridico','financeiro']
   };
   function assert(value,message) { if (!value) throw new Error(message); }
   function can(role,action) { return (rights[action] || []).includes(role); }
@@ -36,7 +36,7 @@
   }
   function execute(state,role,action,data,day) {
     day=date(day || today());assert(can(role,action),'Este perfil não pode executar essa ação.');
-    const s=JSON.parse(JSON.stringify(state)),p=data || {};let result,description='';
+    const s=JSON.parse(JSON.stringify(state)),p=data || {};let result,description='';if(!Array.isArray(s.financeExtras))s.financeExtras=[];
     const opportunity=id=>get(s.opportunities,id);
     if(action==='client') {
       const c={id:uid('cli'),name:required(p.name,'Nome fictício'),source:required(p.source,'Origem'),created:day};s.clients.push(c);
@@ -137,6 +137,31 @@
       const i=get(s.installments,p.id);
       if(p.operation==='undo') {assert(i.paidAt,'Esta parcela ainda não está recebida.');i.reversalReason=required(p.reason,'Motivo do estorno');i.paidAt=null;description='Recebimento estornado: '+i.reversalReason;}
       else {assert(!i.paidAt,'Recebimento já confirmado.');const paidAt=date(p.paidAt);assert(paidAt<=day,'Recebimento não pode estar no futuro.');i.paidAt=paidAt;description='Recebimento integral confirmado manualmente';}result=i;
+     } else if(action==='financeExtra') {
+      if(p.operation==='create'){
+        assert(['mensalidade','acordo','exito'].includes(p.kind),'Categoria financeira inválida.');
+        const amount=cents(p.amount),due=date(p.due),descriptionText=required(p.description,'Descrição do lançamento');
+        assert(descriptionText.length<=160,'Descrição financeira deve ter até 160 caracteres.');
+        const months=p.kind==='mensalidade'?Number(p.months||1):1;
+        assert(Number.isInteger(months)&&months>=1&&months<=24,'Mensalidade aceita de 1 a 24 meses.');
+        const requestId=String(p.requestId||'');
+        assert(/^[a-f0-9-]{36}$/i.test(requestId),'Identificador de requisição inválido.');
+        const existing=s.financeExtras.find(x=>x.requestId===requestId);
+        if(existing){result=existing;description='Repetição idempotente: lançamento já existente';}
+        else{
+          for(let j=0;j<months;j++)s.financeExtras.push({id:uid('fin'),kind:p.kind,amount,due:month(due,j),paidAt:null,description:descriptionText,requestId,installment:j+1,installmentCount:months,created:day,source:'manual'});
+          result=s.financeExtras.find(x=>x.requestId===requestId);
+          description='Lançamento financeiro manual criado ('+months+' vencimento(s))';
+        }
+      }else if(p.operation==='pay'||p.operation==='undo'){
+        const item=get(s.financeExtras,p.id);
+        if(p.operation==='pay'){
+          assert(!item.paidAt,'Recebimento já confirmado.');const paid=date(p.paidAt);
+          assert(paid<=day,'Recebimento futuro não pode ser confirmado.');item.paidAt=paid;item.reversalReason=null;description='Recebimento extra confirmado manualmente';
+        }else{
+          assert(item.paidAt,'Não há recebimento a estornar.');item.reversalReason=required(p.reason,'Motivo do estorno');item.paidAt=null;description='Lançamento financeiro estornado com justificativa';
+        }result=item;
+      }else throw new Error('Operação financeira inválida.');
     } else if(action==='legal') {const c=get(s.cases,p.id);assert(['Kick-off','Documentação pendente','Em análise','Em execução','Concluído'].includes(p.status),'Etapa jurídica inválida.');c.status=p.status;result=c;description='Acompanhamento jurídico: '+p.status;
     } else if(action==='task') {
       if(p.id) {const t=get(s.tasks,p.id);assert(role==='gestor'||t.owner===role,'Conclua apenas tarefas do seu perfil.');assert(!t.done,'Tarefa já concluída.');t.done=true;t.completedAt=day;result=t;description='Tarefa concluída';}
@@ -171,7 +196,7 @@
     const scheduled = new Date(m.date+'T'+m.time+':00-03:00').getTime();
     return Number.isFinite(scheduled) && scheduled < new Date(now).getTime();
   }
-  function validate(s) {assert(s&&s.schema===1,'Formato de dados incompatível.');['clients','debts','opportunities','meetings','proposals','contracts','installments','cases','tasks','audit'].forEach(k=>assert(Array.isArray(s[k]),'Dados incompletos: '+k));return s;}
+  function validate(s) {assert(s&&s.schema===1,'Formato de dados incompatível.');['clients','debts','opportunities','meetings','proposals','contracts','installments','cases','tasks','audit'].forEach(k=>assert(Array.isArray(s[k]),'Dados incompletos: '+k));if(s.financeExtras!==undefined)assert(Array.isArray(s.financeExtras),'Lançamentos complementares inválidos.');return s;}
   return {meetingOverdue,roles,stages,can,today,shift,month,cents,money,latest,execute,metrics,seed,validate};
 });
 
