@@ -52,13 +52,29 @@ if(route==='/api/presence'&&req.method==='POST'){
  return send(res,200,{ok:true});
 }
 if(route==='/api/feedback'&&req.method==='POST'){limit(req);const who=await identity(req,res),p=await body(req);if(!['bug','idea','usability'].includes(p.kind)||typeof p.message!=='string'||p.message.trim().length<8||p.message.length>3000||typeof p.page!=='string'||p.page.length>200)throw new Fault(400,'Confira os campos do feedback.');await adminDb('cj_beta_feedback',{method:'POST',body:{workspace_id:who.membership.workspace_id,user_id:who.user.id,kind:p.kind,message:p.message.trim(),page:p.page},prefer:'return=minimal'});return send(res,200,{ok:true});}
-if(route.startsWith('/api/admin/')){limit(req);await owner(req,res);const p=req.method==='POST'?await body(req):{};if(route==='/api/admin/dashboard'&&req.method==='GET'){
- const [tenants,deals,feedback,tasks,betaTesters,presence,subscriptions,memberships]=await Promise.all([
+if(route.startsWith('/api/admin/')){limit(req);const adminUser=await owner(req,res);const p=req.method==='POST'?await body(req):{};if(route==='/api/admin/dashboard'&&req.method==='GET'){
+ const [tenants,deals,feedback,tasks,betaTesters,presence,subscriptions,memberships,interactions]=await Promise.all([
   adminDb('cj_admin_tenants'),adminDb('cj_admin_deals?order=created_at.desc'),adminDb('cj_beta_feedback?order=created_at.desc'),adminDb('cj_admin_tasks?order=created_at.desc'),
-  adminDb('cj_beta_testers'),adminDb('cj_presence'),adminDb('cj_subscriptions'),adminDb('cj_memberships?select=user_id,workspace_id,role')
+  adminDb('cj_beta_testers'),adminDb('cj_presence'),adminDb('cj_subscriptions'),adminDb('cj_memberships?select=user_id,workspace_id,role'),adminDb('cj_admin_interactions?order=occurred_at.desc')
  ]);
  const metrics=dashboardMetrics({tenants,deals,feedback,tasks,betaTesters,presence,subscriptions,memberships});
- return send(res,200,{tenants,deals,feedback,tasks,betaTesters,subscriptions,memberships,metrics});
+ return send(res,200,{tenants,deals,feedback,tasks,betaTesters,subscriptions,memberships,interactions,metrics});
+}
+if(route==='/api/admin/onboarding'&&req.method==='POST'){
+ if(!uuidRe.test(String(p.workspace_id||''))||!['invited','activated','training','active','paused'].includes(p.status))throw new Fault(400,'Status de onboarding inválido.');
+ const office=await adminDb('cj_workspaces?select=id,name&id=eq.'+encodeURIComponent(p.workspace_id));
+ if(!office.length)throw new Fault(404,'Escritório não encontrado.');
+ const existing=await adminDb('cj_admin_tenants?select=workspace_id&workspace_id=eq.'+encodeURIComponent(p.workspace_id));
+ if(existing.length)await adminDb('cj_admin_tenants?workspace_id=eq.'+encodeURIComponent(p.workspace_id),{method:'PATCH',body:{onboarding_status:p.status},prefer:'return=minimal'});
+ else await adminDb('cj_admin_tenants?on_conflict=workspace_id',{method:'POST',body:{workspace_id:p.workspace_id,name:office[0].name,plan:'beta',status:'active',onboarding_status:p.status},prefer:'resolution=ignore-duplicates,return=minimal'});
+ return send(res,200,{ok:true});
+}
+if(route==='/api/admin/interaction'&&req.method==='POST'){
+ if(!uuidRe.test(String(p.deal_id||''))||!['call','email','meeting','whatsapp','other'].includes(p.channel)||typeof p.note!=='string'||p.note.trim().length<4||p.note.length>1500)throw new Fault(400,'Interação inválida.');
+ const deal=await adminDb('cj_admin_deals?select=id&id=eq.'+encodeURIComponent(p.deal_id));
+ if(!deal.length)throw new Fault(404,'Oportunidade não localizada.');
+ await adminDb('cj_admin_interactions',{method:'POST',body:{deal_id:p.deal_id,channel:p.channel,note:p.note.trim(),created_by:adminUser.user.id},prefer:'return=minimal'});
+ return send(res,200,{ok:true});
 }
 if(route==='/api/admin/beta-users'&&req.method==='GET'){
  const secret=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!secret)throw new Fault(503,'Administração indisponível.');
