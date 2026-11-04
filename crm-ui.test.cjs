@@ -6,7 +6,7 @@ let origin;
 test.before(async()=>{await new Promise(done=>server.listen(0,'127.0.0.1',done));origin='http://127.0.0.1:'+server.address().port;});
 test.after(async()=>{await new Promise(done=>server.close(done));});
 test('CRM app serves actual settings, profile, search and style assets',async()=>{
- const response=await fetch(origin+'/');
+ const response=await fetch(origin+'/app');
  assert.equal(response.status,200);
  const html=await response.text();
  for(const asset of ['/crm-ui.css','/crm-experience.js','/onboarding.js','/feedback.js']){

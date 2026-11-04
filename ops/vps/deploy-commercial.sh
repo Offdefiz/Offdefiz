@@ -58,7 +58,7 @@ runuser -u partelis -- git -C "$CANDIDATE" fetch --quiet --depth 1 origin "refs/
 runuser -u partelis -- git -C "$CANDIDATE" checkout --quiet --detach FETCH_HEAD
 ACTUAL="$(git -C "$CANDIDATE" rev-parse HEAD)"
 [[ "$ACTUAL" == "$EXPECTED" ]] || error "Revisão não corresponde ao SHA autorizado."
-[[ < "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql" ]] || error "Migração incremental ausente."
+[[ -f "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql" ]] || error "Migração incremental ausente."
 
 echo "[2/8] Verificações de sintaxe e regressão"
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs npm --prefix "$CANDIDATE" run build
