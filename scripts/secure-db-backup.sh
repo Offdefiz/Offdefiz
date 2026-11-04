@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 umask 077
-if [ -z "$PARTELIS_DATABASE_URL" ] || [ -z "$PARTELIS_AGE_RECIPIENT" ] || [ -z "$PARTELIS_BACKUP_DIR" ]; then
+if [[ ! -v PARTELIS_DATABASE_URL || ! -v PARTELIS_AGE_RECIPIENT || ! -v PARTELIS_BACKUP_DIR ]] || [ -z "$PARTELIS_DATABASE_URL" ] || [ -z "$PARTELIS_AGE_RECIPIENT" ] || [ -z "$PARTELIS_BACKUP_DIR" ]; then
   echo "Configure PARTELIS_DATABASE_URL, PARTELIS_AGE_RECIPIENT e PARTELIS_BACKUP_DIR em variáveis privadas." >&2
   exit 2
 fi
