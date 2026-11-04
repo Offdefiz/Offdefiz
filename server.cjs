@@ -1,6 +1,7 @@
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),C=require('./domain.js');
 const {preflight}=require('./zapsign-preflight.cjs');
 const {models:contractModels}=require('./contract-catalog.cjs');
+const {dashboardMetrics,validateTask}=require('./ops-metrics.cjs');
 const url=process.env.SUPABASE_URL,key=process.env.SUPABASE_PUBLISHABLE_KEY;
 class Fault extends Error{constructor(status,message){super(message);this.status=status;}}
 async function supa(route,{token,method='GET',body,prefer}={}){if(!url||!key)throw new Fault(503,'O acesso está sendo configurado. A demonstração pública continua disponível.');const r=await fetch(url+route,{method,headers:{apikey:key,...(token?{Authorization:'Bearer '+token}:{}),...(body?{'Content-Type':'application/json'}:{}),...(prefer?{Prefer:prefer}:{})},body:body?JSON.stringify(body):undefined});const d=await r.json().catch(()=>null);if(!r.ok)throw new Fault(r.status===401||r.status===403?401:400,'Não foi possível concluir a operação. Confira seu acesso e tente novamente.');return d;}
@@ -13,6 +14,9 @@ async function ownerIdentity(req,res){let {cj_access:token,cj_refresh:refresh}=c
 async function owner(req,res){const who=await ownerIdentity(req,res);if(!ownerEmail()||!who.user.email_confirmed_at||String(who.user.email||'').toLowerCase()!==ownerEmail())throw new Fault(403,'Acesso restrito ao proprietário do Partelís.');return who;}
 async function adminDb(table,{method='GET',body,query='',prefer}={}){const secret=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!secret)throw new Fault(503,'Configure a chave de serviço para ativar a administração.');const r=await fetch(url+'/rest/v1/'+table+query,{method,headers:{apikey:secret,Authorization:'Bearer '+secret,...(body?{'Content-Type':'application/json'}:{}),...(prefer?{Prefer:prefer}:{})},body:body?JSON.stringify(body):undefined});const d=await r.json().catch(()=>null);if(!r.ok)throw new Fault(503,'A base administrativa não está pronta. Confira a migração e as credenciais.');return d;}
 const allowedStage=['lead','contacted','demo','proposal','won','lost'];
+const presenceLast=new Map();
+const uuidRe=/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i;
+
 function secureRequest(req){return req.headers['x-forwarded-proto']==='https'||process.env.PUBLIC_APP_URL?.startsWith('https:');}
 async function body(req){let b='';for await(const c of req){b+=c;if(Buffer.byteLength(b)>1500000)throw new Fault(413,'Solicitação muito grande.');}try{return JSON.parse(b||'{}');}catch{throw new Fault(400,'Dados inválidos.');}}
 function send(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));}
@@ -40,8 +44,58 @@ if(route==='/contratos/prevalidar'&&req.method==='GET'){const who=await identity
 if(route==='/admin'&&req.method==='GET'){await owner(req,res);res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,'admin.html')));}
 if(route==='/api/profile'&&req.method==='GET'){const who=await ownerIdentity(req,res);const profiles=await supa('/rest/v1/cj_user_profiles?user_id=eq.'+encodeURIComponent(who.user.id)+'&select=display_name,avatar_data,updated_at',{token:who.token});return send(res,200,{profile:profiles[0]||null,email:who.user.email});}
 if(route==='/api/profile'&&req.method==='POST'){limit(req);const who=await ownerIdentity(req,res),p=await body(req);const display_name=String(p.display_name||'').trim(),avatar_data=p.avatar_data;if(display_name.length<2||display_name.length>80||typeof p.avatar_data!=='string'&&avatar_data!==null)throw new Fault(400,'Confira o nome e a foto.');if(avatar_data!==null&&(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar_data)||avatar_data.length>160000))throw new Fault(400,'A foto deve ser JPG, PNG ou WebP de até 120 KB após otimização.');const profiles=await supa('/rest/v1/cj_user_profiles?on_conflict=user_id',{token:who.token,method:'POST',body:{user_id:who.user.id,display_name,avatar_data,updated_at:new Date().toISOString()},prefer:'resolution=merge-duplicates,return=representation'});return send(res,200,{profile:profiles[0],email:who.user.email});}
+if(route==='/api/presence'&&req.method==='POST'){
+ const who=await identity(req,res),id=who.membership.workspace_id+':'+who.user.id,now=Date.now();
+ if(now-(presenceLast.get(id)||0)<45000)return send(res,200,{ok:true});
+ await adminDb('cj_presence?on_conflict=user_id,workspace_id',{method:'POST',body:{user_id:who.user.id,workspace_id:who.membership.workspace_id,last_seen_at:new Date(now).toISOString()},prefer:'resolution=merge-duplicates,return=minimal'});
+ presenceLast.set(id,now);if(presenceLast.size>10000)presenceLast.clear();
+ return send(res,200,{ok:true});
+}
 if(route==='/api/feedback'&&req.method==='POST'){limit(req);const who=await identity(req,res),p=await body(req);if(!['bug','idea','usability'].includes(p.kind)||typeof p.message!=='string'||p.message.trim().length<8||p.message.length>3000||typeof p.page!=='string'||p.page.length>200)throw new Fault(400,'Confira os campos do feedback.');await adminDb('cj_beta_feedback',{method:'POST',body:{workspace_id:who.membership.workspace_id,user_id:who.user.id,kind:p.kind,message:p.message.trim(),page:p.page},prefer:'return=minimal'});return send(res,200,{ok:true});}
-if(route.startsWith('/api/admin/')){limit(req);await owner(req,res);const p=req.method==='POST'?await body(req):{};if(route==='/api/admin/dashboard'&&req.method==='GET'){const [tenants,deals,feedback]=await Promise.all([adminDb('cj_admin_tenants'),adminDb('cj_admin_deals?order=created_at.desc'),adminDb('cj_beta_feedback?order=created_at.desc')]);return send(res,200,{tenants,deals,feedback});}
+if(route.startsWith('/api/admin/')){limit(req);await owner(req,res);const p=req.method==='POST'?await body(req):{};if(route==='/api/admin/dashboard'&&req.method==='GET'){
+ const [tenants,deals,feedback,tasks,betaTesters,presence,subscriptions,memberships]=await Promise.all([
+  adminDb('cj_admin_tenants'),adminDb('cj_admin_deals?order=created_at.desc'),adminDb('cj_beta_feedback?order=created_at.desc'),adminDb('cj_admin_tasks?order=created_at.desc'),
+  adminDb('cj_beta_testers'),adminDb('cj_presence'),adminDb('cj_subscriptions'),adminDb('cj_memberships?select=user_id,workspace_id,role')
+ ]);
+ const metrics=dashboardMetrics({tenants,deals,feedback,tasks,betaTesters,presence,subscriptions,memberships});
+ return send(res,200,{tenants,deals,feedback,tasks,betaTesters,subscriptions,memberships,metrics});
+}
+if(route==='/api/admin/beta-users'&&req.method==='GET'){
+ const secret=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!secret)throw new Fault(503,'Administração indisponível.');
+ const [memberships,response]=await Promise.all([
+  adminDb('cj_memberships?select=user_id,workspace_id,role'),
+  fetch(url+'/auth/v1/admin/users?per_page=100',{headers:{apikey:secret,Authorization:'Bearer '+secret}})
+ ]);
+ if(!response.ok)throw new Fault(503,'Não foi possível consultar as contas de teste.');
+ const payload=await response.json(),users=payload.users||[];
+ return send(res,200,{users:memberships.map(m=>{const user=users.find(u=>u.id===m.user_id);return {user_id:m.user_id,workspace_id:m.workspace_id,role:m.role,email:user?.email||'E-mail indisponível'};})});
+}
+if(route==='/api/admin/beta-assign'&&req.method==='POST'){
+ if(!uuidRe.test(String(p.user_id||''))||!uuidRe.test(String(p.workspace_id||''))||typeof p.label!=='string'||p.label.trim().length<2||p.label.length>80)throw new Fault(400,'Dados do beta tester inválidos.');
+ const member=await adminDb('cj_memberships?select=user_id&user_id=eq.'+encodeURIComponent(p.user_id)+'&workspace_id=eq.'+encodeURIComponent(p.workspace_id));
+ if(!member.length)throw new Fault(404,'Usuário não vinculado ao escritório informado.');
+ await adminDb('cj_beta_testers?on_conflict=user_id',{method:'POST',body:{user_id:p.user_id,workspace_id:p.workspace_id,label:p.label.trim()},prefer:'resolution=merge-duplicates,return=minimal'});
+ return send(res,200,{ok:true});
+}
+if(route==='/api/admin/beta-remove'&&req.method==='POST'){
+ if(!uuidRe.test(String(p.user_id||'')))throw new Fault(400,'Usuário inválido.');
+ await adminDb('cj_beta_testers?user_id=eq.'+encodeURIComponent(p.user_id),{method:'DELETE',prefer:'return=minimal'});
+ return send(res,200,{ok:true});
+}
+if(route==='/api/admin/feedback-task'&&req.method==='POST'){
+ const task=validateTask(p);if(!task)throw new Fault(400,'Informe título e prioridade da tarefa.');
+ const feedback=await adminDb('cj_beta_feedback?select=id&id=eq.'+encodeURIComponent(task.feedback_id));
+ if(!feedback.length)throw new Fault(404,'Sugestão não localizada.');
+ await adminDb('cj_admin_tasks?on_conflict=feedback_id',{method:'POST',body:task,prefer:'resolution=ignore-duplicates,return=minimal'});
+ const rows=await adminDb('cj_admin_tasks?feedback_id=eq.'+encodeURIComponent(task.feedback_id));
+ await adminDb('cj_beta_feedback',{method:'PATCH',query:'?id=eq.'+encodeURIComponent(task.feedback_id),body:{status:'reviewing'},prefer:'return=minimal'});
+ return send(res,200,{ok:true,task:rows[0]});
+}
+if(route==='/api/admin/task-status'&&req.method==='POST'){
+ if(!uuidRe.test(String(p.id||''))||!['backlog','doing','review','done'].includes(p.status))throw new Fault(400,'Tarefa ou situação inválida.');
+ const rows=await adminDb('cj_admin_tasks?id=eq.'+encodeURIComponent(p.id),{method:'PATCH',body:{status:p.status,updated_at:new Date().toISOString()},prefer:'return=representation'});
+ if(!rows.length)throw new Fault(404,'Tarefa não localizada.');return send(res,200,{ok:true});
+}
 if(route==='/api/admin/workspaces'&&req.method==='GET'){const rows=await adminDb('cj_memberships?select=workspace_id,role,user_id');const unique=[...new Set(rows.map(x=>x.workspace_id))];const grants=await adminDb('cj_support_grants');return send(res,200,{workspaces:unique.map(id=>({id,users:rows.filter(x=>x.workspace_id===id).length,grant:grants.find(g=>g.workspace_id===id&& !g.revoked_at&&new Date(g.expires_at)>new Date())?true:false}))});}
 if(route==='/api/admin/support'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.workspace_id||'')))throw new Fault(400,'Escritório inválido.');const grants=await adminDb('cj_support_grants?workspace_id=eq.'+encodeURIComponent(p.workspace_id));const grant=grants[0];if(!grant||grant.revoked_at||new Date(grant.expires_at)<=new Date())throw new Fault(403,'O escritório precisa autorizar o suporte.');const rows=await adminDb('cj_state?workspace_id=eq.'+encodeURIComponent(p.workspace_id)+'&select=revision,data,theme');if(!rows.length)throw new Fault(404,'Ambiente indisponível.');await adminDb('cj_support_audit',{method:'POST',body:{workspace_id:p.workspace_id,owner_id:(await owner(req,res)).user.id,event:'support_read'},prefer:'return=minimal'});return send(res,200,{workspace_id:p.workspace_id,revision:rows[0].revision,theme:rows[0].theme,data:rows[0].data,read_only:true});}
 if(route==='/api/admin/deal'&&req.method==='POST'){if(!String(p.name||'').trim()||String(p.name).length>100||!String(p.next_action||'').trim()||String(p.next_action).length>200||!/^\\d{4}-\\d{2}-\\d{2}$/.test(String(p.next_date||''))||!Number.isFinite(Number(p.value||0))||Number(p.value||0)<0)throw new Fault(400,'Confira os dados da oportunidade.');await adminDb('cj_admin_deals',{method:'POST',body:{name:String(p.name).trim(),contact:String(p.contact||'').slice(0,120),value:Number(p.value||0),next_action:String(p.next_action).trim(),next_date:p.next_date},prefer:'return=minimal'});return send(res,200,{ok:true});}
