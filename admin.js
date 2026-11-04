@@ -31,15 +31,25 @@ function showMetrics(){
 function showTenants(){
  const memberships=data.memberships||[],tenants=data.tenants||[],subs=data.subscriptions||[];
  const ids=[...new Set([...memberships.map(m=>m.workspace_id),...tenants.map(t=>t.workspace_id)])];
- root.innerHTML='<div class="panel"><h2>Escritórios e seus usuários</h2><p>Cadastro administrativo e acesso são separados de faturamento.</p><table><thead><tr><th>Escritório</th><th>Usuários</th><th>Plano</th><th>Acesso</th><th>Assinatura</th></tr></thead><tbody>'+
- ids.map(id=>{const t=tenants.find(x=>x.workspace_id===id)||{},sub=subs.find(x=>x.workspace_id===id)||{};return '<tr><td>'+esc(t.name||'Escritório '+id.slice(0,8))+'</td><td>'+memberships.filter(x=>x.workspace_id===id).length+'</td><td>'+esc(t.plan||'não configurado')+'</td><td>'+esc(t.status||'vínculo ativo')+'</td><td>'+esc(sub.status||'não registrada')+'</td></tr>';}).join('')+'</tbody></table></div>';
+ const states=['invited','activated','training','active','paused'];
+ root.innerHTML='<div class="panel"><h2>Escritórios, acesso e onboarding</h2><p>O status de onboarding é separado de recebimentos e não concede acesso ao cliente final.</p>'+
+ '<input id="tenant-search" type="search" placeholder="Buscar escritório" aria-label="Buscar escritório" style="margin:10px 0;max-width:420px">'+
+ '<table><thead><tr><th>Escritório</th><th>Usuários</th><th>Plano</th><th>Acesso</th><th>Assinatura</th><th>Onboarding</th></tr></thead><tbody>'+
+ ids.map(id=>{const t=tenants.find(x=>x.workspace_id===id)||{},sub=subs.find(x=>x.workspace_id===id)||{};return '<tr data-tenant-row><td>'+esc(t.name||'Escritório '+id.slice(0,8))+'</td><td>'+memberships.filter(x=>x.workspace_id===id).length+'</td><td>'+esc(t.plan||'não configurado')+'</td><td>'+esc(t.status||'vínculo ativo')+'</td><td>'+esc(sub.status||'não registrada')+'</td><td><select data-onboarding="'+esc(id)+'">'+options(states,t.onboarding_status||'invited')+'</select></td></tr>';}).join('')+'</tbody></table></div>';
+ root.querySelector('#tenant-search').addEventListener('input',e=>{const q=e.target.value.toLocaleLowerCase('pt-BR');root.querySelectorAll('[data-tenant-row]').forEach(row=>{row.hidden=!row.textContent.toLocaleLowerCase('pt-BR').includes(q);});});
+ root.querySelectorAll('[data-onboarding]').forEach(el=>el.addEventListener('change',async()=>{try{await api('onboarding',{workspace_id:el.dataset.onboarding,status:el.value});await refresh();message('Onboarding atualizado.');}catch(e){message(e.message);}}));
 }
 function showCRM(){
- const deals=data.deals||[];
- root.innerHTML='<div class="panel"><h2>Nova oportunidade comercial</h2><form id="newdeal"><input name="name" placeholder="Nome do escritório" required maxlength="100"><input name="contact" placeholder="Contato" maxlength="120"><input name="value" type="number" min="0" step=".01" placeholder="R$"><input name="next_action" placeholder="Próxima ação" required maxlength="200"><input name="next_date" type="date" required><button>Adicionar</button></form></div>'+
+ const deals=data.deals||[],interactions=data.interactions||[];
+ root.innerHTML='<div class="panel"><h2>Nova oportunidade comercial</h2><form id="newdeal"><input name="name" placeholder="Nome do escritório" required maxlength="100"><input name="contact" placeholder="Contato profissional" maxlength="120"><input name="value" type="number" min="0" step=".01" placeholder="R$"><input name="next_action" placeholder="Próxima ação" required maxlength="200"><input name="next_date" type="date" required><button>Adicionar</button></form></div>'+
  '<div class="panel"><h2>Pipeline da Partelís</h2><table><thead><tr><th>Escritório</th><th>Etapa</th><th>Valor declarado</th><th>Próxima ação</th></tr></thead><tbody>'+
- deals.map(d=>'<tr><td>'+esc(d.name)+'</td><td><select data-stage="'+esc(d.id)+'">'+options(stageOptions,d.stage)+'</select></td><td>'+money(d.value)+'</td><td>'+esc(d.next_action)+' · '+esc(date(d.next_date))+'</td></tr>').join('')+'</tbody></table></div>';
+ deals.map(d=>'<tr><td>'+esc(d.name)+'</td><td><select data-stage="'+esc(d.id)+'">'+options(stageOptions,d.stage)+'</select></td><td>'+money(d.value)+'</td><td>'+esc(d.next_action)+' · '+esc(date(d.next_date))+'</td></tr>').join('')+'</tbody></table></div>'+
+ '<div class="panel"><h2>Histórico de relacionamento</h2><p>Registre apenas informações profissionais necessárias à operação comercial, sem documentos ou dados bancários de terceiros.</p>'+
+ (deals.length?'<form id="newinteraction"><select name="deal_id" required aria-label="Oportunidade">'+deals.map(d=>'<option value="'+esc(d.id)+'">'+esc(d.name)+'</option>').join('')+'</select><select name="channel" aria-label="Canal">'+options(['call','email','meeting','whatsapp','other'],'call')+'</select><input name="note" maxlength="1500" minlength="4" required placeholder="Resumo da interação e próximo passo"><button>Registrar interação</button></form>':'<p>Cadastre uma oportunidade para registrar interações.</p>')+
+ '<table><thead><tr><th>Data</th><th>Escritório</th><th>Canal</th><th>Registro</th></tr></thead><tbody>'+
+ interactions.map(i=>{const d=deals.find(x=>x.id===i.deal_id);return '<tr><td>'+esc(date(i.occurred_at))+'</td><td>'+esc(d?.name||'Oportunidade removida')+'</td><td>'+esc(i.channel)+'</td><td>'+esc(i.note)+'</td></tr>';}).join('')+'</tbody></table></div>';
  root.querySelector('#newdeal').addEventListener('submit',async e=>{e.preventDefault();try{await api('deal',Object.fromEntries(new FormData(e.target)));await refresh();message('Oportunidade cadastrada.');}catch(err){message(err.message);}});
+ root.querySelector('#newinteraction')?.addEventListener('submit',async e=>{e.preventDefault();try{await api('interaction',Object.fromEntries(new FormData(e.target)));await refresh();message('Interação registrada.');}catch(err){message(err.message);}});
  root.querySelectorAll('[data-stage]').forEach(el=>el.addEventListener('change',async()=>{try{await api('deal-status',{id:el.dataset.stage,stage:el.value});await refresh();}catch(e){message(e.message);}}));
 }
 function showFeedback(){
