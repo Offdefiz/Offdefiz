@@ -1,0 +1,23 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Publicações do cliente · Partelís</title><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/partelis.css"><style>
+body{margin:0;background:#f8f6fc;color:#25163d;font-family:system-ui,sans-serif}header{background:white;border-bottom:1px solid #e8dff2;padding:22px 5%;display:flex;align-items:center;justify-content:space-between}header img{width:155px}
+main{max-width:1050px;margin:30px auto;padding:0 18px}.panel{border:1px solid #e6dbf0;background:white;border-radius:19px;padding:25px;margin:18px 0;box-shadow:0 9px 26px #30145f08}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}label{display:block;font-weight:650;margin:12px 0;font-size:14px}
+input,select,textarea{display:block;box-sizing:border-box;width:100%;font:inherit;border:1px solid #cbc1df;border-radius:10px;padding:12px;margin-top:5px}
+textarea{min-height:115px}button{font:inherit;color:white;background:#30145F;border:none;border-radius:12px;padding:12px 18px;font-weight:700;cursor:pointer}
+button.secondary{background:#665578}button:disabled{opacity:.55}small{color:#746987}p{line-height:1.6;max-width:840px}article{border-bottom:1px solid #e7e0ee;padding:14px 0}
+@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style></head><body><header><img src="/brand-horizontal.svg" alt="Partelís"><a href="/">Voltar ao escritório</a></header><main>
+<p><small>ÁREA DO GESTOR · CLIENTES</small></p><h1>Permissões e publicações</h1>
+<p>Associe uma conta <strong>de teste</strong> a um caso existente. O acesso é individual, revogável e somente leitura. Não há convite automático por e-mail nem importação de dados do escritório para o cliente.</p>
+<p id="status" role="status">Verificando suas permissões…</p>
+<div class="grid">
+<section class="panel"><h2>Autorizar conta de teste</h2><form id="grant">
+<label>Caso existente<select name="case_id" id="case-select" required></select></label>
+<label>Identificador UUID de usuário autenticado<input name="client_user_id" type="text" required placeholder="UUID de conta de teste"></label>
+<label>Título público do caso<input name="case_label" type="text" minlength="2" maxlength="160" required placeholder="Acompanhamento de caso exemplo"></label>
+<label><input name="confirm" type="checkbox" required style="display:inline;width:auto"> Confirmo que é uma conta de teste autorizada.</label>
+<button type="submit">Conceder acesso</button></form></section>
+<section class="panel"><h2>O que é publicado</h2><p>Somente mensagens redigidas e aprovadas pelo gestor. Notas internas, outros casos, documentos privados, dados de outros clientes e prazos não são expostos.</p><p><a href="/cliente" target="_blank" rel="noopener">Abrir visão do cliente</a></p><p><small>Antes de produzir uso real: teste de isolamento A/B, backup recuperável, autenticação/convite seguro e revisão de LGPD.</small></p></section>
+</div>
+<section class="panel"><h2>Acessos concedidos e atualizações</h2><div id="entries"></div></section>
+</main><script src="/portal-management.js"></script></body></html>

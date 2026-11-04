@@ -1,0 +1,29 @@
+name: Partelis quality gate
+on:
+  push:
+    branches:
+      - codex/partelis-oito-frentes-20261104
+  pull_request:
+    branches:
+      - caixa-juridico
+      - codex/gerador-contratos-validacao
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Node and Python versions
+        run: node --version && python3 --version
+      - name: Static checks
+        run: npm run build
+      - name: Unit and API tests (fictitious fixtures only)
+        run: npm test
