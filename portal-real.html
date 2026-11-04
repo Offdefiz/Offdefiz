@@ -1,10 +1,10 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Área do cliente · Partelís</title><link rel="icon" href="/favicon.svg"><style>
 :root{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;color:#291c42;background:#f8f6fc}
-*{box-sizing:border-box}body{margin:0}main{max-width:980px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:0 0 22px;border-bottom:1px solid #e6ddf1}header img{width:146px}a{color:#5a32a4}
+*{box-sizing:border-box}body{margin:0}main{max-width:980px;margin:auto;padding:24px}header{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:0 0 22px;border-bottom:1px solid #e6ddf1}header img{width:146px}a{color:#5a32a4}button{background:#30145f;color:white;border:0;border-radius:12px;padding:10px 15px;font-weight:600;cursor:pointer}
 h1{font-size:clamp(1.6rem,4vw,2.4rem)}p{line-height:1.6;color:#5f536d}
 .card{background:white;border:1px solid #e5daf0;border-radius:20px;padding:20px;margin:18px 0;box-shadow:0 5px 20px #30145f09}
 .card h3{margin-top:0;color:#30145f}small{color:#68587e}.empty{padding:18px;background:#f0eafd;border-radius:14px}
-</style></head><body><main><header><img src="/brand-horizontal.svg" alt="Partelís"><a href="/auth/logout" onclick="event.preventDefault();fetch('/auth/logout',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).then(()=>location.replace('/login'))">Sair</a></header>
+</style></head><body><main><header><img src="/brand-horizontal.svg" alt="Partelís"><button id="logout" type="button">Encerrar sessão</button></header>
 <h1>Acompanhamento do meu caso</h1><p>Você verá apenas informações publicadas pelo escritório responsável, vinculadas à sua identidade e ao caso autorizado. Esta área não substitui comunicados jurídicos formais.</p>
 <div class="card"><h2>Casos autorizados</h2><div id="cases" aria-live="polite">Carregando...</div></div><div class="card"><h2>Atualizações publicadas</h2><div id="updates" aria-live="polite">Carregando...</div></div>
 <p><small>Se um processo não aparecer, solicite conferência ao escritório. Nenhuma mensagem ou documento é enviado por esta tela.</small></p>
