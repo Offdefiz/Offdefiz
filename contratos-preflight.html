@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Pré-validação documental · Partelís</title>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#30145f;background:#f8f6fc}
+*{box-sizing:border-box}body{margin:0}main{max-width:1100px;margin:auto;padding:24px}
+header{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}header img{width:145px}
+a{color:#5639a8}h1{margin:28px 0 8px;font-size:clamp(1.5rem,4vw,2.3rem)}p{line-height:1.5;color:#564e61}
+.notice{border:1px solid #dccbf8;border-radius:16px;background:#f0eafc;padding:15px;margin:20px 0}
+fieldset{border:0;padding:0;margin:0}.card{background:white;padding:22px;border:1px solid #e9e0f4;border-radius:22px;box-shadow:0 7px 26px #2811430b;margin:18px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:15px}
+label{display:flex;flex-direction:column;gap:6px;font-size:.86rem;font-weight:650;color:#38205b}
+input,select{padding:12px;border:1px solid #d2c8e1;border-radius:11px;background:white;color:#261b36;width:100%;min-height:44px;font:inherit}
+input:focus,select:focus{outline:3px solid #8d59ff55}
+button{border:0;border-radius:12px;background:#30145f;color:white;padding:13px 20px;font-weight:700;cursor:pointer}
+button:disabled{opacity:.5;cursor:wait}#result{white-space:pre-wrap;overflow-wrap:anywhere}
+#result[data-state="error"]{color:#a11a38}#result[data-state="ok"]{color:#2c6048}
+footer{font-size:.8rem;color:#696070;margin-top:24px}
+</style></head>
+<body><main><header><img src="/brand-horizontal.svg" alt="Partelís"><a href="/">Voltar ao aplicativo</a></header>
+<h1>Preparação documental</h1>
+<p>Conferência técnica dos campos dos 12 modelos fornecidos. A validação não cria DOCX/PDF, contratos, propostas ou assinaturas e não envia dados à ZapSign.</p>
+<div class="notice"><strong>Ambiente de teste.</strong> Use somente dados fictícios. Nenhum documento pode ser criado até a homologação dos 12 modelos no sandbox.</div>
+<section class="card"><label for="modelo">Modelo jurídico</label><select id="modelo" aria-label="Selecionar modelo"><option>Carregando modelos...</option></select></section>
+<form id="contract-preflight" class="card"><fieldset><legend><strong>Campos do modelo</strong></legend><p>Preencha apenas informações de teste. Os campos exigidos para o documento não tornam obrigatório o preenchimento do cadastro de um lead.</p><div class="grid" id="fields"></div></fieldset><p><button type="submit" id="check" disabled>Conferir preenchimento</button></p></form>
+<section class="card" aria-live="polite"><h2>Resultado da pré-validação</h2><div id="result">Selecione um modelo para começar.</div></section>
+<footer>Partelís · Conceito A / A1 · símbolo e paleta oficial preservados.</footer>
+</main><script src="/contratos-preflight.js" defer></script></body></html>

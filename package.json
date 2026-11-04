@@ -8,6 +8,6 @@
   "scripts": {
     "start": "node server.cjs",
     "test": "node --test *.test.cjs",
-    "build": "node --check server.cjs && node --check app.js && node --check enhancements.js && node --check insights.js && node --check cliente.js && node --check crm-experience.js && node --check feedback.js && node --check onboarding.js && node --check proposal-engine.js && node --check proposal-settings.js && node --check zapsign-validation.cjs && node --check zapsign-preflight.cjs"
+    "build": "node --check server.cjs && node --check app.js && node --check enhancements.js && node --check insights.js && node --check cliente.js && node --check crm-experience.js && node --check feedback.js && node --check onboarding.js && node --check proposal-engine.js && node --check proposal-settings.js && node --check zapsign-validation.cjs && node --check zapsign-preflight.cjs && node --check admin.js && node --check presence.js && node --check contratos-preflight.js && node --check ops-metrics.cjs && node --check contract-catalog.cjs && node --check portal-real.js && node --check finance-drafts.cjs"
   }
 }
