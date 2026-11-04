@@ -43,6 +43,12 @@ async function auth(route,{token:access,body={},method='GET'}){
       const user=await identify(access,client);
       await client.query('UPDATE native_users SET password_hash=$1 WHERE id=$2',[salt+':'+hash,user.id]);
       await client.query('DELETE FROM native_sessions WHERE user_id=$1 AND access_hash<>$2',[user.id,digest(access)]);
+      // Só ativa o escritório depois que o gestor cria sua própria senha.
+      await client.query(
+        "UPDATE cj_admin_tenants t SET status='active' FROM cj_memberships m "+
+        "WHERE m.workspace_id=t.workspace_id AND m.user_id=$1 AND m.role='gestor' "+
+        "AND t.status='pending_activation'",[user.id]
+      );
     });
   }
   if(route==='/auth/v1/logout'){await pool.query('DELETE FROM native_sessions WHERE access_hash=$1 OR refresh_hash=$2',[digest(access),digest(body.refresh_token)]);return;}
