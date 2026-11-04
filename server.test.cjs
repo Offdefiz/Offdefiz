@@ -4,3 +4,5 @@ test('dados exigem autenticação',async()=>{const r=await fetch(origin+'/api/st
 test('demo pública isolada e login com senha',async()=>{assert.match(await(await fetch(origin+'/demo')).text(),/window.CLOUD=false/);assert.match(await(await fetch(origin+'/login')).text(),/autocomplete="current-password"/);});
 test('origem externa não pode submeter login',async()=>{const r=await fetch(origin+'/auth/login',{method:'POST',headers:{Origin:'https://evil.example','Content-Type':'application/json'},body:'{}'});assert.equal(r.status,403);});
 test('arquivos privados e caminhos arbitrários não são servidos',async()=>{for(const route of ['/.env','/server.cjs','/schema.sql','/package.json'])assert.equal((await fetch(origin+route)).status,404);});
+
+test('pré-validação documental exige sessão nas duas rotas',async()=>{assert.equal((await fetch(origin+'/contratos/prevalidar')).status,401);assert.equal((await fetch(origin+'/api/contracts/catalog')).status,401);});
