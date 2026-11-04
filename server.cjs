@@ -54,6 +54,7 @@ if(route.startsWith('/api/admin/commercial/')){
   if(route==='/api/admin/commercial/provision'&&req.method==='POST')return send(res,201,await commercial.createWorkspace(p,actor));
   if(route==='/api/admin/commercial/invite-member'&&req.method==='POST')return send(res,201,await commercial.inviteMember(p,actor));
   if(route==='/api/admin/commercial/reissue-invite'&&req.method==='POST')return send(res,200,await commercial.reissueInvite(p,actor));
+  if(route==='/api/admin/commercial/assisted-recovery'&&req.method==='POST')return send(res,200,await commercial.assistedRecovery(p,actor));
   if(route==='/api/admin/commercial/tenant-status'&&req.method==='POST')return send(res,200,await commercial.setWorkspaceStatus(p,actor));
   throw new Fault(404,'Recurso administrativo inexistente.');
 }
