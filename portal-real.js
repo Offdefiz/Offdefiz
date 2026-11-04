@@ -1,5 +1,6 @@
 (()=>{'use strict';
 const cases=document.querySelector('#cases'),updates=document.querySelector('#updates');
+document.querySelector('#logout').addEventListener('click',async()=>{try{const r=await fetch('/auth/logout',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:'{}'});if(!r.ok)throw Error('Não foi possível encerrar a sessão.');location.replace('/login');}catch(error){empty(cases,error.message);}});
 function title(text,as='h3'){const el=document.createElement(as);el.textContent=text;return el;}
 function empty(into,message){const p=document.createElement('p');p.className='empty';p.textContent=message;into.replaceChildren(p);}
 (async()=>{try{
