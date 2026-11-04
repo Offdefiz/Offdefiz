@@ -45,7 +45,7 @@ function successFeeEstimate({economicBenefitCents,rateBasisPoints}) {
 }
 function overdueDays({dueDate:due,asOf,status}) {
  const a=validDate(due),b=validDate(asOf);
- if(status==='confirmed_paid'||status==='reversed')return 0;
+ if(status==='confirmed_paid')return 0;
  const diff=Math.floor((b.getTime()-a.getTime())/86400000);
  return Math.max(0,diff);
 }
