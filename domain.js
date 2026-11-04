@@ -9,7 +9,7 @@
     client:['gestor','secretaria','especialista'], clientUpdate:['gestor','secretaria','especialista'], debt:['gestor','secretaria','especialista'],
     stage:['gestor','secretaria','especialista'], meeting:['gestor','secretaria','especialista'],
     proposal:['gestor','especialista'], contract:['gestor','especialista'], payment:['gestor','financeiro'], followup:['gestor','secretaria','especialista'],
-    legal:['gestor','juridico'], financeExtra:['gestor','financeiro'], task:['gestor','secretaria','especialista','juridico','financeiro']
+    legal:['gestor','juridico'], monitor:['gestor','juridico'], financeExtra:['gestor','financeiro'], task:['gestor','secretaria','especialista','juridico','financeiro']
   };
   function assert(value,message) { if (!value) throw new Error(message); }
   function can(role,action) { return (rights[action] || []).includes(role); }
@@ -36,7 +36,7 @@
   }
   function execute(state,role,action,data,day) {
     day=date(day || today());assert(can(role,action),'Este perfil não pode executar essa ação.');
-    const s=JSON.parse(JSON.stringify(state)),p=data || {};let result,description='';if(!Array.isArray(s.financeExtras))s.financeExtras=[];
+    const s=JSON.parse(JSON.stringify(state)),p=data || {};let result,description='';if(!Array.isArray(s.financeExtras))s.financeExtras=[];if(!Array.isArray(s.processMonitors))s.processMonitors=[];
     const opportunity=id=>get(s.opportunities,id);
     if(action==='client') {
       const c={id:uid('cli'),name:required(p.name,'Nome fictício'),source:required(p.source,'Origem'),created:day};s.clients.push(c);
@@ -137,7 +137,27 @@
       const i=get(s.installments,p.id);
       if(p.operation==='undo') {assert(i.paidAt,'Esta parcela ainda não está recebida.');i.reversalReason=required(p.reason,'Motivo do estorno');i.paidAt=null;description='Recebimento estornado: '+i.reversalReason;}
       else {assert(!i.paidAt,'Recebimento já confirmado.');const paidAt=date(p.paidAt);assert(paidAt<=day,'Recebimento não pode estar no futuro.');i.paidAt=paidAt;description='Recebimento integral confirmado manualmente';}result=i;
-     } else if(action==='financeExtra') {
+     } else if(action==='monitor') {
+      if(p.operation==='register'){
+        const raw=String(p.number||'').replace(/[^0-9]/g,'');
+        assert(raw.length===20,'Informe os 20 dígitos do número processual CNJ.');
+        assert(!s.processMonitors.some(m=>m.number===raw),'Processo já cadastrado neste escritório.');
+        const label=required(p.label,'Descrição do acompanhamento');
+        assert(label.length<=160,'Descrição processual muito longa.');
+        result={id:uid('mon'),number:raw,label,status:'aguardando_conferencia',source:'manual',events:[],created:day};
+        s.processMonitors.push(result);description='Processo adicionado ao acompanhamento manual';
+      }else if(p.operation==='record'){
+        const item=get(s.processMonitors,p.id),summary=required(p.summary,'Resumo da movimentação'),uri=String(p.sourceUrl||'').trim();
+        assert(summary.length<=800,'Resumo muito longo.');
+        let parsed;try{parsed=new URL(uri);}catch{throw new Error('Informe URL válida do tribunal.');}
+        assert(parsed.protocol==='https:'&&(parsed.hostname==='jus.br'||parsed.hostname.endsWith('.jus.br')),'Use somente fonte oficial HTTPS de tribunal .jus.br.');
+        const eventDate=date(p.eventDate);
+        assert(eventDate<=day,'Não registre movimentação futura.');
+        assert(p.confirm===true,'Confirme que conferiu a movimentação na fonte original.');
+        const event={id:uid('mov'),date:eventDate,summary,sourceUrl:uri,reviewedBy:role,reviewedAt:day,reviewMethod:'manual'};
+        item.events.unshift(event);item.status='conferido_manualmente';result=item;description='Movimentação conferida manualmente e registrada';
+      }else throw new Error('Operação de monitoramento inválida.');
+    } else if(action==='financeExtra') {
       if(p.operation==='create'){
         assert(['mensalidade','acordo','exito'].includes(p.kind),'Categoria financeira inválida.');
         const amount=cents(p.amount),due=date(p.due),descriptionText=required(p.description,'Descrição do lançamento');
@@ -196,7 +216,7 @@
     const scheduled = new Date(m.date+'T'+m.time+':00-03:00').getTime();
     return Number.isFinite(scheduled) && scheduled < new Date(now).getTime();
   }
-  function validate(s) {assert(s&&s.schema===1,'Formato de dados incompatível.');['clients','debts','opportunities','meetings','proposals','contracts','installments','cases','tasks','audit'].forEach(k=>assert(Array.isArray(s[k]),'Dados incompletos: '+k));if(s.financeExtras!==undefined)assert(Array.isArray(s.financeExtras),'Lançamentos complementares inválidos.');return s;}
+  function validate(s) {assert(s&&s.schema===1,'Formato de dados incompatível.');['clients','debts','opportunities','meetings','proposals','contracts','installments','cases','tasks','audit'].forEach(k=>assert(Array.isArray(s[k]),'Dados incompletos: '+k));if(s.financeExtras!==undefined)assert(Array.isArray(s.financeExtras),'Lançamentos complementares inválidos.');if(s.processMonitors!==undefined)assert(Array.isArray(s.processMonitors),'Acompanhamento processual inválido.');return s;}
   return {meetingOverdue,roles,stages,can,today,shift,month,cents,money,latest,execute,metrics,seed,validate};
 });
 
