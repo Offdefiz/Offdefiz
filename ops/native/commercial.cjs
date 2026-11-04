@@ -126,6 +126,33 @@ async function reissueInvite(input,actorId){
   });
   return {email,activation_url:'https://partelis.com.br/ativar#token_hash='+secret,expires_in_hours:48};
 }
+async function assistedRecovery(input,actorId){
+  const workspace=input.workspace_id,email=emailOf(input.email);
+  const reason=clean(input.reason,200);
+  if(!uuid(workspace)||!emailOk(email)||input.identity_verified!==true||reason.length<10||reason.length>200)
+    throw fail(400,'Identifique o usuário, confirme a verificação de identidade e descreva o motivo.');
+  const secret=token();
+  await transaction(async client=>{
+    const {rows:[user]}=await client.query(
+      "SELECT u.id FROM native_users u JOIN cj_memberships m ON m.user_id=u.id "+
+      "WHERE m.workspace_id=$1 AND u.email=$2 AND u.password_hash IS NOT NULL FOR UPDATE OF u",
+      [workspace,email]
+    );
+    if(!user)throw fail(404,'Usuário ativo não encontrado no escritório informado.');
+    await client.query(
+      "INSERT INTO native_invites(token_hash,user_id,expires_at) VALUES($1,$2,now()+interval '30 minutes') "+
+      "ON CONFLICT(user_id) DO UPDATE SET token_hash=excluded.token_hash,expires_at=excluded.expires_at",
+      [digest(secret),user.id]
+    );
+    await client.query(
+      "INSERT INTO cj_provision_audit(actor_id,workspace_id,user_id,event) VALUES($1,$2,$3,'assisted_password_recovery')",
+      [actorId,workspace,user.id]
+    );
+  });
+  // A senha anterior continua válida até o usuário definir uma nova. Depois,
+  // auth.cjs revoga todas as outras sessões do usuário.
+  return {email,activation_url:'https://partelis.com.br/ativar#token_hash='+secret,expires_in_minutes:30};
+}
 async function setWorkspaceStatus(input,actorId){
   const allowed=new Set(['active','suspended','pending_activation']);
   if(!uuid(input.workspace_id)||!allowed.has(input.status))throw fail(400,'Escritório ou status inválido.');
@@ -137,4 +164,4 @@ async function setWorkspaceStatus(input,actorId){
   });
   return r;
 }
-module.exports={createLead,listing,updateLead,createWorkspace,inviteMember,reissueInvite,setWorkspaceStatus};
+module.exports={createLead,listing,updateLead,createWorkspace,inviteMember,reissueInvite,setWorkspaceStatus,assistedRecovery};
