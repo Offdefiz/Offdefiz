@@ -1,2 +1,96 @@
-(async()=>{'use strict';const el=document.querySelector('#content'),notice=document.querySelector('#notice');let tab='overview',data={};const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));async function api(route,body){const r=await fetch('/api/admin/'+route,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw Error(d.error||'Falha ao carregar');return d;}const fmt=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);async function refresh(){try{data=await api('dashboard');render();}catch(e){el.textContent=e.message;}}function render(){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));const tenants=data.tenants||[],deals=data.deals||[],feedback=data.feedback||[];if(tab==='overview'){el.innerHTML='<div class="grid">'+[['Escritórios',tenants.length],['Beta testers',tenants.filter(t=>t.plan==='beta').length],['Oportunidades',deals.length],['Feedback pendente',feedback.filter(f=>f.status==='open').length]].map(([a,b])=>'<div class="panel"><small>'+a+'</small><div class="metric">'+b+'</div></div>').join('')+'</div><div class="panel"><h2>Receita contratada</h2><div class="metric">'+fmt(deals.filter(d=>d.stage==='won').reduce((s,d)=>s+Number(d.value||0),0))+'</div><small>Valor registrado no CRM, não equivale a receita recebida.</small></div>';}if(tab==='tenants')el.innerHTML='<div class="panel"><h2>Escritórios cadastrados</h2><table><thead><tr><th>Escritório</th><th>Plano</th><th>Situação</th></tr></thead><tbody>'+tenants.map(t=>'<tr><td>'+esc(t.name)+'</td><td>'+esc(t.plan)+'</td><td>'+esc(t.status)+'</td></tr>').join('')+'</tbody></table></div>';if(tab==='crm')el.innerHTML='<div class="panel"><h2>Nova oportunidade</h2><form id="newdeal"><input name="name" placeholder="Nome do escritório" required maxlength="100"><input name="contact" placeholder="Contato profissional" maxlength="120"><input name="value" type="number" min="0" step=".01" placeholder="Valor R$"><input name="next_action" placeholder="Próxima ação" required maxlength="200"><input name="next_date" type="date" required><button>Adicionar</button></form></div><div class="panel"><h2>Pipeline comercial</h2><table><thead><tr><th>Escritório</th><th>Etapa</th><th>Valor</th><th>Próxima ação</th></tr></thead><tbody>'+deals.map(d=>'<tr><td>'+esc(d.name)+'</td><td><select data-stage="'+esc(d.id)+'">'+['lead','contacted','demo','proposal','won','lost'].map(s=>'<option value="'+s+'" '+(s===d.stage?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td>'+fmt(d.value)+'</td><td>'+esc(d.next_action)+' · '+esc(d.next_date)+'</td></tr>').join('')+'</tbody></table></div>';if(tab==='support'){el.innerHTML='<div class="panel"><h2>Suporte remoto autorizado</h2><p>O gestor do escritório autoriza uma sessão de leitura por 60 minutos. Toda abertura é registrada. Não são permitidas alterações.</p><div id="support-list">Carregando escritórios…</div><div id="support-view"></div></div>';api('workspaces').then(d=>{const list=document.querySelector('#support-list');if(!list)return;list.innerHTML=(d.workspaces||[]).map(w=>'<div style="padding:12px;border-bottom:1px solid #eee"><strong>Escritório '+esc(w.id.slice(0,8))+'</strong> · '+esc(w.users)+' usuário(s) · '+(w.grant?'Autorização ativa':'Aguardando autorização')+' <button data-open-support="'+esc(w.id)+'" '+(w.grant?'':'disabled')+'>Abrir suporte</button></div>').join('')||'Nenhum escritório cadastrado.';list.querySelectorAll('[data-open-support]').forEach(b=>b.onclick=async()=>{try{const d=await api('support',{workspace_id:b.dataset.openSupport});const v=document.querySelector('#support-view');if(!v)return;const state=d.data||{};v.replaceChildren();const h=document.createElement('h3');h.textContent='Visualização de suporte · somente leitura';v.append(h);for(const [k,val] of Object.entries(state)){if(!Array.isArray(val))continue;const section=document.createElement('section'),heading=document.createElement('h4');heading.textContent=k+' ('+val.length+')';section.append(heading);for(const item of val.slice(0,50)){const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #eee;border-radius:8px;padding:10px';pre.textContent=JSON.stringify(item,null,2);section.append(pre);}v.append(section);}}catch(e){notice.textContent=e.message;}});}).catch(e=>notice.textContent=e.message);}
-if(tab==='feedback')el.innerHTML='<div class="panel"><h2>Relatos recebidos</h2><table><thead><tr><th>Tipo</th><th>Relato</th><th>Página</th><th>Status</th></tr></thead><tbody>'+feedback.map(f=>'<tr><td>'+esc(f.kind)+'</td><td>'+esc(f.message)+'</td><td>'+esc(f.page)+'</td><td><select data-feedback="'+esc(f.id)+'">'+['open','reviewing','resolved'].map(s=>'<option '+(s===f.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td></tr>').join('')+'</tbody></table></div>';}document.querySelector('#newdeal')?.addEventListener('submit',async ev=>{ev.preventDefault();const v=Object.fromEntries(new FormData(ev.target));try{await api('deal',v);notice.textContent='Oportunidade registrada.';await refresh();}catch(e){notice.textContent=e.message;}});document.querySelectorAll('[data-stage]').forEach(n=>n.onchange=async()=>{try{await api('deal-status',{id:n.dataset.stage,stage:n.value});await refresh();}catch(e){notice.textContent=e.message;}});document.querySelectorAll('[data-feedback]').forEach(n=>n.onchange=async()=>{try{await api('feedback-status',{id:n.dataset.feedback,status:n.value});await refresh();}catch(e){notice.textContent=e.message;}});}document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});await refresh();})();
+(async()=>{'use strict';
+const root=document.querySelector('#content'),notice=document.querySelector('#notice');
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(n)||0);
+const date=s=>s?String(s).slice(0,10):'—';
+let tab='overview',data={},users=null;
+const stageOptions=['lead','contacted','demo','proposal','won','lost'];
+const taskStatuses=['backlog','doing','review','done'];
+const priorities=['P0','P1','P2','P3'];
+async function api(route,payload){
+ const r=await fetch('/api/admin/'+route,{method:payload?'POST':'GET',credentials:'same-origin',headers:payload?{'Content-Type':'application/json'}:{},body:payload?JSON.stringify(payload):undefined});
+ const out=await r.json();if(!r.ok)throw Error(out.error||'Falha no serviço administrativo.');return out;
+}
+function message(value){notice.textContent=value||'';}
+async function refresh(){try{data=await api('dashboard');message('');render();}catch(e){root.replaceChildren();const p=document.createElement('p');p.textContent=e.message+' A migração privada de operações precisa ser homologada antes de ativar este painel.';root.append(p);}}
+function options(list,selected){return list.map(v=>'<option value="'+esc(v)+'" '+(selected===v?'selected':'')+'>'+esc(v)+'</option>').join('');}
+function showMetrics(){
+ const m=data.metrics||{},deals=data.deals||[];
+ const cells=[
+ ['Escritórios com acesso',m.workspacesWithAccess??0],
+ ['Usuários cadastrados',m.activeUsers??0],
+ ['Online (últimos 2 min)',m.onlineUsers??0],
+ ['Beta testers identificados',m.betaTesters??0],
+ ['Pagantes confirmados',m.payingWorkspacesVerified??0],
+ ['Sugestões pendentes',m.feedbackPending??0],
+ ['Tarefas abertas',m.tasksOpen??0]
+ ];
+ root.innerHTML='<div class="grid">'+cells.map(([title,value])=>'<div class="panel"><small>'+title+'</small><div class="metric">'+esc(value)+'</div></div>').join('')+'</div>'+
+ '<section class="panel"><h2>Indicadores financeiros sem estimativas artificiais</h2><div class="metric">'+money(deals.filter(d=>d.stage==='won').reduce((sum,d)=>sum+Number(d.value||0),0))+'</div><p>Valor nominal de oportunidades marcadas como ganhas no CRM. Não representa pagamentos recebidos.</p><small>Pagantes confirmados: apenas assinaturas ativas validadas por provedor; planos cadastrados manualmente não contam como receita realizada.</small></section>';
+}
+function showTenants(){
+ const memberships=data.memberships||[],tenants=data.tenants||[],subs=data.subscriptions||[];
+ const ids=[...new Set([...memberships.map(m=>m.workspace_id),...tenants.map(t=>t.workspace_id)])];
+ root.innerHTML='<div class="panel"><h2>Escritórios e seus usuários</h2><p>Cadastro administrativo e acesso são separados de faturamento.</p><table><thead><tr><th>Escritório</th><th>Usuários</th><th>Plano</th><th>Acesso</th><th>Assinatura</th></tr></thead><tbody>'+
+ ids.map(id=>{const t=tenants.find(x=>x.workspace_id===id)||{},sub=subs.find(x=>x.workspace_id===id)||{};return '<tr><td>'+esc(t.name||'Escritório '+id.slice(0,8))+'</td><td>'+memberships.filter(x=>x.workspace_id===id).length+'</td><td>'+esc(t.plan||'não configurado')+'</td><td>'+esc(t.status||'vínculo ativo')+'</td><td>'+esc(sub.status||'não registrada')+'</td></tr>';}).join('')+'</tbody></table></div>';
+}
+function showCRM(){
+ const deals=data.deals||[];
+ root.innerHTML='<div class="panel"><h2>Nova oportunidade comercial</h2><form id="newdeal"><input name="name" placeholder="Nome do escritório" required maxlength="100"><input name="contact" placeholder="Contato" maxlength="120"><input name="value" type="number" min="0" step=".01" placeholder="R$"><input name="next_action" placeholder="Próxima ação" required maxlength="200"><input name="next_date" type="date" required><button>Adicionar</button></form></div>'+
+ '<div class="panel"><h2>Pipeline da Partelís</h2><table><thead><tr><th>Escritório</th><th>Etapa</th><th>Valor declarado</th><th>Próxima ação</th></tr></thead><tbody>'+
+ deals.map(d=>'<tr><td>'+esc(d.name)+'</td><td><select data-stage="'+esc(d.id)+'">'+options(stageOptions,d.stage)+'</select></td><td>'+money(d.value)+'</td><td>'+esc(d.next_action)+' · '+esc(date(d.next_date))+'</td></tr>').join('')+'</tbody></table></div>';
+ root.querySelector('#newdeal').addEventListener('submit',async e=>{e.preventDefault();try{await api('deal',Object.fromEntries(new FormData(e.target)));await refresh();message('Oportunidade cadastrada.');}catch(err){message(err.message);}});
+ root.querySelectorAll('[data-stage]').forEach(el=>el.addEventListener('change',async()=>{try{await api('deal-status',{id:el.dataset.stage,stage:el.value});await refresh();}catch(e){message(e.message);}}));
+}
+function showFeedback(){
+ const entries=data.feedback||[],tasks=data.tasks||[],testers=data.betaTesters||[];
+ root.innerHTML='<div class="panel"><h2>Relatos das beta testers e da equipe</h2><p>A identidade do autor é vinculada à conta autenticada. Converter não muda documentos nem código: cria uma tarefa de produto para revisão.</p>'+
+ entries.map(f=>{
+  const task=tasks.find(t=>t.feedback_id===f.id),author=testers.find(t=>t.user_id===f.user_id);
+  return '<section class="panel"><small>'+esc(f.kind)+' · '+esc(author?.label||('Usuário '+f.user_id.slice(0,8)))+' · '+esc(date(f.created_at))+' · '+esc(f.page)+'</small><p>'+esc(f.message)+'</p>'+
+  '<label>Status <select data-feedback="'+esc(f.id)+'">'+options(['open','reviewing','resolved'],f.status)+'</select></label>'+
+  (task?'<p><strong>Tarefa associada:</strong> '+esc(task.title)+' ('+esc(task.priority)+')</p>':
+  '<form data-task-for="'+esc(f.id)+'"><input name="title" required minlength="4" maxlength="160" aria-label="Título da tarefa" placeholder="Nome curto da melhoria" value="'+esc(String(f.message||'').slice(0,100))+'"><select name="priority" aria-label="Prioridade">'+options(priorities,'P1')+'</select><button>Converter em tarefa</button></form>')+
+  '</section>';
+ }).join('')+'</div>';
+ root.querySelectorAll('[data-feedback]').forEach(el=>el.addEventListener('change',async()=>{try{await api('feedback-status',{id:el.dataset.feedback,status:el.value});await refresh();}catch(e){message(e.message);}}));
+ root.querySelectorAll('[data-task-for]').forEach(el=>el.addEventListener('submit',async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(el));try{await api('feedback-task',{id:el.dataset.taskFor,title:f.title,priority:f.priority});await refresh();message('Feedback convertido em tarefa.');}catch(err){message(err.message);}}));
+}
+function showTasks(){
+ const entries=data.tasks||[];
+ root.innerHTML='<section class="panel"><h2>Backlog de melhorias</h2><p>Prioridades são definidas pelo proprietário. A conclusão da tarefa não publica nenhuma alteração automaticamente.</p><table><thead><tr><th>Prioridade</th><th>Tarefa</th><th>Estado</th><th>Criada</th></tr></thead><tbody>'+
+ entries.map(t=>'<tr><td>'+esc(t.priority)+'</td><td>'+esc(t.title)+'</td><td><select data-task-status="'+esc(t.id)+'">'+options(taskStatuses,t.status)+'</select></td><td>'+esc(date(t.created_at))+'</td></tr>').join('')+'</tbody></table></section>';
+ root.querySelectorAll('[data-task-status]').forEach(el=>el.addEventListener('change',async()=>{try{await api('task-status',{id:el.dataset.taskStatus,status:el.value});await refresh();}catch(e){message(e.message);}}));
+}
+async function loadUsers(){if(users)return;try{users=(await api('beta-users')).users||[];if(tab==='beta')render();}catch(e){message(e.message);}}
+function showBeta(){
+ const testers=data.betaTesters||[];
+ root.innerHTML='<section class="panel"><h2>Beta testers — pessoas, não escritórios</h2><p>Selecione a conta existente. Se houver dois e-mails da mesma pessoa, confirme qual deve participar do teste; o sistema não faz essa escolha por semelhança de nome.</p>'+
+ '<form id="add-beta"><select name="account" required><option value="">Selecione uma conta</option>'+
+ (users||[]).map(u=>'<option value="'+esc(u.user_id+'|'+u.workspace_id)+'">'+esc(u.email)+' ('+esc(u.role)+')</option>').join('')+
+ '</select><input name="label" maxlength="80" minlength="2" required placeholder="Nome de exibição (ex.: Dra. Ketrin)"><button>Habilitar beta tester</button></form>'+
+ '<h3>Contas identificadas</h3><table><thead><tr><th>Nome</th><th>Conta</th><th>Ação</th></tr></thead><tbody>'+
+ testers.map(t=>{const u=(users||[]).find(x=>x.user_id===t.user_id);return '<tr><td>'+esc(t.label)+'</td><td>'+esc(u?.email||t.user_id.slice(0,8))+'</td><td><button data-remove-beta="'+esc(t.user_id)+'">Revogar identificação</button></td></tr>';}).join('')+'</tbody></table></section>';
+ root.querySelector('#add-beta').addEventListener('submit',async e=>{e.preventDefault();const v=Object.fromEntries(new FormData(e.target)),[user_id,workspace_id]=(v.account||'').split('|');try{await api('beta-assign',{user_id,workspace_id,label:v.label});await refresh();message('Beta tester vinculado à conta selecionada.');}catch(err){message(err.message);}});
+ root.querySelectorAll('[data-remove-beta]').forEach(el=>el.addEventListener('click',async()=>{try{await api('beta-remove',{user_id:el.dataset.removeBeta});await refresh();message('Identificação beta revogada.');}catch(e){message(e.message);}}));
+ if(!users)loadUsers();
+}
+function showSupport(){
+ root.innerHTML='<section class="panel"><h2>Suporte autorizado</h2><p>Acesso somente após autorização do gestor válida por até 60 minutos, com registro de consulta. Esta visualização mostra contagens, não conteúdos de casos.</p><div id="support-list">Carregando escritórios…</div><div id="support-view"></div></section>';
+ api('workspaces').then(d=>{
+  const list=root.querySelector('#support-list');if(!list)return;
+  list.innerHTML=(d.workspaces||[]).map(w=>'<p>Escritório '+esc(w.id.slice(0,8))+' · '+Number(w.users)+' usuário(s) · '+(w.grant?'Autorizado':'Sem autorização')+' <button data-support="'+esc(w.id)+'" '+(w.grant?'':'disabled')+'>Ver resumo</button></p>').join('')||'Sem escritórios cadastrados.';
+  list.querySelectorAll('[data-support]').forEach(btn=>btn.addEventListener('click',async()=>{try{
+   const d=await api('support',{workspace_id:btn.dataset.support}),view=root.querySelector('#support-view');
+   view.replaceChildren();const title=document.createElement('h3');title.textContent='Resumo de suporte · somente leitura';view.append(title);
+   for(const [kind,records] of Object.entries(d.data||{})){if(!Array.isArray(records))continue;const row=document.createElement('p');row.textContent=kind+': '+records.length+' registro(s)';view.append(row);}
+  }catch(e){message(e.message);}}));
+ }).catch(e=>message(e.message));
+}
+function render(){
+ document.querySelectorAll('[data-tab]').forEach(b=>{b.classList.toggle('active',b.dataset.tab===tab);b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false');});
+ if(tab==='overview')showMetrics();else if(tab==='tenants')showTenants();else if(tab==='crm')showCRM();else if(tab==='feedback')showFeedback();else if(tab==='tasks')showTasks();else if(tab==='beta')showBeta();else if(tab==='support')showSupport();
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{tab=b.dataset.tab;render();}));
+await refresh();
+})();
