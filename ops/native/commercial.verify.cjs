@@ -93,7 +93,7 @@ async function run(){
   assert.equal(response.status,200);
   assert.equal((await request('/api/state',{cookie:newClientCookie})).status,403);
   assert.equal((await request('/api/state',{cookie:memberCookie})).status,403);
-  assert.equal((await request('/admin',{cookie:clientCookie})).status,403);
+  assert.equal((await request('/admin',{cookie:newClientCookie})).status,403);
   console.log('COMERCIAL OK: site, leads, aprovação, convite, equipe, superadmin, isolamento e suspensão.');
 }
 run().catch(e=>{console.error(e);process.exitCode=1}).finally(async()=>{
