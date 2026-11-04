@@ -16,6 +16,7 @@ SWAPPED=0
 VERIFY_DB="partelis_verify_release_$(date -u +%s)"
 RESTORE_DB="partelis_verify_backup_$(date -u +%s)"
 BACKUP="/var/backups/partelis/pre-commercial-$STAMP.dump"
+CHECK_DIR=""
 
 error(){ echo "FALHA: $*" >&2; exit 1; }
 if [[ ${EUID} -ne 0 ]]; then error "Execute como root via sudo no terminal da VPS."; fi
@@ -32,6 +33,7 @@ pg_isready -q || error "PostgreSQL indisponível."
 
 cleanup(){
   if [[ -n "$CANDIDATE" && -d "$CANDIDATE" ]]; then rm -rf -- "$CANDIDATE"; fi
+  if [[ -n "$CHECK_DIR" && -d "$CHECK_DIR" ]]; then rm -rf -- "$CHECK_DIR"; fi
   runuser -u postgres -- dropdb --if-exists "$VERIFY_DB" >/dev/null 2>&1 || true
   runuser -u postgres -- dropdb --if-exists "$RESTORE_DB" >/dev/null 2>&1 || true
 }
@@ -103,10 +105,15 @@ systemctl start partelis
 systemctl is-active --quiet partelis || error "Serviço falhou; rollback automático."
 
 echo "[8/8] Testar saúde, site, app e demonstração pelo próprio domínio"
-curl -fsS --max-time 12 https://partelis.com.br/health | grep -q '"configured":true' || error "Healthcheck público não passou."
-curl -fsS --max-time 12 https://partelis.com.br/ | grep -q 'Solicitar apresentação e proposta' || error "Site comercial não está servindo a nova versão."
-curl -fsS --max-time 12 https://partelis.com.br/demo | grep -q 'window.CLOUD=false' || error "Demonstração não está isolada."
-curl -fsS --max-time 12 https://partelis.com.br/app | grep -q 'window.CLOUD=true' || error "Aplicativo real não está separado."
+CHECK_DIR="$(mktemp -d)"
+curl -fsS --max-time 12 -o "$CHECK_DIR/health.json" https://partelis.com.br/health
+grep -q '"configured":true' "$CHECK_DIR/health.json" || error "Healthcheck público não passou."
+curl -fsS --max-time 12 -o "$CHECK_DIR/home.html" https://partelis.com.br/
+grep -q 'Solicitar apresentação e proposta' "$CHECK_DIR/home.html" || error "Site comercial não está servindo a nova versão."
+curl -fsS --max-time 12 -o "$CHECK_DIR/demo.html" https://partelis.com.br/demo
+grep -q 'window.CLOUD=false' "$CHECK_DIR/demo.html" || error "Demonstração não está isolada."
+curl -fsS --max-time 12 -o "$CHECK_DIR/app.html" https://partelis.com.br/app
+grep -q 'window.CLOUD=true' "$CHECK_DIR/app.html" || error "Aplicativo real não está separado."
 SWAPPED=0
 echo "PUBLICAÇÃO CONCLUÍDA com SHA: $EXPECTED"
 echo "Aplicativo anterior preservado em $OLD"
