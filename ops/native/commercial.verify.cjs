@@ -78,9 +78,20 @@ async function run(){
   const ownState=await(await request('/api/state?workspace_id='+createdBody.workspace_id,{cookie:otherCookie})).json();
   assert.notEqual(ownState.user.email,email);
   assert.notEqual(ownState.user.email,memberEmail);
+  // Recuperação auditada: nova senha invalida as sessões antigas sem afetar outros escritórios.
+  const recovery=await request('/api/admin/commercial/assisted-recovery',{cookie:ownerCookie,data:{
+    workspace_id:createdBody.workspace_id,email,reason:'Confirmação de identidade em canal independente',identity_verified:true}});
+  assert.equal(recovery.status,200);
+  const recoverySecret=new URL((await recovery.json()).activation_url).hash.slice('#token_hash='.length);
+  const recoveryCookie=await activate(recoverySecret);
+  assert.equal((await request('/api/password',{cookie:recoveryCookie,data:{password:'Nova-Senha-Cliente-2026'}})).status,200);
+  assert.equal((await request('/api/state',{cookie:clientCookie})).status,401);
+  const newLogin=await request('/auth/login',{data:{email,password:'Nova-Senha-Cliente-2026'}});
+  assert.equal(newLogin.status,200);
+  const newClientCookie=cookies(newLogin);
   response=await request('/api/admin/commercial/tenant-status',{cookie:ownerCookie,data:{workspace_id:createdBody.workspace_id,status:'suspended'}});
   assert.equal(response.status,200);
-  assert.equal((await request('/api/state',{cookie:clientCookie})).status,403);
+  assert.equal((await request('/api/state',{cookie:newClientCookie})).status,403);
   assert.equal((await request('/api/state',{cookie:memberCookie})).status,403);
   assert.equal((await request('/admin',{cookie:clientCookie})).status,403);
   console.log('COMERCIAL OK: site, leads, aprovação, convite, equipe, superadmin, isolamento e suspensão.');
