@@ -4,6 +4,7 @@ on:
     branches:
       - caixa-juridico
       - 'feature/partelis-*'
+      - 'codex/partelis-*'
   pull_request:
     branches:
       - caixa-juridico
