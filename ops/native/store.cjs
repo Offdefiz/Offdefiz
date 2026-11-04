@@ -7,7 +7,12 @@ async function tenant(route,options={}){
   const user=await identify(token);
   const {pathname,searchParams}=new URL(route,'http://local');
   if(pathname==='/rest/v1/cj_memberships'&&method==='GET')
-    return (await pool.query('SELECT workspace_id,role FROM cj_memberships WHERE user_id=$1',[user.id])).rows;
+    return (await pool.query(
+      "SELECT m.workspace_id,m.role FROM cj_memberships m "+
+      "LEFT JOIN cj_admin_tenants t ON t.workspace_id=m.workspace_id "+
+      "WHERE m.user_id=$1 AND coalesce(t.status,'active') NOT IN ('suspended','cancelled')",
+      [user.id]
+    )).rows;
   if(pathname==='/rest/v1/cj_user_profiles'){
     if(method==='GET')return (await pool.query('SELECT display_name,avatar_data,updated_at FROM cj_user_profiles WHERE user_id=$1',[user.id])).rows;
     if(method==='POST')return (await pool.query('INSERT INTO cj_user_profiles VALUES($1,$2,$3,now()) ON CONFLICT(user_id) DO UPDATE SET display_name=excluded.display_name, avatar_data=excluded.avatar_data, updated_at=now() RETURNING display_name,avatar_data,updated_at',[user.id,body.display_name,body.avatar_data])).rows;

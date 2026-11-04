@@ -1,0 +1,75 @@
+name: Publicar Partelís na VPS
+
+on:
+  workflow_dispatch:
+    inputs:
+      revision:
+        description: 'SHA completo da revisão comercial aprovada (40 caracteres)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partelis-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    outputs:
+      revision: ${{ steps.revision.outputs.value }}
+    steps:
+      - name: Validar revisão
+        id: revision
+        env:
+          REVISION: ${{ inputs.revision }}
+        run: |
+          [[ "$REVISION" =~ ^[0-9a-f]{40}$ ]] || { echo 'SHA inválido'; exit 1; }
+          echo "value=$REVISION" >> "$GITHUB_OUTPUT"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.revision.outputs.value }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verificar código e rotina de publicação
+        run: |
+          test "$(git rev-parse HEAD)" = '${{ steps.revision.outputs.value }}'
+          bash -n ops/vps/deploy-commercial.sh
+          npm run build
+          npm test
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - name: Preparar SSH com chave e host verificado
+        env:
+          DEPLOY_KEY: ${{ secrets.PARTELIS_DEPLOY_KEY }}
+          HOST_KEY: ${{ secrets.PARTELIS_VPS_HOST_KEY }}
+          VPS_HOST: ${{ secrets.PARTELIS_VPS_HOST }}
+          VPS_PORT: ${{ secrets.PARTELIS_VPS_PORT }}
+        run: |
+          test -n "$DEPLOY_KEY" && test -n "$HOST_KEY" && test -n "$VPS_HOST" && test -n "$VPS_PORT"
+          [[ "$VPS_PORT" =~ ^[0-9]{1,5}$ ]]
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 0600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$HOST_KEY" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -F "$VPS_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null || \
+            ssh-keygen -F "[$VPS_HOST]:$VPS_PORT" -f "$HOME/.ssh/known_hosts" >/dev/null
+      - name: Publicar revisão fixa com backup, verificação e rollback
+        env:
+          VPS_HOST: ${{ secrets.PARTELIS_VPS_HOST }}
+          VPS_PORT: ${{ secrets.PARTELIS_VPS_PORT }}
+          REVISION: ${{ needs.verify.outputs.revision }}
+        run: |
+          ssh -p "$VPS_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "partelis-deploy@$VPS_HOST" \
+            "sudo -n /usr/local/sbin/partelis-deploy-commercial '$REVISION'"

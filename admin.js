@@ -1,2 +1,83 @@
-(async()=>{'use strict';const el=document.querySelector('#content'),notice=document.querySelector('#notice');let tab='overview',data={};const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));async function api(route,body){const r=await fetch('/api/admin/'+route,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});const d=await r.json();if(!r.ok)throw Error(d.error||'Falha ao carregar');return d;}const fmt=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);async function refresh(){try{data=await api('dashboard');render();}catch(e){el.textContent=e.message;}}function render(){document.querySelectorAll('[data-tab]').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));const tenants=data.tenants||[],deals=data.deals||[],feedback=data.feedback||[];if(tab==='overview'){el.innerHTML='<div class="grid">'+[['Escritórios',tenants.length],['Beta testers',tenants.filter(t=>t.plan==='beta').length],['Oportunidades',deals.length],['Feedback pendente',feedback.filter(f=>f.status==='open').length]].map(([a,b])=>'<div class="panel"><small>'+a+'</small><div class="metric">'+b+'</div></div>').join('')+'</div><div class="panel"><h2>Receita contratada</h2><div class="metric">'+fmt(deals.filter(d=>d.stage==='won').reduce((s,d)=>s+Number(d.value||0),0))+'</div><small>Valor registrado no CRM, não equivale a receita recebida.</small></div>';}if(tab==='tenants')el.innerHTML='<div class="panel"><h2>Escritórios cadastrados</h2><table><thead><tr><th>Escritório</th><th>Plano</th><th>Situação</th></tr></thead><tbody>'+tenants.map(t=>'<tr><td>'+esc(t.name)+'</td><td>'+esc(t.plan)+'</td><td>'+esc(t.status)+'</td></tr>').join('')+'</tbody></table></div>';if(tab==='crm')el.innerHTML='<div class="panel"><h2>Nova oportunidade</h2><form id="newdeal"><input name="name" placeholder="Nome do escritório" required maxlength="100"><input name="contact" placeholder="Contato profissional" maxlength="120"><input name="value" type="number" min="0" step=".01" placeholder="Valor R$"><input name="next_action" placeholder="Próxima ação" required maxlength="200"><input name="next_date" type="date" required><button>Adicionar</button></form></div><div class="panel"><h2>Pipeline comercial</h2><table><thead><tr><th>Escritório</th><th>Etapa</th><th>Valor</th><th>Próxima ação</th></tr></thead><tbody>'+deals.map(d=>'<tr><td>'+esc(d.name)+'</td><td><select data-stage="'+esc(d.id)+'">'+['lead','contacted','demo','proposal','won','lost'].map(s=>'<option value="'+s+'" '+(s===d.stage?'selected':'')+'>'+s+'</option>').join('')+'</select></td><td>'+fmt(d.value)+'</td><td>'+esc(d.next_action)+' · '+esc(d.next_date)+'</td></tr>').join('')+'</tbody></table></div>';if(tab==='support'){el.innerHTML='<div class="panel"><h2>Suporte remoto autorizado</h2><p>O gestor do escritório autoriza uma sessão de leitura por 60 minutos. Toda abertura é registrada. Não são permitidas alterações.</p><div id="support-list">Carregando escritórios…</div><div id="support-view"></div></div>';api('workspaces').then(d=>{const list=document.querySelector('#support-list');if(!list)return;list.innerHTML=(d.workspaces||[]).map(w=>'<div style="padding:12px;border-bottom:1px solid #eee"><strong>Escritório '+esc(w.id.slice(0,8))+'</strong> · '+esc(w.users)+' usuário(s) · '+(w.grant?'Autorização ativa':'Aguardando autorização')+' <button data-open-support="'+esc(w.id)+'" '+(w.grant?'':'disabled')+'>Abrir suporte</button></div>').join('')||'Nenhum escritório cadastrado.';list.querySelectorAll('[data-open-support]').forEach(b=>b.onclick=async()=>{try{const d=await api('support',{workspace_id:b.dataset.openSupport});const v=document.querySelector('#support-view');if(!v)return;const state=d.data||{};v.replaceChildren();const h=document.createElement('h3');h.textContent='Visualização de suporte · somente leitura';v.append(h);for(const [k,val] of Object.entries(state)){if(!Array.isArray(val))continue;const section=document.createElement('section'),heading=document.createElement('h4');heading.textContent=k+' ('+val.length+')';section.append(heading);for(const item of val.slice(0,50)){const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #eee;border-radius:8px;padding:10px';pre.textContent=JSON.stringify(item,null,2);section.append(pre);}v.append(section);}}catch(e){notice.textContent=e.message;}});}).catch(e=>notice.textContent=e.message);}
-if(tab==='feedback')el.innerHTML='<div class="panel"><h2>Relatos recebidos</h2><table><thead><tr><th>Tipo</th><th>Relato</th><th>Página</th><th>Status</th></tr></thead><tbody>'+feedback.map(f=>'<tr><td>'+esc(f.kind)+'</td><td>'+esc(f.message)+'</td><td>'+esc(f.page)+'</td><td><select data-feedback="'+esc(f.id)+'">'+['open','reviewing','resolved'].map(s=>'<option '+(s===f.status?'selected':'')+'>'+s+'</option>').join('')+'</select></td></tr>').join('')+'</tbody></table></div>';}document.querySelector('#newdeal')?.addEventListener('submit',async ev=>{ev.preventDefault();const v=Object.fromEntries(new FormData(ev.target));try{await api('deal',v);notice.textContent='Oportunidade registrada.';await refresh();}catch(e){notice.textContent=e.message;}});document.querySelectorAll('[data-stage]').forEach(n=>n.onchange=async()=>{try{await api('deal-status',{id:n.dataset.stage,stage:n.value});await refresh();}catch(e){notice.textContent=e.message;}});document.querySelectorAll('[data-feedback]').forEach(n=>n.onchange=async()=>{try{await api('feedback-status',{id:n.dataset.feedback,status:n.value});await refresh();}catch(e){notice.textContent=e.message;}});}document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render();});await refresh();})();
+(async()=>{
+'use strict';
+const root=document.querySelector('#content'), notice=document.querySelector('#notice');
+let active='overview',data={tenants:[],deals:[],feedback:[]};
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
+const say=(msg,error=false)=>{notice.textContent=msg;notice.style.color=error?'#a52742':'#6530ac'};
+const panel=(title,content)=>'<div class="panel"><h2>'+title+'</h2>'+content+'</div>';
+async function api(endpoint,body){
+  const response=await fetch('/api/admin/'+endpoint,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined,cache:'no-store'});
+  const content=await response.json();
+  if(!response.ok)throw Error(content.error||'Não foi possível processar a operação.');
+  return content;
+}
+async function reload(){
+  try{data=await api('dashboard');await render()}catch(err){root.textContent='Não foi possível carregar o painel: '+err.message;say(err.message,true)}
+}
+function overview(){
+  const t=data.tenants||[],d=data.deals||[],f=data.feedback||[];
+  const metrics=[['Escritórios registrados',t.length],['Ambientes beta',t.filter(v=>v.plan==='beta').length],['Oportunidades comerciais',d.length],['Feedbacks pendentes',f.filter(v=>v.status==='open').length]];
+  return '<div class="grid">'+metrics.map(([name,n])=>'<div class="panel"><small>'+esc(name)+'</small><div class="metric">'+n+'</div></div>').join('')+'</div>'+
+    panel('Operação comercial','<p>Gerencie solicitações, novos escritórios e convites no painel comercial.</p><a class="link" style="display:inline-flex" href="/admin/comercial">Gerenciar contas e contratações</a>')+
+    panel('Oportunidades registradas como ganhas','<div class="metric">'+money(d.filter(x=>x.stage==='won').reduce((s,x)=>s+Number(x.value||0),0))+'</div><small>Valor estimado do CRM, não equivale a receita recebida nem assinatura verificada.</small>');
+}
+function tenants(){
+  const list=data.tenants||[];
+  return panel('Escritórios cadastrados','<p><a href="/admin/comercial">Adicionar escritório ou gerenciar usuários</a></p><div style="overflow:auto"><table><thead><tr><th>Escritório</th><th>Plano</th><th>Situação</th></tr></thead><tbody>'+
+    (list.map(t=>'<tr><td>'+esc(t.name)+'</td><td>'+esc(t.plan)+'</td><td>'+esc(t.status)+'</td></tr>').join('')||'<tr><td colspan="3">Nenhum escritório.</td></tr>')+'</tbody></table></div>');
+}
+function crm(){
+  const list=data.deals||[],stages=['lead','contacted','demo','proposal','won','lost'];
+  return panel('Nova oportunidade','<form id="newdeal"><input name="name" maxlength="100" placeholder="Nome do escritório" required><input name="contact" maxlength="120" placeholder="Contato profissional"><input name="value" type="number" min="0" step=".01" placeholder="Valor estimado (R$)"><input name="next_action" maxlength="200" required placeholder="Próxima ação"><input name="next_date" type="date" required><button type="submit">Adicionar</button></form>')+
+    panel('Pipeline comercial','<div style="overflow:auto"><table><thead><tr><th>Escritório</th><th>Etapa</th><th>Valor</th><th>Próxima ação</th></tr></thead><tbody>'+
+    (list.map(d=>'<tr><td>'+esc(d.name)+'</td><td><select data-stage="'+esc(d.id)+'">'+stages.map(stage=>'<option value="'+stage+'" '+(d.stage===stage?'selected':'')+'>'+stage+'</option>').join('')+'</select></td><td>'+money(d.value)+'</td><td>'+esc(d.next_action)+' · '+esc(d.next_date)+'</td></tr>').join('')||'<tr><td colspan="4">Nenhuma oportunidade.</td></tr>')+'</tbody></table></div>');
+}
+function feedback(){
+  const list=data.feedback||[];
+  return panel('Relatos das pessoas beta testers','<div style="overflow:auto"><table><thead><tr><th>Tipo</th><th>Relato</th><th>Página</th><th>Status</th></tr></thead><tbody>'+
+    (list.map(f=>'<tr><td>'+esc(f.kind)+'</td><td>'+esc(f.message)+'</td><td>'+esc(f.page)+'</td><td><select data-feedback="'+esc(f.id)+'">'+['open','reviewing','resolved'].map(v=>'<option value="'+v+'" '+(f.status===v?'selected':'')+'>'+v+'</option>').join('')+'</select></td></tr>').join('')||'<tr><td colspan="4">Nenhum relato enviado.</td></tr>')+'</tbody></table></div>');
+}
+function support(){
+  return panel('Suporte autorizado','<p>O responsável do escritório deve autorizar uma sessão de leitura, válida por 60 minutos. Cada acesso é auditado.</p><div id="support-list">Carregando escritórios...</div><div id="support-view"></div>');
+}
+async function loadSupport(){
+  try{
+    const result=await api('workspaces');
+    const list=root.querySelector('#support-list');if(!list)return;
+    const spaces=result.workspaces||[];
+    list.innerHTML=spaces.map(s=>'<div style="padding:12px;border-bottom:1px solid #eee"><strong>Escritório '+esc(String(s.id).slice(0,8))+'</strong> · '+Number(s.users)+' usuário(s) · '+(s.grant?'Autorização ativa':'Aguardando autorização')+' <button data-open-support="'+esc(s.id)+'" '+(s.grant?'':'disabled')+'>Abrir leitura</button></div>').join('')||'Nenhum escritório.';
+    list.querySelectorAll('[data-open-support]').forEach(button=>button.addEventListener('click',async()=>{
+      try{
+        const response=await api('support',{workspace_id:button.dataset.openSupport});
+        const container=root.querySelector('#support-view');if(!container)return;
+        container.replaceChildren();const title=document.createElement('h3');title.textContent='Dados para diagnóstico — somente leitura';container.append(title);
+        for(const [name,arr] of Object.entries(response.data||{})){
+          if(!Array.isArray(arr))continue;
+          const title=document.createElement('h4');title.textContent=name+' ('+arr.length+')';container.append(title);
+          for(const item of arr.slice(0,50)){
+            const pre=document.createElement('pre');pre.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;border:1px solid #eee;border-radius:8px;padding:10px';pre.textContent=JSON.stringify(item,null,2);container.append(pre);
+          }
+        }
+      }catch(e){say(e.message,true)}
+    }));
+  }catch(err){say(err.message,true)}
+}
+async function render(){
+  document.querySelectorAll('[data-tab]').forEach(button=>button.classList.toggle('active',button.dataset.tab===active));
+  root.innerHTML=active==='overview'?overview():active==='tenants'?tenants():active==='crm'?crm():active==='feedback'?feedback():support();
+  root.querySelector('#newdeal')?.addEventListener('submit',async ev=>{
+    ev.preventDefault();
+    try{await api('deal',Object.fromEntries(new FormData(ev.target)));say('Oportunidade registrada.');await reload()}catch(e){say(e.message,true)}
+  });
+  root.querySelectorAll('[data-stage]').forEach(select=>select.addEventListener('change',async()=>{
+    try{await api('deal-status',{id:select.dataset.stage,stage:select.value});await reload()}catch(e){say(e.message,true)}
+  }));
+  root.querySelectorAll('[data-feedback]').forEach(select=>select.addEventListener('change',async()=>{
+    try{await api('feedback-status',{id:select.dataset.feedback,status:select.value});await reload()}catch(e){say(e.message,true)}
+  }));
+  if(active==='support')await loadSupport();
+}
+document.querySelectorAll('[data-tab]').forEach(button=>button.addEventListener('click',()=>{active=button.dataset.tab;render().catch(e=>say(e.message,true))}));
+await reload();
+})();

@@ -1,7 +1,8 @@
 name: Partelis PostgreSQL
 on:
+  push:
+    branches: [feature/partelis-comercial-vps-20261104]
   pull_request:
-    branches: [caixa-juridico]
   workflow_dispatch:
 permissions:
   contents: read
@@ -21,11 +22,15 @@ jobs:
           sudo -u postgres createuser --createdb "$(id -un)"
           createdb "$PGDATABASE"
           psql -v ON_ERROR_STOP=1 -f ops/native/schema.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-04-sales-onboarding.sql
           npm install --no-save --package-lock=false --ignore-scripts pg@8.13.1
       - name: Existing behavior and seven independent offices
         run: |
+          npm run build
+          bash -n ops/vps/deploy-commercial.sh
           npm test
           node ops/native/verify.cjs
+          node ops/native/commercial.verify.cjs
       - name: Restore and compare all rows
         run: |
           pg_dump -Fc -f "$RUNNER_TEMP/partelis.dump"
