@@ -35,6 +35,23 @@ create table if not exists public.cj_subscriptions(
  current_period_end timestamptz,
  updated_at timestamptz not null default now()
 );
+alter table public.cj_admin_tenants
+ add column if not exists onboarding_status text not null default 'invited'
+ check(onboarding_status in ('invited','activated','training','active','paused'));
+create table if not exists public.cj_admin_interactions(
+ id uuid primary key default gen_random_uuid(),
+ deal_id uuid references public.cj_admin_deals(id) on delete cascade,
+ workspace_id uuid references public.cj_workspaces(id) on delete cascade,
+ channel text not null check(channel in ('call','email','meeting','whatsapp','other')),
+ note text not null check(char_length(note) between 4 and 1500),
+ created_by uuid not null references auth.users(id),
+ occurred_at timestamptz not null default now(),
+ check(deal_id is not null or workspace_id is not null)
+);
+alter table public.cj_admin_interactions enable row level security;
+revoke all on public.cj_admin_interactions from public,anon,authenticated;
+grant select,insert,update,delete on public.cj_admin_interactions to service_role;
+create index if not exists cj_admin_interactions_deal_idx on public.cj_admin_interactions(deal_id,occurred_at desc);
 create index if not exists cj_presence_recent_idx on public.cj_presence(last_seen_at desc);
 create index if not exists cj_admin_tasks_status_idx on public.cj_admin_tasks(status,priority,created_at desc);
 -- Bloqueio completo à Data API do navegador. O servidor usa chave de serviço, nunca enviada ao cliente.
