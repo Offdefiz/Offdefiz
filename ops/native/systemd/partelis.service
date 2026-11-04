@@ -1,0 +1,20 @@
+[Unit]
+Description=Partelís
+After=postgresql.service
+Requires=postgresql.service
+[Service]
+User=partelis
+Group=partelis
+WorkingDirectory=/srv/partelis/app
+Environment=NODE_PATH=/usr/share/nodejs
+Environment=PARTELIS_STORAGE=postgres
+Environment=PUBLIC_APP_URL=https://partelis.com.br
+EnvironmentFile=/etc/partelis/service.env
+ExecStart=/usr/bin/node /srv/partelis/app/server.cjs
+Restart=on-failure
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+[Install]
+WantedBy=multi-user.target

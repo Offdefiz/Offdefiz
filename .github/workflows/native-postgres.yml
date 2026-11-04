@@ -1,0 +1,38 @@
+name: Partelis PostgreSQL
+on:
+  pull_request:
+    branches: [caixa-juridico]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  isolate-and-restore:
+    runs-on: ubuntu-24.04
+    env:
+      PGDATABASE: partelis_verify_ci
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare disposable PostgreSQL
+        run: |
+          sudo systemctl start postgresql
+          sudo -u postgres createuser --createdb "$(id -un)"
+          createdb "$PGDATABASE"
+          psql -v ON_ERROR_STOP=1 -f ops/native/schema.sql
+          npm install --no-save --package-lock=false --ignore-scripts pg@8.13.1
+      - name: Existing behavior and seven independent offices
+        run: |
+          npm test
+          node ops/native/verify.cjs
+      - name: Restore and compare all rows
+        run: |
+          pg_dump -Fc -f "$RUNNER_TEMP/partelis.dump"
+          createdb partelis_verify_restore
+          pg_restore --exit-on-error --single-transaction -d partelis_verify_restore "$RUNNER_TEMP/partelis.dump"
+          for db in "$PGDATABASE" partelis_verify_restore; do
+            pg_dump -d "$db" --data-only --inserts | grep '^INSERT INTO' | LC_ALL=C sort > "$RUNNER_TEMP/$db.rows"
+          done
+          test -s "$RUNNER_TEMP/$PGDATABASE.rows"
+          cmp "$RUNNER_TEMP/$PGDATABASE.rows" "$RUNNER_TEMP/partelis_verify_restore.rows"

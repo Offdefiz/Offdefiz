@@ -1,0 +1,6 @@
+[Unit]
+Description=Backup criptografado do Partelís no Google Drive
+[Service]
+Type=oneshot
+EnvironmentFile=/etc/partelis/backup.env
+ExecStart=/bin/bash /srv/partelis/app/ops/native/backup.sh
