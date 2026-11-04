@@ -23,6 +23,7 @@ test('êxito é estimativa que exige aprovação profissional',()=>{
 test('vencimento não vira atraso para pagamento confirmado e rejeita datas inválidas',()=>{
  assert.equal(b.overdueDays({dueDate:'2026-10-01',asOf:'2026-10-04',status:'not_charged'}),3);
  assert.equal(b.overdueDays({dueDate:'2026-10-01',asOf:'2026-10-04',status:'confirmed_paid'}),0);
+ assert.equal(b.overdueDays({dueDate:'2026-10-01',asOf:'2026-10-04',status:'reversed'}),3);
  assert.throws(()=>b.dueDate('2026-02-30'),/inexistente/);
  assert.throws(()=>b.agreementDrafts({balanceCents:2,installments:3,firstDue:'2026-11-01'}),/Parcelamento/);
 });
