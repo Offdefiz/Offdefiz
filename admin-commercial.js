@@ -15,7 +15,7 @@ function render(){
   $('#leads').innerHTML='<table><thead><tr><th>Escritório / responsável</th><th>Solicitação</th><th>Contato</th><th>Etapa</th><th>Ação</th></tr></thead><tbody>'+
     (leads.map(l=>'<tr><td><strong>'+esc(l.firm_name)+'</strong><small>'+esc(l.contact_name)+'</small></td><td><span class="pill">'+esc(l.plan_interest)+'</span><small>'+esc(l.message)+'</small></td><td><span>'+esc(l.email)+'</span><small>'+esc(l.phone)+'</small></td><td><select data-lead-status="'+esc(l.id)+'" '+(l.status==='approved'?'disabled':'')+'>'+['new','contacted','demo','proposal','rejected'].map(v=>'<option value="'+v+'" '+(l.status===v?'selected':'')+'>'+pretty[v]+'</option>').join('')+'</select></td><td>'+(l.status==='approved'?'<span class="pill">Criado</span>':'<button class="rowbtn primary" data-provision="'+esc(l.id)+'">Aprovar</button>')+'</td></tr>').join('')||'<tr><td colspan="5">Nenhuma solicitação recebida.</td></tr>')+'</tbody></table>';
   const options=tenants.map(t=>'<option value="'+esc(t.workspace_id)+'">'+esc(t.name)+'</option>').join('');
-  $('#member-workspace').innerHTML=options;$('#reissue-workspace').innerHTML=options;
+  $('#member-workspace').innerHTML=options;$('#reissue-workspace').innerHTML=options;$('#recovery-workspace').innerHTML=options;
   $('#tenants').innerHTML='<table><thead><tr><th>Escritório</th><th>Plano</th><th>Usuários</th><th>Contas</th><th>Situação</th></tr></thead><tbody>'+
     (tenants.map(t=>'<tr><td><strong>'+esc(t.name)+'</strong><small>'+esc(t.workspace_id)+'</small></td><td>'+esc(t.plan)+'</td><td>'+Number(t.activated||0)+' de '+Number(t.users||0)+' ativados</td><td><small>'+esc((t.emails||[]).join(', '))+'</small></td><td><select data-workspace-status="'+esc(t.workspace_id)+'">'+['pending_activation','active','suspended'].map(v=>'<option value="'+v+'" '+(t.status===v?'selected':'')+'>'+pretty[v]+'</option>').join('')+'</select></td></tr>').join('')||'<tr><td colspan="5">Nenhum ambiente cadastrado.</td></tr>')+'</tbody></table>';
   document.querySelectorAll('[data-provision]').forEach(b=>b.addEventListener('click',async()=>{
@@ -45,4 +45,12 @@ $('#dismiss-invite').addEventListener('click',()=>{lastSecret='';$('#invite-url'
 bindForm('create-workspace','provision');
 bindForm('invite-member','invite-member');
 bindForm('reissue','reissue-invite');
+$('#assisted-recovery').addEventListener('submit',async e=>{
+  e.preventDefault();const form=e.target,button=form.querySelector('button[type=submit]');
+  if(!confirm('Você verificou a identidade deste usuário por canal independente?'))return;
+  button.disabled=true;
+  try{const data=Object.fromEntries(new FormData(form));data.identity_verified=$('#recovery-verified').checked;
+    const result=await api('POST','assisted-recovery',data);reveal(result);form.reset();await refresh();
+  }catch(err){msg(err.message,true)}finally{button.disabled=false}
+});
 refresh();
