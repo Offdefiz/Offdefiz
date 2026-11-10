@@ -16,6 +16,20 @@
     const effective=role==='socio_admin'?'gestor':role==='advogado'?'juridico':role;
     return (rights[action] || []).includes(effective) || (role==='estagiario'&&action==='task');
   }
+  // CPF e CNPJ numérico/alfanumérico: mesma regra para todas as áreas do Direito.
+  function fiscalIdValid(value) {
+    const n=String(value||'').replace(/[^a-z0-9]/gi,'').toUpperCase();
+    if(n.length===11) {
+      if(!/^\d{11}$/.test(n)||/^(\d)\1{10}$/.test(n))return false;
+      const digit=len=>{const sum=Array.from(n.slice(0,len),(c,i)=>Number(c)*(len+1-i)).reduce((a,b)=>a+b,0);const r=(sum*10)%11;return r===10?0:r;};
+      return digit(9)===Number(n[9])&&digit(10)===Number(n[10]);
+    }
+    if(n.length!==14||!/^[A-Z0-9]{12}\d{2}$/.test(n)||/^(.)\1{13}$/.test(n))return false;
+    const check=(prefix,w)=>{const sum=Array.from(prefix,(c,i)=>(c.charCodeAt(0)-48)*w[i]).reduce((a,b)=>a+b,0);const r=sum%11;return r<2?0:11-r;};
+    const first=check(n.slice(0,12),[5,4,3,2,9,8,7,6,5,4,3,2]);
+    const second=check(n.slice(0,12)+first,[6,5,4,3,2,9,8,7,6,5,4,3,2]);
+    return n.slice(12)===String(first)+String(second);
+  }
   function required(value,label) { const s=String(value || '').trim(); assert(s && s.length<=1000,label+' é obrigatório e deve ter até 1.000 caracteres.'); return s; }
   function date(value) { assert(/^\d{4}-\d{2}-\d{2}$/.test(value || ''),'Informe uma data válida.'); const d=new Date(value+'T12:00:00Z'); assert(!isNaN(d) && d.toISOString().slice(0,10)===value,'Informe uma data válida.'); return value; }
   function today() { const p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()); return ['year','month','day'].map(k=>p.find(v=>v.type===k).value).join('-'); }
@@ -49,10 +63,10 @@
     } else if(action==='clientUpdate') {
       const c=get(s.clients,p.clientId);
       const clean=(value,max)=>String(value||'').trim().slice(0,max);
-      const email=clean(p.email,150),phone=clean(p.phone,24),taxId=clean(p.taxId,18).replace(/[^0-9]/g,'');
+      const email=clean(p.email,150),phone=clean(p.phone,24),taxId=clean(p.taxId,24).replace(/[^a-z0-9]/gi,'').toUpperCase();
       assert(!email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),'E-mail inválido.');
       assert(!phone||phone.replace(/\D/g,'').length>=10,'Telefone deve conter DDD.');
-      assert(!taxId||[11,14].includes(taxId.length),'CPF ou CNPJ deve conter 11 ou 14 dígitos.');
+      assert(!taxId||fiscalIdValid(taxId),'CPF ou CNPJ inválido: confira o dígito verificador.');
       c.name=required(p.name,'Nome do cliente').slice(0,150);
       c.email=email;c.phone=phone;c.taxId=taxId;c.type=taxId.length===14?'PJ':taxId.length===11?'PF':(p.type==='PJ'?'PJ':'PF');
       c.city=clean(p.city,80);c.state=clean(p.state,2).toUpperCase();c.updated=day;
