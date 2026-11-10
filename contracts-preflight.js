@@ -10,7 +10,7 @@ function selectClient(){
  const c=clients.find(c=>String(c.id)===clientEl.value);if(!c)return;
  for(const [field,prop] of Object.entries(map)){const node=[...fieldsEl.querySelectorAll('input')].find(n=>n.dataset.field===field);if(!node)continue;
   let val=c[prop];if(typeof val!=='string')continue;
-  if(field==='CPF DO CLIENTE'&&!/^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(val))continue;
+  if(field==='CPF DO CLIENTE'){const cpf=val.replace(/\D/g,'');if(cpf.length!==11)continue;val=cpf.slice(0,3)+'.'+cpf.slice(3,6)+'.'+cpf.slice(6,9)+'-'+cpf.slice(9);}
   node.value=val;
  }
  show('Dados cadastrais disponíveis foram preenchidos. Confira e complete as informações obrigatórias.');
