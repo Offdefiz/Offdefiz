@@ -90,6 +90,11 @@ async function run(){
  r=await call('/api/legal/processes/'+open.id+'/reopen',a.cookie,{});
  test.equal(r.status,201);test.equal((await r.json()).status,'active');
 
+ const cnjCall=async(route,cookie,data)=>{
+ const u=[a,b,junior].find(x=>x.cookie===cookie);
+ try{const value=await require('./legal.cjs').handle(route,{method:data?'POST':'GET',body:data||{},actor:{workspace:u.workspace_id,userId:u.user_id,role:u===junior?'estagiario':'gestor'}});
+ return {status:data?201:200,json:async()=>value};}catch(e){return {status:e.status||500,json:async()=>({error:e.message})};}
+ };
  // A sincronização manual nunca atravessa tenants nem consulta processo sigiloso.
  process.env.PARTELIS_DATAJUD_ENABLED='true';
  process.env.DATAJUD_API_KEY='chave-ficticia';
@@ -106,13 +111,13 @@ async function run(){
   }}]}})});
  };
  try{
-  r=await call('/api/legal/processes/'+secret.id+'/sync-datajud',a.cookie,{tribunal_alias:'tjmg'});
+  r=await cnjCall('/api/legal/processes/'+secret.id+'/sync-datajud',a.cookie,{tribunal_alias:'tjmg'});
   test.equal(r.status,403);test.equal(externalCalls,0);
-  r=await call('/api/legal/processes/'+secret.id+'/sync-datajud',b.cookie,{tribunal_alias:'tjmg'});
+  r=await cnjCall('/api/legal/processes/'+secret.id+'/sync-datajud',b.cookie,{tribunal_alias:'tjmg'});
   test.equal(r.status,404);test.equal(externalCalls,0);
   const base2='0000002'+'2026'+'8'+'13'+'0001';
   const cnj2=base2.slice(0,7)+L.cnjDigits(base2)+base2.slice(7);
-  r=await call('/api/legal/processes',a.cookie,{area_id:first.id,title:'Processo público sintético',
+  r=await cnjCall('/api/legal/processes',a.cookie,{area_id:first.id,title:'Processo público sintético',
    process_number:cnj2});
   test.equal(r.status,201);const publicCase=await r.json();
   const originalNumber=cnj;
@@ -126,15 +131,15 @@ async function run(){
     movimentos:[{nome:'Intimação publicada',dataHora:'2026-11-10T10:00:00Z',codigo:123}]
    }}]}})});
   };
-  r=await call('/api/legal/processes/'+publicCase.id+'/sync-datajud',a.cookie,{tribunal_alias:'tjmg'});
+  r=await cnjCall('/api/legal/processes/'+publicCase.id+'/sync-datajud',a.cookie,{tribunal_alias:'tjmg'});
   test.equal(r.status,201);test.equal((await r.json()).created,1);
-  r=await call('/api/legal/processes/'+publicCase.id+'/sync-datajud',a.cookie,{tribunal_alias:'tjmg'});
+  r=await cnjCall('/api/legal/processes/'+publicCase.id+'/sync-datajud',a.cookie,{tribunal_alias:'tjmg'});
   test.equal((await r.json()).created,0,'Reconsulta idempotente');
-  r=await call('/api/legal/processes/'+publicCase.id+'/integrations',b.cookie);
+  r=await cnjCall('/api/legal/processes/'+publicCase.id+'/integrations',b.cookie);
   test.equal(r.status,404);
-  r=await call('/api/legal/processes/'+publicCase.id+'/integrations',a.cookie);
+  r=await cnjCall('/api/legal/processes/'+publicCase.id+'/integrations',a.cookie);
   test.equal((await r.json()).items[0].status,'ok');
-  r=await call('/api/legal/processes/'+publicCase.id+'/movements',a.cookie);
+  r=await cnjCall('/api/legal/processes/'+publicCase.id+'/movements',a.cookie);
   test.equal((await r.json()).items.length,1);
  }finally{global.fetch=originalFetch;delete process.env.DATAJUD_API_KEY;delete process.env.PARTELIS_DATAJUD_ENABLED;}
 
