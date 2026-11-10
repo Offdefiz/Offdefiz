@@ -244,7 +244,7 @@ async function syncDatajud(actor,id,body){
  if(!/^(?:stj|stm|tst|tse|trf[1-6]|trt(?:[1-9]|1[0-9]|2[0-4])|tj(?:[a-z]{2}|dft)|tjm(?:mg|rs|sp)|tre-[a-z]{2,3})$/.test(alias))
   throw fail(400,'Selecione um tribunal válido do DataJud.');
  const {DataJudProvider}=require('../../lib/process-providers.cjs');
- const provider=new DataJudProvider({httpClient:fetch,key:process.env.DATAJUD_API_KEY});
+ const provider=new DataJudProvider({httpClient:(url,opts)=>fetch(url,{...opts,signal:AbortSignal.timeout(15000),redirect:'error'}),key:process.env.DATAJUD_API_KEY});
  let result;
  try{result=await provider.searchByNumber(record.process_number,{tribunalAlias:alias});}
  catch(error){
@@ -292,6 +292,15 @@ async function handle(route,{method,body={},actor}){
  if(parts[2]==='processes'&&parts.length>=4){
   const id=parts[3];
   if(parts.length===4&&method==='GET')return getProcess(actor,id,{auditRead:true});
+  if(parts.length===5){
+   const cnj=require('./cnj.cjs');
+   if(parts[4]==='cnj-jobs'&&method==='POST')return cnj.enqueue(actor,id,body);
+   if(parts[4]==='cnj-status'&&method==='GET')return cnj.status(actor,id);
+   if(parts[4]==='monitor'&&method==='POST')return cnj.monitor(actor,id,body);
+   if(parts[4]==='publications'&&method==='GET')return cnj.inbox(actor,id);
+   if(parts[4]==='publication-review'&&method==='POST')return cnj.review(actor,id,body);
+  }
+
   if(parts.length===5&&parts[4]==='integrations'&&method==='GET')return integrationStatus(actor,id);
   if(parts.length===5&&parts[4]==='sync-datajud'&&method==='POST')return syncDatajud(actor,id,body);
   if(parts.length===5&&parts[4]==='archive'&&method==='POST')return archiveProcess(actor,id,false);
@@ -302,4 +311,4 @@ async function handle(route,{method,body={},actor}){
  }
  throw fail(404,'Recurso jurídico inexistente.');
 }
-module.exports={handle,ensureAreas};
+module.exports={handle,ensureAreas,getProcess,syncDatajud};
