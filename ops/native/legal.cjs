@@ -225,6 +225,60 @@ async function archiveProcess(actor,id,reopen){
   return updated;
  });
 }
+
+async function integrationStatus(actor,id){
+ await getProcess(actor,id,{auditRead:true});
+ const {rows}=await pool.query(
+  'SELECT provider,last_synced_at,status,last_error_code,retry_count FROM cj_integration_status WHERE workspace_id=$1 AND process_id=$2 ORDER BY provider',
+  [actor.workspace,id]);
+ return {items:rows};
+}
+async function syncDatajud(actor,id,body){
+ requireRole(actor.role,'legalWrite');
+ const record=await getProcess(actor,id,{edit:true});
+ if(record.secret)throw fail(403,'Consulta externa indisponível para processo sigiloso.');
+ if(!record.process_number)throw fail(400,'Informe um número CNJ antes da consulta.');
+ if(process.env.PARTELIS_DATAJUD_ENABLED!=='true'||!process.env.DATAJUD_API_KEY)
+  throw fail(503,'DataJud ainda não configurado para este ambiente.');
+ const alias=String(body.tribunal_alias||'').toLowerCase();
+ if(!/^(?:stj|stm|tst|tse|trf[1-6]|trt(?:[1-9]|1[0-9]|2[0-4])|tj(?:[a-z]{2}|dft)|tjm(?:mg|rs|sp)|tre-[a-z]{2,3})$/.test(alias))
+  throw fail(400,'Selecione um tribunal válido do DataJud.');
+ const {DataJudProvider}=require('../../lib/process-providers.cjs');
+ const provider=new DataJudProvider({httpClient:fetch,key:process.env.DATAJUD_API_KEY});
+ let result;
+ try{result=await provider.searchByNumber(record.process_number,{tribunalAlias:alias});}
+ catch(error){
+  await pool.query('INSERT INTO cj_integration_status(workspace_id,process_id,provider,status,last_error_code,retry_count) VALUES($1,$2,$3,$4,$5,1) ON CONFLICT(workspace_id,process_id,provider) DO UPDATE SET status=$4,last_error_code=$5,retry_count=cj_integration_status.retry_count+1',
+   [actor.workspace,id,'datajud','error','REMOTE_UNAVAILABLE']);
+  throw fail(502,'Não foi possível consultar o DataJud. Tente novamente mais tarde.');
+ }
+ if(result.restricted)throw fail(403,'O CNJ restringe a consulta deste processo.');
+ return transaction(async client=>{
+  const current=await getProcess(actor,id,{edit:true,connection:client});
+  if(current.secret||current.process_number!==record.process_number)throw fail(409,'O processo mudou durante a consulta. Recarregue.');
+  let created=0;
+  for(const movement of result.movements.slice(0,500)){
+   const fingerprint=L.movementFingerprint({workspaceId:actor.workspace,processId:id,
+    date:movement.date,description:movement.description,tpuCode:movement.tpuCode});
+   const {rowCount}=await client.query(
+    'INSERT INTO cj_process_movements(workspace_id,process_id,movement_date,description,tpu_code,origin,fingerprint) VALUES($1,$2,$3,$4,$5,$6,$7) ON CONFLICT(workspace_id,process_id,fingerprint) DO NOTHING',
+    [actor.workspace,id,movement.date,movement.description,movement.tpuCode,'synchronized',fingerprint]);
+   created+=rowCount;
+  }
+  if(result.found){
+   await client.query('UPDATE cj_legal_processes SET court=COALESCE($3,court), degree=COALESCE($4,degree), class_tpu=COALESCE($5,class_tpu), subjects_tpu=COALESCE($6,subjects_tpu), judicial_body=COALESCE($7,judicial_body),updated_at=now() WHERE workspace_id=$1 AND id=$2',
+    [actor.workspace,id,result.tribunal,result.degree,JSON.stringify(result.processClass),JSON.stringify(result.subjects),
+     typeof result.judicialBody==='object'?result.judicialBody?.nome||null:result.judicialBody]);
+  }
+  await client.query('INSERT INTO cj_integration_status(workspace_id,process_id,provider,last_synced_at,status,last_error_code,retry_count) VALUES($1,$2,$3,now(),$4,NULL,0) ON CONFLICT(workspace_id,process_id,provider) DO UPDATE SET last_synced_at=now(),status=$4,last_error_code=NULL,retry_count=0',
+   [actor.workspace,id,'datajud',result.found?'ok':'not_found']);
+  await audit(client,actor,'sync','process',id,id);
+  return {found:result.found,created,movements:result.movements.length,
+   suggestions:result.movements.filter(x=>x.needsHumanReview).map(x=>({date:x.date,description:x.description.slice(0,200),reviewRequired:true,isFatal:false})),
+   last_synced_at:new Date().toISOString()};
+ });
+}
+
 async function handle(route,{method,body={},actor}){
  const url=new URL(route,'http://internal');
  const parts=url.pathname.split('/').filter(Boolean);
@@ -238,6 +292,8 @@ async function handle(route,{method,body={},actor}){
  if(parts[2]==='processes'&&parts.length>=4){
   const id=parts[3];
   if(parts.length===4&&method==='GET')return getProcess(actor,id,{auditRead:true});
+  if(parts.length===5&&parts[4]==='integrations'&&method==='GET')return integrationStatus(actor,id);
+  if(parts.length===5&&parts[4]==='sync-datajud'&&method==='POST')return syncDatajud(actor,id,body);
   if(parts.length===5&&parts[4]==='archive'&&method==='POST')return archiveProcess(actor,id,false);
   if(parts.length===5&&parts[4]==='reopen'&&method==='POST')return archiveProcess(actor,id,true);
   if(parts.length===5&&parts[4]==='movements'&&method==='GET')return listMovements(actor,id);
