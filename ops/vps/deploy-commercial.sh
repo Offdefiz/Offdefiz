@@ -115,7 +115,7 @@ systemctl is-active --quiet partelis || error "Serviço falhou; rollback automá
 
 echo "[8/8] Testar saúde, site, app e demonstração pelo próprio domínio"
 CHECK_DIR="$(mktemp -d)"
-curl -fsS --max-time 12 -o "$CHECK_DIR/health.json" https://partelis.com.br/health
+curl -fsS --retry 8 --retry-all-errors --retry-delay 2 --max-time 12 -o "$CHECK_DIR/health.json" https://partelis.com.br/health
 grep -q '"configured":true' "$CHECK_DIR/health.json" || error "Healthcheck público não passou."
 curl -fsS --max-time 12 -o "$CHECK_DIR/home.html" https://partelis.com.br/
 grep -q 'Solicitar apresentação e proposta' "$CHECK_DIR/home.html" || error "Site comercial não está servindo a nova versão."
