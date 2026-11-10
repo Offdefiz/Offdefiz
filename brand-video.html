@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Partelís · Guia de identidade e vídeo</title>
+<meta name="description" content="Especificações verificáveis da marca Partelís A1 e material Liquid Glass para vídeos">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="stylesheet" href="/partelis.css"><link rel="stylesheet" href="/liquid-glass.css">
+<style>
+*{box-sizing:border-box}html{scroll-behavior:smooth}body.brand-doc{margin:0;font-family:Inter,system-ui,Arial,sans-serif;color:#241042;min-height:100vh}
+.wrap{max-width:1150px;padding:27px 26px 90px;margin:0 auto}
+.sitebar{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+.sitebar img{height:57px;width:240px;object-fit:contain;object-position:left}
+.sitebar nav{display:flex;gap:12px;flex-wrap:wrap}
+.sitebar nav a{font-size:13px;color:#30145F;text-decoration:none;font-weight:700;border:1px solid #D5C7EF;background:#FFF9;padding:11px 16px;border-radius:11px}
+.head{padding:74px 0 30px;max-width:840px}.ey{font-size:12px;color:#6A32DE;font-weight:800;letter-spacing:.14em}
+.head h1{font-size:clamp(34px,5.5vw,65px);line-height:1.1;letter-spacing:-.06em;margin:15px 0}
+.head p{color:#625571;font-size:17px;line-height:1.7;margin:0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:17px}
+.doc-glass{padding:23px;border-radius:22px;min-height:160px}
+.doc-glass h2{margin:0 0 10px;font-size:17px;color:#30145F}.doc-glass p{font-size:13px;color:#625571;line-height:1.6}
+.doc-glass strong{font-size:21px}
+.section{margin:45px 0 18px;font-size:24px;letter-spacing:-.04em}
+.swatches{display:flex;gap:13px;margin-top:12px}
+.swatches span{width:51px;height:51px;border:2px solid #FFFFFF;border-radius:13px;box-shadow:0 5px 18px #30145F25}
+.icon-showcase{display:flex;align-items:center;gap:24px}.icon-showcase img{height:88px;width:88px}.icon-showcase h2{margin:0}
+pre{background:#1C1231;color:#F0E9FF;border-radius:15px;padding:22px;overflow:auto;white-space:pre-wrap;word-break:break-word;line-height:1.65;font-size:12px}
+.copy{font-weight:700;font-size:13px}.links a{color:#5B2BBD;font-weight:700;overflow-wrap:anywhere}
+.timeline{display:grid;gap:11px}.scene{border-left:3px solid #8D59FF;padding-left:16px}.scene strong{display:block;color:#30145F}.scene p{margin:5px 0 0}
+.note{background:#F0E9FF;border:1px solid #E4DCF4;padding:17px 20px;border-radius:12px;color:#433061;font-size:14px;line-height:1.6}
+@media(max-width:850px){.grid{grid-template-columns:1fr}.wrap{padding:16px 16px 45px}.head{padding:36px 0 20px}.icon-showcase{flex-wrap:wrap}}
+</style></head>
+<body class="brand-doc">
+<main class="wrap">
+<header class="sitebar"><a href="/demo"><img src="/brand-horizontal.svg" alt="Partelís"></a>
+<nav aria-label="Navegação"><a href="/demo">Aplicativo de demonstração</a><a href="/apresentacao">Apresentação animada</a><a href="/liquid-glass.css">CSS completo</a></nav></header>
+<section class="head"><div class="ey">DIREÇÃO CRIATIVA OFICIAL · V1.0</div>
+<h1>Partelís A1.<br>Movimento com clareza.</h1>
+<p>Identidade de referência para produto, vídeo, apresentações e materiais comerciais. Fonte de verdade: logotipo A1 original de duas faixas diagonais arredondadas, em violeta profundo e violeta luminoso. O acabamento <i>Liquid Glass</i> pertence aos componentes de interface, não ao desenho do símbolo.</p></section>
+<div class="grid">
+<article class="doc-glass"><h2>Marca imutável</h2><div class="icon-showcase"><img src="/brand-symbol.svg" alt="Símbolo A1"><p><strong>Partelís</strong><br>Não girar, redesenhar, cromar ou acrescentar símbolos jurídicos.</p></div></article>
+<article class="doc-glass"><h2>Paleta oficial</h2><p>#30145F · #8D59FF · #6A32DE · #F8F7FC</p><div class="swatches"><span style="background:#30145F"></span><span style="background:#8D59FF"></span><span style="background:#6A32DE"></span><span style="background:#F8F7FC"></span></div></article>
+<article class="doc-glass"><h2>Material de interface</h2><p>Vidro branco translúcido, blur físico suave, borda de luz delicada e sombra ambiente violeta. Painéis de conteúdo com alto contraste.</p><p><strong>18px</strong> blur · <strong>145%</strong> saturation</p></article>
+</div>
+<h2 class="section">CSS de referência para produção de vídeo</h2>
+<p>Este é um recorte real da folha <code>/liquid-glass.css</code>. Use em sobreposições de interface, cartões demonstrativos e painéis. O código completo está disponível no link acima.</p>
+<pre><code>.glass-surface,.metric,.panel,.opp-card,.chart-card,.login-card,
+.workspace,.flow-step,.detail-block,.version,.lane{
+  background:var(--glass-fill);
+  border:1px solid var(--glass-border);
+  -webkit-backdrop-filter:var(--glass-frost);
+  backdrop-filter:var(--glass-frost);
+  box-shadow:var(--glass-shadow),var(--glass-highlight);
+}
+</code></pre>
+<h2 class="section">Roteiro visual recomendado · 25 segundos</h2>
+<div class="grid">
+<article class="doc-glass timeline">
+<div class="scene"><strong>00–05s · Identidade</strong><p>Fundo violeta profundo. Símbolo A1 surge suavemente, sem alterar suas proporções. Palavra Partelís ao lado.</p></div>
+<div class="scene"><strong>05–11s · Organização</strong><p>Câmera revela a sidebar translúcida e os blocos de tarefas e atendimentos com animações discretas.</p></div></article>
+<article class="doc-glass timeline"><div class="scene"><strong>11–18s · Plataforma conectada</strong><p>Alternância fluida entre agenda, propostas, jurídico e financeiro com os cartões de vidro.</p></div>
+<div class="scene"><strong>18–22s · Responsividade</strong><p>Transição do dashboard desktop para o mobile sem distorcer tipografia ou dados.</p></div></article>
+<article class="doc-glass timeline"><div class="scene"><strong>22–25s · Assinatura</strong><p>Logo oficial e assinatura: “Partelís — Gestão jurídica inteligente.” Fechamento com espaço negativo e silêncio visual.</p></div>
+<div class="scene"><strong>Formato</strong><p>16:9 (1920×1080) e versão vertical 9:16 (1080×1920). Movimento de 250–450 ms, sem flashing.</p></div></article>
+</div>
+<h2 class="section">Prompt de direção de arte</h2>
+<div class="note">Criar vídeo de apresentação de um SaaS jurídico premium brasileiro denominado <b>Partelís</b>. Utilizar exatamente o símbolo A1 fornecido, sem reconstruí-lo com geração de imagem. Mostrar interface realista com cartões de vidro esbranquiçado translúcido, bordas iluminadas, backdrop blur e sombras violetas suaves. Fundo claro com iluminação ambiente violeta profunda; contraste e leitura impecáveis. Animações de navegação realistas, suaves e sofisticadas. Evitar balanças da justiça, martelos, 3D cromado, explosões de partículas, efeitos genéricos de IA, números reais e dados identificáveis. Usar dados inteiramente fictícios.</div>
+<h2 class="section">Recursos e documentação</h2>
+<div class="doc-glass links"><p>Identidade: <a href="/brand-symbol.svg">Símbolo SVG A1</a> · <a href="/brand-horizontal.svg">Logotipo horizontal SVG</a> · <a href="/favicon.svg">Favicon</a> · <a href="/liquid-glass.css">CSS de produção</a> · <a href="/apresentacao">Motion demo</a></p>
+<p>Referência técnica: <a href="https://developer.mozilla.org/en-US/docs/Web/CSS/backdrop-filter">MDN — CSS backdrop-filter</a>. Os elementos permanecem legíveis em tema claro e escuro, com redução de movimento e fallback sem desfoque.</p></div>
+</main></body></html>

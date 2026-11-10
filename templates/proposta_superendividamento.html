@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Proposta de Honorários · Superendividamento</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500;1,600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cor:#0f2a44;--sec:#b08d57;--paper:#f6f3ec;--ink:#1b2530;--mute:#6b7280;--line:#dcd4c2}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;background:#0b1620;font-family:Inter,system-ui,sans-serif;color:var(--ink);overflow:hidden}
+.deck{position:fixed;inset:0}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;padding:9vh 7vw 12vh;background:var(--paper);overflow:hidden}
+.slide::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 99px,rgba(15,42,68,.035) 99px 100px);pointer-events:none}
+.slide.on{display:flex;animation:fade .5s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.on .up{animation:up .8s cubic-bezier(.2,.7,.2,1) both;animation-delay:var(--d,0s)}
+.wm{position:absolute;right:2vw;top:-6vh;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:34vw;line-height:1;color:rgba(15,42,68,.045);pointer-events:none}
+.head{display:flex;align-items:center;gap:16px;margin-bottom:3.4vh}
+.num{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:1.1rem;color:var(--sec);letter-spacing:.14em}
+.rv{width:1px;height:34px;background:var(--line)}
+.kick{font-size:.7rem;letter-spacing:.26em;text-transform:uppercase;color:var(--mute)}
+h2{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(2.2rem,4.6vw,3.8rem);line-height:1.02;color:var(--cor);max-width:22ch}
+h2 em{color:var(--sec);font-style:italic}
+h3{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:1.35rem;color:var(--cor);margin:.4vh 0 .5vh}
+p{font-size:clamp(.92rem,1.2vw,1.05rem);line-height:1.6;color:#2d3742}
+.lbl{font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--mute)}
+.big{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(2.2rem,4.4vw,3.8rem);line-height:1;color:var(--cor)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:2.6vh 2vw;box-shadow:0 22px 42px -30px rgba(15,42,68,.5);position:relative;overflow:hidden}
+.card::after{content:"";position:absolute;left:0;top:0;width:100%;height:3px;background:linear-gradient(90deg,var(--sec),transparent)}
+.card.dark{background:var(--cor);color:#fff;border-color:var(--cor)}
+.card.dark .lbl{color:#c9b48a}.card.dark .big{color:#fff}.card.dark p{color:#c9d3de}
+.g{display:grid;gap:2vw}
+.escopo{display:grid;grid-template-columns:repeat(3,1fr);gap:1.8vw}
+.escopo .num{display:block;font-size:1.9rem;margin-bottom:.8vh}
+.foot{position:absolute;left:7vw;right:7vw;bottom:4vh;display:flex;justify-content:space-between;font-size:.66rem;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);border-top:1px solid var(--line);padding-top:1.4vh}
+.prog{position:fixed;left:0;bottom:0;height:3px;background:var(--sec);width:0;transition:width .6s}
+.timeline{position:relative;display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:1.2vw;margin-top:3vh}
+.timeline::before{content:"";position:absolute;left:0;right:0;top:9px;height:2px;background:linear-gradient(90deg,var(--sec),var(--line))}
+.etapa .dot{display:block;width:20px;height:20px;border-radius:50%;background:var(--paper);border:3px solid var(--cor);margin-bottom:2.6vh;position:relative;z-index:1}
+.etapa:last-child .dot{background:var(--sec);border-color:var(--sec)}
+.etapa .tag{font-size:.66rem;letter-spacing:.18em;text-transform:uppercase;color:var(--sec)}
+.etapa p{font-size:.9rem;color:var(--mute)}
+.tiles{display:grid;grid-template-columns:repeat(6,1fr);gap:.8vw}
+.tile{aspect-ratio:1.15;border-radius:10px;background:linear-gradient(160deg,var(--cor),#24507a);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-weight:600;font-size:clamp(.8rem,1.1vw,1rem);animation:up .5s both}
+.tile:last-child{background:linear-gradient(160deg,var(--sec),#8d6c3e)}
+.checks{list-style:none}
+.checks li{display:flex;gap:14px;align-items:center;padding:1.5vh 0;border-bottom:1px solid var(--line);font-size:1.02rem}
+.checks li::before{content:"✓";flex:0 0 22px;height:22px;border-radius:50%;background:var(--cor);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem}
+.chip{display:inline-block;padding:.5vh 1vw;border-radius:999px;border:1px solid var(--sec);color:var(--cor);font-size:.8rem;letter-spacing:.04em}
+.cover{background:var(--cor);color:#fff;padding:0;justify-content:flex-start}
+.cover .photo{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.3;mix-blend-mode:luminosity}
+.cover .shade{position:absolute;inset:0;background:linear-gradient(100deg,var(--cor) 40%,rgba(15,42,68,.6) 72%,rgba(15,42,68,.25))}
+.cover .logo{position:absolute;left:7vw;top:8vh;height:50px}
+.cover .content{position:absolute;left:7vw;top:50%;transform:translateY(-50%);width:52vw}
+.cover h1{font-family:'Cormorant Garamond',serif;font-weight:500;font-size:clamp(3rem,7vw,6.4rem);line-height:.95;color:#fff}
+.cover h1 em{color:var(--sec)}
+.cover .pillars{position:absolute;right:7vw;top:50%;transform:translateY(-50%);height:70vh;opacity:.6}
+img[src=""]{display:none}
+svg text{font-family:Inter,system-ui,sans-serif}
+</style>
+</head>
+<body>
+<div class="deck">
+
+<!-- 1 · CAPA -->
+<section class="slide cover">
+  <img class="photo" data-t="FOTO_CAPA" src="" alt="">
+  <div class="shade"></div>
+  <img class="logo" data-t="ESCRITORIO_LOGO" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 260 60'><path d='M6 46h44M10 40h36M14 16l16-10 16 10z' fill='none' stroke='%23b08d57' stroke-width='2'/><text x='64' y='36' font-family='Georgia' font-size='20' fill='%23ffffff' letter-spacing='3'>SUA MARCA</text></svg>" alt="">
+  <svg class="pillars" viewBox="0 0 320 430" fill="none" stroke="#b08d57" stroke-width="1.4">
+    <path d="M10 110 L160 30 L310 110 Z"/>
+    <rect x="30" y="122" width="260" height="16"/>
+    <rect x="54" y="138" width="20" height="260"/><rect x="110" y="138" width="20" height="260"/>
+    <rect x="166" y="138" width="20" height="260"/><rect x="222" y="138" width="20" height="260"/>
+    <path d="M61 140V396M67 140V396M117 140V396M123 140V396M173 140V396M179 140V396M229 140V396M235 140V396"/>
+    <rect x="20" y="398" width="280" height="14"/>
+    <rect x="10" y="412" width="300" height="18"/>
+  </svg>
+  <div class="content">
+    <div class="kick up" style="color:var(--sec);margin-bottom:3vh">Proposta de honorários</div>
+    <h1 class="up" style="--d:.1s">Renegociação<br>de <em>superendividamento</em></h1>
+    <div class="up" style="--d:.25s;width:70px;height:2px;background:var(--sec);margin:4vh 0"></div>
+    <p class="up" style="--d:.3s;color:#dfe6ee">Preparada para <span data-t="CLIENTE_NOME">Maria Oliveira</span></p>
+    <p class="up" style="--d:.4s;color:#9fb0c2;font-size:.92rem;margin-top:1vh"><span data-t="DATA_PROPOSTA">02/11/2026</span> · válida até <span data-t="VALIDADE">17/11/2026</span></p>
+  </div>
+</section>
+
+<!-- 2 · DIAGNÓSTICO -->
+<section class="slide">
+  <div class="wm">01</div>
+  <div class="head up"><span class="num">01</span><span class="rv"></span><span class="kick">Diagnóstico</span></div>
+  <h2 class="up" style="--d:.05s">Quanto da renda já está <em>comprometido</em></h2>
+  <p class="up" style="--d:.12s;max-width:62ch;margin-top:2.4vh" data-t="DIAGNOSTICO_TEXTO">Mapeamento do orçamento mensal e das obrigações assumidas. O objetivo é preservar o mínimo existencial e propor um plano sustentável.</p>
+  <div class="card up" style="--d:.2s;margin-top:3.5vh">
+    <div class="lbl" style="margin-bottom:2vh">Distribuição mensal da renda</div>
+    <div id="renda"></div>
+  </div>
+  <div class="g" style="grid-template-columns:1fr 1fr 1fr;margin-top:2.5vh">
+    <div class="card up" style="--d:.28s"><div class="lbl">Dívida total</div><div class="big" data-t="DIVIDA_TOTAL">R$ 92 mil</div></div>
+    <div class="card up" style="--d:.34s"><div class="lbl">Renda comprometida</div><div class="big" data-t="RENDA_COMPROMETIDA">42%</div></div>
+    <div class="card dark up" style="--d:.4s"><div class="lbl">Credores</div><div class="big" data-t="QTD_CREDORES">4</div></div>
+  </div>
+  <div class="foot"><span data-t="ESCRITORIO_NOME">Seu Escritório</span><span>02 / 07</span></div>
+</section>
+
+<!-- 3 · ESCOPO -->
+<section class="slide">
+  <div class="wm">02</div>
+  <div class="head up"><span class="num">02</span><span class="rv"></span><span class="kick">Escopo de trabalho</span></div>
+  <h2 class="up" style="--d:.05s">O que será <em>feito</em></h2>
+  <div class="escopo" data-field="ESCOPO" style="margin-top:4.5vh">
+    <div class="card up" style="--d:.1s"><span class="num">01</span><h3>Mapeamento de credores</h3><p>Levantamento de contratos, saldos e situação de cada dívida.</p></div>
+    <div class="card up" style="--d:.16s"><span class="num">02</span><h3>Mínimo existencial</h3><p>Orçamento familiar que preserva despesas essenciais.</p></div>
+    <div class="card up" style="--d:.22s"><span class="num">03</span><h3>Análise de cabimento</h3><p>Enquadramento na repactuação prevista no Código de Defesa do Consumidor.</p></div>
+    <div class="card up" style="--d:.28s"><span class="num">04</span><h3>Propostas aos credores</h3><p>Plano de pagamento negociado de forma extrajudicial.</p></div>
+    <div class="card up" style="--d:.34s"><span class="num">05</span><h3>Ação de repactuação</h3><p>Ajuizamento quando a negociação não avançar.</p></div>
+    <div class="card up" style="--d:.4s"><span class="num">06</span><h3>Acompanhamento</h3><p>Monitoramento do plano até a quitação integral.</p></div>
+  </div>
+  <div class="foot"><span data-t="ESCRITORIO_NOME">Seu Escritório</span><span>03 / 07</span></div>
+</section>
+
+<!-- 4 · CRONOGRAMA + CURVA -->
+<section class="slide">
+  <div class="wm">03</div>
+  <div class="head up"><span class="num">03</span><span class="rv"></span><span class="kick">Etapas e curva de quitação</span></div>
+  <h2 class="up" style="--d:.05s">Caminho até a <em>quitação</em></h2>
+  <div class="timeline" data-field="ETAPAS" style="margin-top:4vh">
+    <div class="etapa up" style="--d:.1s"><span class="dot"></span><span class="tag">Etapa 1</span><h3>Mapeamento</h3><p>Até 15 dias</p></div>
+    <div class="etapa up" style="--d:.2s"><span class="dot"></span><span class="tag">Etapa 2</span><h3>Negociação</h3><p>Até 40 dias</p></div>
+    <div class="etapa up" style="--d:.3s"><span class="dot"></span><span class="tag">Etapa 3</span><h3>Judicial</h3><p>Se necessário</p></div>
+    <div class="etapa up" style="--d:.4s"><span class="dot"></span><span class="tag">Etapa 4</span><h3>Plano</h3><p>Conforme acordo</p></div>
+  </div>
+  <div class="card up" style="--d:.45s;margin-top:4vh">
+    <div class="lbl" style="margin-bottom:1vh">Saldo devedor projetado · % do total</div>
+    <div id="quitacao"></div>
+  </div>
+  <div class="foot"><span data-t="ESCRITORIO_NOME">Seu Escritório</span><span>04 / 07</span></div>
+</section>
+
+<!-- 5 · HONORÁRIOS -->
+<section class="slide">
+  <div class="wm">04</div>
+  <div class="head up"><span class="num">04</span><span class="rv"></span><span class="kick">Honorários fixos</span></div>
+  <h2 class="up" style="--d:.05s">Investimento e <em>parcelamento</em></h2>
+  <div class="g" style="grid-template-columns:1fr 1.15fr;margin-top:3.5vh;align-items:start">
+    <div>
+      <div class="lbl up" style="--d:.1s">Honorário fixo</div>
+      <div class="big up" style="--d:.15s;font-size:clamp(3.2rem,7vw,6rem);margin:1vh 0" data-t="HONORARIO_INICIAL">R$ 3.600,00</div>
+      <p class="up" style="--d:.2s;font-style:italic;color:var(--mute)" data-t="HONORARIO_INICIAL_EXTENSO">três mil e seiscentos reais</p>
+      <div class="card up" style="--d:.3s;margin-top:4vh">
+        <div class="lbl">Parcelamento</div>
+        <div class="big" style="font-size:2.2rem;margin-top:1vh"><span data-t="PARCELAS_QTD">6</span>× <span data-t="PARCELA_VALOR">R$ 600,00</span></div>
+        <p style="margin-top:1.2vh;color:var(--mute);font-size:.9rem">1º vencimento <b data-t="PARCELA_VENCIMENTO_PRIMEIRA">05/12/2026</b> · <span data-t="FORMA_PAGAMENTO">PIX ou boleto</span></p>
+      </div>
+    </div>
+    <div class="card up" style="--d:.2s">
+      <div class="lbl" style="margin-bottom:2.4vh">Calendário de parcelas</div>
+      <div class="tiles" id="tiles"></div>
+      <p style="margin-top:2.2vh;font-size:.85rem;color:var(--mute)">Cada bloco representa uma parcela. O último, dourado, marca a quitação.</p>
+    </div>
+  </div>
+  <div class="foot"><span data-t="ESCRITORIO_NOME">Seu Escritório</span><span>05 / 07</span></div>
+</section>
+
+<!-- 6 · ÊXITO -->
+<section class="slide">
+  <div class="wm">05</div>
+  <div class="head up"><span class="num">05</span><span class="rv"></span><span class="kick">Honorários de êxito</span></div>
+  <h2 class="up" style="--d:.05s">Remuneração ligada ao <em>resultado</em></h2>
+  <div class="g" style="grid-template-columns:.9fr 1.1fr;margin-top:3.5vh;align-items:center">
+    <div class="up" style="--d:.1s;display:flex;justify-content:center"><div id="ring" style="width:min(300px,30vw)"></div></div>
+    <div>
+      <div class="lbl up" style="--d:.15s">Percentual</div>
+      <div class="big up" style="--d:.2s;margin:.8vh 0 2vh" data-t="EXITO_PERCENTUAL">10%</div>
+      <p class="up" style="--d:.25s">Sobre <b data-t="EXITO_BASE">a redução obtida no valor mensal comprometido</b>.</p>
+      <p class="up" style="--d:.3s;margin-top:1.4vh;color:var(--mute);font-size:.95rem" data-t="EXITO_CONDICOES">Cobrado somente sobre a economia efetiva, mensal ou total, conforme o plano homologado.</p>
+      <div class="up" style="--d:.4s;margin-top:4vh">
+        <div class="lbl" style="margin-bottom:1.6vh">Cenários ilustrativos · economia em R$ mil</div>
+        <div id="cenarios"></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span data-t="ESCRITORIO_NOME">Seu Escritório</span><span>06 / 07</span></div>
+</section>
+
+<!-- 7 · ACEITE -->
+<section class="slide">
+  <div class="wm">06</div>
+  <div class="head up"><span class="num">06</span><span class="rv"></span><span class="kick">Aceite</span></div>
+  <h2 class="up" style="--d:.05s">Próximos <em>passos</em></h2>
+  <div class="g" style="grid-template-columns:1.25fr .75fr;gap:4vw;margin-top:4vh;align-items:start">
+    <div class="up" style="--d:.1s">
+      <ul class="checks" data-field="PROXIMOS_PASSOS">
+        <li>Aprovação desta proposta</li>
+        <li>Assinatura do contrato e da procuração</li>
+        <li>Envio de extratos, faturas e lista completa de credores</li>
+      </ul>
+    </div>
+    <div class="card dark up" style="--d:.2s">
+      <div class="lbl">Validade da proposta</div>
+      <p style="color:#fff;font-size:1.15rem;margin-top:.6vh" data-t="VALIDADE">17/11/2026</p>
+      <div style="margin-top:6vh;border-top:1px solid #c9b48a;padding-top:1.6vh">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:1.7rem;color:#fff" data-t="RESPONSAVEL">Dr. Nome do Responsável</div>
+        <div style="color:#c9d3de;font-size:.9rem;margin-top:.4vh">OAB <span data-t="OAB">MG 000.000</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span data-t="ESCRITORIO_NOME">Seu Escritório</span><span>07 / 07</span></div>
+</section>
+
+</div>
+<div class="prog" id="prog"></div>
+
+<script>
+/* DADOS: séries dos gráficos. O sistema substitui o JSON entre os marcadores. */
+const DADOS=/*DADOS_INICIO*/{"renda":[{"l":"Mínimo existencial","v":45},{"l":"Parcelas das dívidas","v":42},{"l":"Disponível","v":13}],"quitacao":{"labels":["0","6","12","18","24","30","36"],"saldo":[100,88,74,61,47,33,18]},"cenarios":[{"l":"Conservador","v":14},{"l":"Esperado","v":22},{"l":"Otimista","v":30}]}/*DADOS_FIM*/;
+
+const NS='http://www.w3.org/2000/svg';
+const $=s=>document.querySelector(s);
+const cs=getComputedStyle(document.documentElement);
+const COR=cs.getPropertyValue('--cor').trim(),SEC=cs.getPropertyValue('--sec').trim();
+const PAL=[COR,SEC,'#7d90a6','#d8c49b','#4d6a88','#c7cdd6'];
+const num=s=>parseFloat(String(s).replace(/[^0-9,.-]/g,'').replace(',','.'))||0;
+const uid=()=>'u'+Math.random().toString(36).slice(2,8);
+const E=(t,a,p)=>{const e=document.createElementNS(NS,t);for(const k in a)e.setAttribute(k,a[k]);if(p)p.appendChild(e);return e};
+const TX=(p,x,y,s,a={})=>{const e=E('text',Object.assign({x,y,'font-size':11,fill:'#6b7280'},a),p);e.textContent=s;return e};
+
+function stack(sel,items){const tot=items.reduce((a,b)=>a+b.v,0);
+  $(sel).innerHTML=`<div style="display:flex;height:72px;border-radius:14px;overflow:hidden">`+items.map((it,i)=>`<div title="${it.l}" style="width:${it.v/tot*100}%;background:${PAL[i]};color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:1.4rem;font-weight:600">${Math.round(it.v/tot*100)}%</div>`).join('')+`</div><div style="display:flex;gap:2.5vw;margin-top:2vh;flex-wrap:wrap">`+items.map((it,i)=>`<span style="font-size:.92rem"><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:${PAL[i]};margin-right:8px"></i>${it.l}</span>`).join('')+`</div>`}
+
+function hbars(sel,items,unit=''){const max=Math.max(...items.map(i=>i.v));$(sel).innerHTML=items.map((it,i)=>`<div style="margin-bottom:2.2vh"><div style="display:flex;justify-content:space-between;font-size:.9rem;margin-bottom:6px"><span>${it.l}</span><b style="color:${COR}">${it.v}${unit}</b></div><div style="height:9px;background:#ece6d9;border-radius:9px;overflow:hidden"><div style="height:100%;width:${it.v/max*100}%;background:${i?SEC:COR};border-radius:9px"></div></div></div>`).join('')}
+
+function area(sel,labels,data){const W=560,H=240,P={l:40,r:12,t:14,b:28},s=E('svg',{viewBox:`0 0 ${W} ${H}`},$(sel)),lo=0,hi=100,n=labels.length,X=i=>P.l+i*(W-P.l-P.r)/(n-1),Y=v=>P.t+(H-P.t-P.b)*(1-(v-lo)/(hi-lo)),gid=uid(),gr=E('linearGradient',{id:gid,x1:0,y1:0,x2:0,y2:1},E('defs',{},s));
+  E('stop',{offset:0,'stop-color':SEC,'stop-opacity':.35},gr);E('stop',{offset:1,'stop-color':SEC,'stop-opacity':0},gr);
+  [0,50,100].forEach(v=>{const y=Y(v);E('line',{x1:P.l,x2:W-P.r,y1:y,y2:y,stroke:'#e4ddcc','stroke-dasharray':'3 4'},s);TX(s,P.l-8,y+4,v+'%',{'text-anchor':'end','font-size':10})});
+  labels.forEach((l,i)=>TX(s,X(i),H-8,'mês '+l,{'text-anchor':'middle','font-size':10}));
+  const pts=data.map((v,i)=>X(i)+','+Y(v)).join(' ');
+  E('polygon',{points:`${X(0)},${Y(lo)} ${pts} ${X(n-1)},${Y(lo)}`,fill:`url(#${gid})`},s);
+  E('polyline',{points:pts,fill:'none',stroke:COR,'stroke-width':3,'stroke-linejoin':'round'},s);
+  data.forEach((v,i)=>E('circle',{cx:X(i),cy:Y(v),r:4,fill:'#fff',stroke:COR,'stroke-width':2},s));}
+
+function ring(sel,pct,label){const s=E('svg',{viewBox:'0 0 200 200'},$(sel)),R=84,L=2*Math.PI*R;
+  E('circle',{cx:100,cy:100,r:R,fill:'none',stroke:'#ece6d9','stroke-width':14},s);
+  E('circle',{cx:100,cy:100,r:R,fill:'none',stroke:SEC,'stroke-width':14,'stroke-linecap':'round','stroke-dasharray':(L*Math.min(pct,100)/100)+' '+L,transform:'rotate(-90 100 100)'},s);
+  TX(s,100,108,pct+'%',{'text-anchor':'middle','font-family':'Cormorant Garamond',fill:COR,'font-size':40,'font-weight':600});
+  TX(s,100,130,label,{'text-anchor':'middle','font-size':10});}
+
+function tiles(sel,n){n=Math.min(Math.max(parseInt(n)||1,1),48);$(sel).innerHTML=Array.from({length:n},(_,i)=>`<div class="tile" style="animation-delay:${i*.03}s">${i+1}</div>`).join('')}
+
+function init(){
+  stack('#renda',DADOS.renda);
+  area('#quitacao',DADOS.quitacao.labels,DADOS.quitacao.saldo);
+  tiles('#tiles',$('[data-t="PARCELAS_QTD"]').textContent);
+  ring('#ring',num($('[data-t="EXITO_PERCENTUAL"]').textContent),'de êxito');
+  hbars('#cenarios',DADOS.cenarios,' mil');
+}
+
+const S=[...document.querySelectorAll('.slide')];let I=0;
+function go(n){S[I].classList.remove('on');I=Math.max(0,Math.min(S.length-1,n));S[I].classList.add('on');$('#prog').style.width=(I/(S.length-1)*100)+'%'}
+document.addEventListener('keydown',e=>{if(['ArrowRight','PageDown',' '].includes(e.key)){e.preventDefault();go(I+1)}if(['ArrowLeft','PageUp'].includes(e.key))go(I-1)});
+document.addEventListener('click',e=>{e.clientX>innerWidth/2?go(I+1):go(I-1)});
+init();S[0].classList.add('on');$('#prog').style.width='0%';
+</script>
+</body>
+</html>

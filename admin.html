@@ -1,0 +1,33 @@
+<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Admin · Partelís</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/partelis.css"><style>body{background:#f7f5fb;color:#261b39;font-family:system-ui}main{max-width:1150px;margin:auto;padding:28px}header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}nav{display:flex;gap:8px;flex-wrap:wrap;margin:22px 0}button,.link{border:1px solid #d9d2e5;border-radius:12px;background:white;padding:11px 16px;cursor:pointer;color:#30145f}button.active{background:#30145f;color:white}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px}.panel{background:white;border:1px solid #e8e1f0;border-radius:18px;padding:20px;margin:16px 0;overflow:auto}.metric{font-size:28px;font-weight:700}table{border-collapse:collapse;width:100%}td,th{text-align:left;padding:12px;border-bottom:1px solid #eee}input,select,textarea{border:1px solid #d9d2e5;border-radius:10px;padding:10px;max-width:100%}form{display:flex;gap:8px;flex-wrap:wrap}small{color:#746a80}a{color:#5c30a4}#notice{min-height:20px}
+:root{--admin-accent:#30145f;--admin-muted:#82768f;--admin-line:#e8e1ef}
+body{background:#f7f5fb;color:#291b3b;font-family:Inter,'Segoe UI',system-ui,sans-serif}
+main{max-width:none;margin:0;padding:0 34px 45px 278px;min-height:100dvh}
+header{padding:30px 0 26px;border-bottom:1px solid var(--admin-line);display:flex;align-items:center;gap:15px}
+header>div{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+header img{width:124px;padding-right:17px;border-right:1px solid var(--admin-line)}
+header h1{font-size:27px;letter-spacing:-.8px;margin:0}
+header p{width:100%;margin:0 0 0 143px;color:var(--admin-muted);font-size:12px}
+header a.link{margin-left:auto;text-decoration:none;background:#fff;border:1px solid var(--admin-line);color:#52328b;font-weight:650;font-size:12px}
+nav{position:fixed;left:0;top:0;bottom:0;width:244px;display:flex;flex-direction:column;align-items:stretch;gap:7px;margin:0;padding:115px 14px 28px;background:white;border-right:1px solid var(--admin-line);z-index:3}
+nav:before{content:"PARTELÍS / PROPRIETÁRIO";position:absolute;top:38px;left:24px;font-size:12px;font-weight:800;letter-spacing:1.3px;color:#4d268d}
+nav button{text-align:left;background:transparent;border:0;border-radius:11px;padding:14px 17px;color:#6b5c7c;font-size:13px;font-weight:650;transition:background .18s,transform .18s}
+nav button:hover{background:#f4effb;transform:translateX(2px)}
+nav button.active{background:#efe8fb;color:#432080;box-shadow:inset 3px 0 0 #8d59ff}
+#content{padding-top:27px;animation:admin-enter .4s cubic-bezier(.2,1,.3,1) both}
+#notice{padding:10px 0 0;font-size:12px;color:#7a35ab}
+.grid{gap:17px;grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+.panel{border:1px solid var(--admin-line);border-radius:19px;box-shadow:0 3px 8px #29133908,0 18px 40px #29133908;padding:24px;margin:0 0 18px;transition:box-shadow .2s}
+.panel:hover{box-shadow:0 9px 24px #29133912}
+.panel h2{font-size:17px;letter-spacing:-.3px;margin:0 0 17px}
+.panel small{font-size:12px;color:var(--admin-muted)}
+.metric{font-size:33px;letter-spacing:-1px;color:#34155f;margin:8px 0}
+table{min-width:550px}
+th{text-transform:uppercase;letter-spacing:.7px;font-size:10px;color:var(--admin-muted);background:#fbf9fe}
+td{font-size:12px}
+th,td{padding:14px 12px}
+input,select,textarea{min-height:40px;border-color:var(--admin-line);background:#fff;color:#332440}
+button:focus-visible,a:focus-visible{outline:3px solid #a67fff;outline-offset:2px}
+@keyframes admin-enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:850px){main{padding:0 18px 35px 18px}nav{position:static;width:auto;display:flex;flex-direction:row;overflow-x:auto;white-space:nowrap;padding:12px;margin:0 -18px 8px;border-right:0;border-bottom:1px solid var(--admin-line)}nav:before{display:none}nav button{flex:none;padding:11px}header{padding:24px 0}header>div{gap:10px}header p{margin:0}header h1{font-size:21px}header img{width:100px}.panel{padding:18px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style></head><body><main><header><div><img src="/brand-horizontal.svg" alt="Partelís" width="160"><h1>Centro de comando</h1><p>Operação SaaS e relacionamento com escritórios</p></div><a class="link" href="/app">Voltar ao aplicativo</a></header><p id="notice" role="status"></p><nav><a class="link" href="/admin/comercial" style="display:block;text-decoration:none;margin-bottom:14px;background:#30145F;color:#fff">Comercial e acessos</a><button data-tab="overview" class="active">Visão geral</button><button data-tab="tenants">Escritórios</button><button data-tab="crm">CRM Partelís</button><button data-tab="feedback">Feedback beta</button><button data-tab="support">Suporte remoto</button></nav><section id="content" aria-live="polite"><div class="panel" role="status"><h2>Preparando centro de comando…</h2><p>Carregando indicadores, escritórios e solicitações.</p></div></section></main><script src="/admin.js"></script></body></html>

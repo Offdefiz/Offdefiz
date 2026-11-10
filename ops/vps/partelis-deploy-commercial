@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+# Instalar em /usr/local/sbin/partelis-deploy-commercial, root:root, modo 0755.
+set -Eeuo pipefail
+if [[ $# -ne 1 || ! "$1" =~ ^[a-f0-9]{40}$ ]]; then
+  echo 'Informe somente o SHA completo aprovado.' >&2
+  exit 2
+fi
+exec /usr/bin/bash /srv/partelis/app/ops/vps/deploy-commercial.sh "$1"

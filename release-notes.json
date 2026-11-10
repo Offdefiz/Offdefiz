@@ -1,0 +1,82 @@
+{
+  "version": "0.7.1",
+  "published": "2026-11-02",
+  "title": "Partelís · Propostas bancárias e segurança",
+  "notes": [
+    {
+      "type": "security",
+      "title": "Gráficos de proposta protegidos",
+      "description": "Rótulos inseridos nos gráficos não podem injetar HTML na apresentação."
+    },
+    {
+      "type": "new",
+      "title": "Quatro modelos de proposta com sete slides",
+      "description": "Passivo bancário, ação revisional, superendividamento e holding; escopo, diagnóstico e parcelamento personalizados, PDF em paisagem."
+    },
+    {
+      "type": "improvement",
+      "title": "Identidade das propostas por escritório",
+      "description": "Foto de capa, logotipo otimizado, OAB e cores próprias da apresentação, sem alterar o tema do CRM."
+    },
+    {
+      "type": "improvement",
+      "title": "Migração visual para Partelís",
+      "description": "Nomes e arquivos visíveis ajustados com compatibilidade para os identificadores técnicos e sessões existentes."
+    },
+    {
+      "type": "new",
+      "title": "Cadastro de clientes",
+      "description": "Perfil por pessoa ou empresa com telefone, e-mail, documento e data de entrada, vinculado aos atendimentos e dívidas."
+    },
+    {
+      "type": "improvement",
+      "title": "Kanban com validações",
+      "description": "Arrastar entre etapas iniciais exige reunião agendada ou diagnóstico realizado; etapas posteriores preservam o fluxo de propostas e contratos."
+    },
+    {
+      "type": "new",
+      "title": "Proposta visual em sete páginas",
+      "description": "Quatro apresentações institucionais de sete slides, com gráficos quando houver dados, escopo e parcelamento."
+    },
+    {
+      "type": "improvement",
+      "title": "Experiência CRM e modo escuro",
+      "description": "Transições de página, animação de gráficos, sombras e ajustes de superfícies escuras."
+    },
+    {
+      "type": "new",
+      "title": "Questionário pré-contratação",
+      "description": "Diagnóstico inicial para escritórios individuais e equipes em /conhecer."
+    },
+    {
+      "type": "improvement",
+      "title": "Painel do proprietário",
+      "description": "Nova organização visual responsiva do centro de comando."
+    },
+    {
+      "type": "improvement",
+      "title": "Navegação organizada como CRM",
+      "description": "Módulos agrupados, busca rápida, criação contextual e menu de conta."
+    },
+    {
+      "type": "new",
+      "title": "Meu perfil",
+      "description": "Cadastro de nome de exibição e foto otimizada, com salvamento privado por conta."
+    },
+    {
+      "type": "new",
+      "title": "Central de configurações",
+      "description": "Aparência, identidade do escritório, senha, suporte, ajuda e recursos em um só lugar."
+    },
+    {
+      "type": "fix",
+      "title": "Controles no lugar correto",
+      "description": "Aparência, sair, tutorial, novidades, feedback e suporte deixam de ocupar o espaço de trabalho como botões soltos."
+    },
+    {
+      "type": "security",
+      "title": "Foto com acesso restrito",
+      "description": "Perfil protegido por autenticação e políticas RLS. O acesso remoto permanece autorizado, limitado e auditável."
+    }
+  ]
+}

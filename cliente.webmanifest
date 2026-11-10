@@ -1,0 +1,19 @@
+{
+  "name": "Partelís — Área do Cliente (Demonstração)",
+  "short_name": "Partelís Cliente",
+  "description": "Protótipo fictício de acompanhamento jurídico",
+  "start_url": "/cliente/demo",
+  "scope": "/cliente/",
+  "display": "standalone",
+  "lang": "pt-BR",
+  "theme_color": "#30145F",
+  "background_color": "#F8F7FC",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

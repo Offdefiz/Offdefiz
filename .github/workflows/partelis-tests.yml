@@ -1,0 +1,25 @@
+name: Partelís · testes de integração
+on:
+  push:
+    branches:
+      - main
+      - caixa-juridico
+      - 'feature/partelis-*'
+  pull_request:
+    branches:
+      - main
+      - caixa-juridico
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts
+      - run: npm run build
+      - run: npm test
+      - run: npm run test:deploy

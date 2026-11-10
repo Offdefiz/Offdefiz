@@ -1,0 +1,7 @@
+[Unit]
+Description=Backup diário do Partelís
+[Timer]
+OnCalendar=*-*-* 03:00:00 America/Sao_Paulo
+Persistent=true
+[Install]
+WantedBy=timers.target
