@@ -80,3 +80,10 @@
 - [ ] ZapSign: originais 12/12, rubricas, valores e PDF confrontados no sandbox.
 
 **Não fazer merge da PR #13 isoladamente** sem a PR #12, migrações e homologação. Não há deploy neste trabalho.
+
+## Incrementos adicionais após a primeira revisão
+- Perfis `socio_admin`, `advogado` e `estagiario` reconhecidos por esquema, convites, backend legado, menus e regras do CRM; o seletor fictício de perfil fica bloqueado no ambiente real.
+- Cadastro de atendimento no CRM agora obtém as áreas **configuradas pelo escritório** via `/api/legal/areas`, com fallback genérico na demo. Não há três opções bancárias obrigatórias no formulário.
+- `lib/process-providers.cjs` implementa contratos DataJud/DJEN/agregador separados, clientes HTTP injetáveis, consulta DataJud por número CNJ/alias de tribunal e mapeamento de movimentos. Não há chamada remota espontânea. Provedor DJEN exige adapter explicitamente configurado; nenhuma suposição sobre parâmetros oficiais não verificados.
+- `process-providers.test.cjs` testa dados simulados, segredo de justiça e indicação de revisão humana; não cria prazo fatal.
+- Documentação consultada em 10/11/2026: [API pública DataJud](https://www.cnj.jus.br/sistemas/datajud/api-publica/), [consulta por número](https://datajud-wiki.cnj.jus.br/api-publica/exemplos/exemplo1/), [API DJEN Swagger](https://hcomunicaapi.cnj.jus.br/swagger/index.html). A interpretação comercial/licenças exige revisão específica.
