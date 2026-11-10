@@ -100,7 +100,7 @@ async function runOne(){
   if(!job)return false;
   try{
    if(!enabled(job.provider))throw Error('PROVIDER_DISABLED');
-   const member=await pool.query('SELECT role FROM cj_memberships WHERE workspace_id=$1 AND user_id=$2',[job.workspace_id,job.actor_id]);
+   const member=await pool.query('SELECT m.role FROM cj_memberships m JOIN cj_admin_tenants t ON t.workspace_id=m.workspace_id WHERE m.workspace_id=$1 AND m.user_id=$2 AND t.status='active'',[job.workspace_id,job.actor_id]);
    if(!member.rows[0])throw Error('ACCESS_REVOKED');
    const actor={workspace:job.workspace_id,userId:job.actor_id,role:member.rows[0].role};
    const p=await legal().getProcess(actor,job.process_id,{edit:true});
