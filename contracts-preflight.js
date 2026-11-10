@@ -18,9 +18,9 @@ function selectClient(){
 function render(){
  const model=current();fieldsEl.replaceChildren();form.hidden=!model;if(!model)return;
  for(const field of model.fields){
-   const label=document.createElement('label');label.textContent=field.label||field.name;
-   const input=document.createElement('input');input.dataset.field=field.name;input.name=field.name;input.type=field.type==='email'?'email':'text';input.required=Boolean(field.required);
-   input.autocomplete='off';input.maxLength=500;input.placeholder=field.type==='dinheiro'?'R$ 0,00':field.type==='date'?'dd/mm/aaaa':'';
+   const label=document.createElement('label');label.textContent=field.label||field.variable;
+   const input=document.createElement('input');input.dataset.field=field.variable;input.name=field.variable;input.type=field.input_type==='email'?'email':'text';input.required=Boolean(field.required);
+   input.autocomplete='off';input.maxLength=500;input.placeholder=field.input_type==='dinheiro'?'R$ 0,00':field.input_type==='date'?'dd/mm/aaaa':'';
    label.append(input);fieldsEl.append(label);
  }
  show('Modelo carregado. Preencha os campos e execute a pré-validação.');
