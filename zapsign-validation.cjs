@@ -2,6 +2,7 @@
 
 // Os nomes de campos vêm exclusivamente do catálogo fornecido com os modelos.
 const forms = require('./zapsign-formularios.json');
+const {cpfValid,cnpjValid}=require('./lib/legal-core.cjs');
 function template(modalidade, tipo) {
   const found = forms.find(x => x.modalidade === modalidade && x.tipo === tipo);
   if (!found) throw new Error('Modelo não encontrado.');
@@ -27,8 +28,8 @@ function validate(modalidade, tipo, values) {
     if (!value) { errors.push(`${label}: preenchimento obrigatório.`); continue; }
     if (/\{\{|\}\}|<</.test(value)) { errors.push(`${label}: contém marcador de modelo.`); continue; }
     let ok = true;
-    if (name === 'CPF DO CLIENTE') ok = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value);
-    else if (name === 'ESCRITORIO CNPJ') ok = /^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/.test(value);
+    if (name === 'CPF DO CLIENTE') ok = /^\d{3}\.\d{3}\.\d{3}-\d{2}$/.test(value) && cpfValid(value);
+    else if (name === 'ESCRITORIO CNPJ') ok = /^[\dA-Z]{2}\.[\dA-Z]{3}\.[\dA-Z]{3}\/[\dA-Z]{4}-\d{2}$/i.test(value) && cnpjValid(value);
     else if (field?.input_type === 'email' || name === 'ADVOGADO EMAIL') ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
     else if (field?.input_type === 'phone_br') ok = /^\(\d{2}\) \d{5}-\d{4}$/.test(value);
     else if (field?.input_type === 'date') ok = validDate(value);
