@@ -60,7 +60,8 @@ ACTUAL="$(runuser -u partelis -- git -C "$CANDIDATE" rev-parse HEAD)"
 [[ "$ACTUAL" == "$EXPECTED" ]] || error "Revisão não corresponde ao SHA autorizado."
 [[ -f "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql" ]] || error "Migração incremental ausente."
 
-echo "[2/8] Verificações de sintaxe e regressão"
+echo "[2/8] Instalar dependências e verificar sintaxe e regressão"
+runuser -u partelis -- npm --prefix "$CANDIDATE" install --omit=dev --ignore-scripts --no-audit --no-fund
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs npm --prefix "$CANDIDATE" run build
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs npm --prefix "$CANDIDATE" test
 
