@@ -7,7 +7,7 @@ const {validate,substitutions,moneyCents,installments}=require('./zapsign-valida
 const {preflight}=require('./zapsign-preflight.cjs');
 
 function values(model) {
-  const defaults={cpf:'123.456.789-00',cnpj:'12.345.678/0001-00',email:'sandbox@example.invalid',phone_br:'(31) 99999-9999',date:'02/11/2026',dinheiro:'R$ 1.000,00'};
+  const defaults={cpf:'529.982.247-25',cnpj:'04.252.011/0001-10',email:'sandbox@example.invalid',phone_br:'(31) 99999-9999',date:'02/11/2026',dinheiro:'R$ 1.000,00'};
   const v=Object.fromEntries(model.update_form_payload.inputs.map(f=>[f.variable.slice(2,-2),defaults[f.input_type]||'Teste fictício']));
   if (model.tipo==='contrato') Object.assign(v,{'QUANTIDADE PARCELAS':'2','HONORARIO FIXO VALOR':'R$ 1.000,00','VALOR PARCELA':'R$ 500,00','EXITO PERCENTUAL':'20%'});
   if(model.variaveis.includes('QUANTIDADE CONTRATOS'))v['QUANTIDADE CONTRATOS']='1';
