@@ -5,7 +5,7 @@ const {template,validate,substitutions,installments} = require('./zapsign-valida
 test('exige todos os campos e rejeita marcadores ainda não preenchidos',()=>{
   const m=template('passivo_bancario','declaracao_hipossuficiencia');
   const v=Object.fromEntries(m.variaveis.map(n=>[n,'teste']));
-  v['CPF DO CLIENTE']='123.456.789-00'; v['RENDA MENSAL']='R$ 1.000,00'; v['DATA CONTRATO']='01/11/2026';
+  v['CPF DO CLIENTE']='529.982.247-25'; v['RENDA MENSAL']='R$ 1.000,00'; v['DATA CONTRATO']='01/11/2026';
   assert.equal(validate(m.modalidade,m.tipo,v).ok,true);
   assert.deepEqual(substitutions(m.modalidade,m.tipo,v).map(x=>x.de),m.variaveis.map(n=>`{{${n}}}`));
   v['NOME COMPLETO']='{{NOME COMPLETO}}'; v['DATA CONTRATO']='31/02/2026';
