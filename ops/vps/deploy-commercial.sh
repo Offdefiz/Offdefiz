@@ -69,7 +69,7 @@ echo "[3/8] Testes multi-escritório no banco descartável"
 runuser -u postgres -- createdb -O partelis "$VERIFY_DB"
 runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$CANDIDATE/ops/native/schema.sql"
 runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql"
-for migration in "$CANDIDATE"/ops/native/migrations/2026-11-10-*.sql; do
+for migration in "$CANDIDATE"/ops/native/migrations/2026-11-10-multiarea-foundation.sql "$CANDIDATE"/ops/native/migrations/2026-11-10-ops-metrics.sql "$CANDIDATE"/ops/native/migrations/2026-11-10-cnj-inbox.sql; do
   runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$migration"
 done
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs PGDATABASE="$VERIFY_DB" /usr/bin/node "$CANDIDATE/ops/native/verify.cjs"
@@ -95,7 +95,7 @@ echo "Backup e restauração validados, sem expor dados no log."
 
 echo "[6/8] Migração aditiva no banco real"
 runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d partelis < "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql"
-for migration in "$CANDIDATE"/ops/native/migrations/2026-11-10-*.sql; do
+for migration in "$CANDIDATE"/ops/native/migrations/2026-11-10-multiarea-foundation.sql "$CANDIDATE"/ops/native/migrations/2026-11-10-ops-metrics.sql "$CANDIDATE"/ops/native/migrations/2026-11-10-cnj-inbox.sql; do
   runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d partelis < "$migration"
 done
 

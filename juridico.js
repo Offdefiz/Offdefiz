@@ -133,7 +133,7 @@ async function loadIntegration(){
  const result=await api('/api/legal/processes/'+p.id+'/integrations');
  for(const item of result.items)root.append(text('p',item.provider+' · '+item.status+' · '+(item.last_synced_at||'Sem sincronização')));
  if(p.secret||!p.process_number)return;
- if(!['gestor','socio_admin','advogado','juridico'].includes(state.role))return;
+ const canWrite=['gestor','socio_admin','advogado','juridico'].includes(state.role);
  const label=text('label','Tribunal DataJud (ex.: tjmg, trf6, trt3)');
  const alias=document.createElement('input');alias.maxLength=24;label.append(alias);
  const button=text('button','Consultar DataJud');button.type='button';
@@ -145,7 +145,33 @@ async function loadIntegration(){
    await loadMovements();
   }finally{button.disabled=false;}
  });
- root.append(label,button);
+ button.disabled=!canWrite;root.append(label,button);
+ const base='/api/legal/processes/'+p.id;
+ const queueState=await api(base+'/cnj-status');
+ const reload=text('button','Atualizar integrações e intimações');reload.type='button';reload.onclick=()=>safely(loadIntegration);root.append(reload);
+ for(const job of queueState.jobs)root.append(text('p',job.provider+' · '+job.status+' · tentativas: '+job.attempts+(job.last_error_code?' · '+job.last_error_code:'')));
+ for(const source of ['djen','datajud']){
+  const sync=text('button','Sincronizar '+source+' pela fila');sync.type='button';
+  sync.onclick=()=>safely(async()=>{sync.disabled=true;try{await api(base+'/cnj-jobs',{provider:source,tribunal_alias:alias.value.trim()});await loadIntegration();}finally{sync.disabled=false;}});
+  const watch=text('button','Monitorar '+source+' a cada hora');watch.type='button';
+  watch.onclick=()=>safely(async()=>{await api(base+'/monitor',{provider:source,tribunal_alias:alias.value.trim(),enabled:true});await loadIntegration();});
+  const stop=text('button','Pausar '+source);stop.type='button';stop.onclick=()=>safely(async()=>{await api(base+'/monitor',{provider:source,enabled:false});await loadIntegration();});
+  sync.disabled=watch.disabled=stop.disabled=!canWrite;root.append(sync,watch,stop);
+ }
+ root.append(text('h3','Caixa de intimações · revisão humana'));
+ const box=await api(base+'/publications');
+ if(!box.items.length)root.append(text('p','Nenhuma publicação recebida para este processo.'));
+ for(const publication of box.items){
+  const card=document.createElement('div');card.className='card';
+  card.append(text('strong',publication.available_date.slice(0,10)+' · '+publication.review_status+(publication.read_at?' · lida':' · não lida')));
+  card.append(text('p',publication.summary));
+  for(const [title,reviewStatus]of [['Marcar como lida',undefined],['Revisada','reviewed'],['Descartar','dismissed']]){
+   const action=text('button',title);action.type='button';
+   action.onclick=()=>safely(async()=>{await api(base+'/publication-review',{publication_id:publication.id,...(reviewStatus?{status:reviewStatus}:{})});await loadIntegration();});
+   action.disabled=Boolean(reviewStatus)&&!canWrite;card.append(action);
+  }
+  root.append(card);
+ }
 }
 async function loadMovements(){
  const p=state.process;if(!p)return;

@@ -25,6 +25,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-04-sales-onboarding.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-multiarea-foundation.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-ops-metrics.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-cnj-inbox.sql
           npm install --no-save --package-lock=false --ignore-scripts pg@8.13.1
       - name: Existing behavior and seven independent offices
         run: |
