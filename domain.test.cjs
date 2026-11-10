@@ -45,3 +45,13 @@ test('novos perfis são compatíveis com permissões existentes sem ampliar aces
  assert.equal(C.can('estagiario','contract'),false);
  assert.equal(C.can('financeiro','legal'),false);
 });
+
+test('cadastro do CRM verifica CPF/CNPJ e aceita CNPJ alfanumérico',()=>{
+ const f=fixture();
+ const update=taxId=>run(f,'clientUpdate',{clientId:f.state.clients[0].id,name:'Pessoa de teste',taxId},'gestor');
+ assert.equal(update('529.982.247-25').taxId,'52998224725');
+ assert.equal(update('04.252.011/0001-10').type,'PJ');
+ assert.equal(update('12.ABC.345/01DE-35').taxId,'12ABC34501DE35');
+ assert.throws(()=>update('111.111.111-11'),/dígito verificador/);
+ assert.throws(()=>update('04.252.011/0001-11'),/dígito verificador/);
+});
