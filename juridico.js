@@ -123,7 +123,29 @@ async function openProcess(id){
  $('#detailInfo').textContent=[p.process_number||'Sem número CNJ',p.court||'Sem tribunal',
   'Fase: '+p.phase,'Status: '+p.status,p.secret?'Acesso restrito':''].filter(Boolean).join(' · ');
  $('#archive').disabled=p.status==='archived';$('#reopen').disabled=p.status==='active';
- await loadMovements();$('#detailCard').scrollIntoView({block:'start',behavior:'smooth'});
+ await loadMovements();await loadIntegration();$('#detailCard').scrollIntoView({block:'start',behavior:'smooth'});
+}
+async function loadIntegration(){
+ let root=$('#cnjIntegration');
+ if(!root){root=document.createElement('div');root.id='cnjIntegration';$('#detailInfo').after(root);}
+ root.replaceChildren();
+ const p=state.process;
+ const result=await api('/api/legal/processes/'+p.id+'/integrations');
+ for(const item of result.items)root.append(text('p',item.provider+' · '+item.status+' · '+(item.last_synced_at||'Sem sincronização')));
+ if(p.secret||!p.process_number)return;
+ if(!['gestor','socio_admin','advogado','juridico'].includes(state.role))return;
+ const label=text('label','Tribunal DataJud (ex.: tjmg, trf6, trt3)');
+ const alias=document.createElement('input');alias.maxLength=24;label.append(alias);
+ const button=text('button','Consultar DataJud');button.type='button';
+ button.onclick=()=>safely(async()=>{
+  button.disabled=true;
+  try{const answer=await api('/api/legal/processes/'+p.id+'/sync-datajud',{tribunal_alias:alias.value.trim()});
+   root.append(text('p',answer.found?answer.created+' novos andamentos.':'Processo não localizado nesta fonte.'));
+   for(const suggestion of answer.suggestions||[])root.append(text('p','Revisar possível prazo: '+suggestion.description));
+   await loadMovements();
+  }finally{button.disabled=false;}
+ });
+ root.append(label,button);
 }
 async function loadMovements(){
  const p=state.process;if(!p)return;
