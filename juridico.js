@@ -133,7 +133,7 @@ async function loadIntegration(){
  const result=await api('/api/legal/processes/'+p.id+'/integrations');
  for(const item of result.items)root.append(text('p',item.provider+' · '+item.status+' · '+(item.last_synced_at||'Sem sincronização')));
  if(p.secret||!p.process_number)return;
- if(!['gestor','socio_admin','advogado','juridico'].includes(state.role))return;
+ const canWrite=['gestor','socio_admin','advogado','juridico'].includes(state.role);
  const label=text('label','Tribunal DataJud (ex.: tjmg, trf6, trt3)');
  const alias=document.createElement('input');alias.maxLength=24;label.append(alias);
  const button=text('button','Consultar DataJud');button.type='button';
@@ -145,7 +145,7 @@ async function loadIntegration(){
    await loadMovements();
   }finally{button.disabled=false;}
  });
- root.append(label,button);
+ button.disabled=!canWrite;root.append(label,button);
  const base='/api/legal/processes/'+p.id;
  const queueState=await api(base+'/cnj-status');
  const reload=text('button','Atualizar integrações e intimações');reload.type='button';reload.onclick=()=>safely(loadIntegration);root.append(reload);
@@ -156,7 +156,7 @@ async function loadIntegration(){
   const watch=text('button','Monitorar '+source+' a cada hora');watch.type='button';
   watch.onclick=()=>safely(async()=>{await api(base+'/monitor',{provider:source,tribunal_alias:alias.value.trim(),enabled:true});await loadIntegration();});
   const stop=text('button','Pausar '+source);stop.type='button';stop.onclick=()=>safely(async()=>{await api(base+'/monitor',{provider:source,enabled:false});await loadIntegration();});
-  root.append(sync,watch,stop);
+  sync.disabled=watch.disabled=stop.disabled=!canWrite;root.append(sync,watch,stop);
  }
  root.append(text('h3','Caixa de intimações · revisão humana'));
  const box=await api(base+'/publications');
@@ -168,7 +168,7 @@ async function loadIntegration(){
   for(const [title,reviewStatus]of [['Marcar como lida',undefined],['Revisada','reviewed'],['Descartar','dismissed']]){
    const action=text('button',title);action.type='button';
    action.onclick=()=>safely(async()=>{await api(base+'/publication-review',{publication_id:publication.id,...(reviewStatus?{status:reviewStatus}:{})});await loadIntegration();});
-   card.append(action);
+   action.disabled=Boolean(reviewStatus)&&!canWrite;card.append(action);
   }
   root.append(card);
  }
