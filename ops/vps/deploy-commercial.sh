@@ -56,7 +56,7 @@ chown partelis:partelis "$CANDIDATE"
 runuser -u partelis -- git clone --quiet --filter=blob:none --no-checkout "$REPO" "$CANDIDATE"
 runuser -u partelis -- git -C "$CANDIDATE" fetch --quiet --depth 1 origin "refs/heads/$BRANCH"
 runuser -u partelis -- git -C "$CANDIDATE" checkout --quiet --detach "$EXPECTED"
-ACTUAL="$(git -C "$CANDIDATE" rev-parse HEAD)"
+ACTUAL="$(runuser -u partelis -- git -C "$CANDIDATE" rev-parse HEAD)"
 [[ "$ACTUAL" == "$EXPECTED" ]] || error "Revisão não corresponde ao SHA autorizado."
 [[ -f "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql" ]] || error "Migração incremental ausente."
 
