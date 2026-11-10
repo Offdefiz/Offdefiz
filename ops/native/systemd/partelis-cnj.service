@@ -1,0 +1,16 @@
+[Unit]
+Description=Partelis CNJ queue and monitor worker
+After=postgresql.service
+[Service]
+Type=oneshot
+User=partelis
+Group=partelis
+WorkingDirectory=/srv/partelis/app
+EnvironmentFile=/etc/partelis/service.env
+Environment=NODE_ENV=production
+ExecStart=/usr/bin/node /srv/partelis/app/ops/native/cnj.cjs
+TimeoutStartSec=240
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
