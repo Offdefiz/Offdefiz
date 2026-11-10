@@ -87,6 +87,17 @@ if(route==='/health')return send(res,200,{status:'ok',configured:!!native&&await
 if(route==='/auth/login'&&req.method==='POST'){limit(req);const p=await body(req);const d=await store('/auth/v1/token?grant_type=password',{method:'POST',body:{email:p.email,password:p.password}});session(res,d,secureRequest(req));return send(res,200,{ok:true});}
 if(route==='/auth/signup'&&req.method==='POST')throw new Fault(403,'Novas contas são criadas por convite aprovado pelo Partelís.');
 if(route==='/auth/logout'&&req.method==='POST'){const token=cookies(req).cj_access;if(token||native)await store('/auth/v1/logout',{token,method:'POST',...(native?{body:{refresh_token:cookies(req).cj_refresh}}:{})}).catch(()=>{});res.setHeader('Set-Cookie',['cj_access=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/','cj_refresh=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/']);return send(res,200,{ok:true});}
+if(route.startsWith('/api/legal/')){
+ if(!native)throw new Fault(503,'Gestão processual indisponível neste ambiente.');
+ limit(req);
+ const who=await identity(req,res);
+ const p=req.method==='POST'?await body(req):{};
+ const result=await require('./ops/native/legal.cjs').handle(req.url,{
+  method:req.method,body:p,
+  actor:{workspace:who.membership.workspace_id,userId:who.user.id,role:who.membership.role,ip:req.socket.remoteAddress}
+ });
+ return send(res,req.method==='POST'?201:200,result);
+}
 if(route.startsWith('/api/')){const who=await identity(req,res);const base='/rest/v1/cj_state?workspace_id=eq.'+who.membership.workspace_id;const rows=await store(base+'&select=revision,data,theme',{token:who.token});let row=rows[0];
 if(!row)throw new Fault(503,'O escritório precisa ser inicializado pelo administrador.');
 if(route==='/api/password'&&req.method==='POST'){const p=await body(req);if(String(p.password||'').length<8)throw new Fault(400,'Use pelo menos 8 caracteres.');await store('/auth/v1/user',{token:who.token,method:'PUT',body:{password:p.password}});return send(res,200,{ok:true});}
