@@ -34,3 +34,24 @@ test('reuniões pendentes entram em atraso pelo horário de Brasília sem altera
  for(const status of ['realizada','cancelada','reagendada','nao_compareceu'])assert.equal(C.meetingOverdue({...m,status},new Date('2026-11-02T17:00:00Z')),false);
  assert.equal(C.meetingOverdue({...m,status:'agendada'},new Date('2026-11-02T17:00:00Z')),true);
 });
+
+test('novos perfis são compatíveis com permissões existentes sem ampliar acesso financeiro',()=>{
+ assert.ok(C.roles.socio_admin&&C.roles.advogado&&C.roles.estagiario);
+ assert.equal(C.can('socio_admin','payment'),true);
+ assert.equal(C.can('socio_admin','contract'),true);
+ assert.equal(C.can('advogado','legal'),true);
+ assert.equal(C.can('advogado','payment'),false);
+ assert.equal(C.can('estagiario','task'),true);
+ assert.equal(C.can('estagiario','contract'),false);
+ assert.equal(C.can('financeiro','legal'),false);
+});
+
+test('cadastro do CRM verifica CPF/CNPJ e aceita CNPJ alfanumérico',()=>{
+ const f=fixture();
+ const update=taxId=>run(f,'clientUpdate',{clientId:f.state.clients[0].id,name:'Pessoa de teste',taxId},'gestor');
+ assert.equal(update('529.982.247-25').taxId,'52998224725');
+ assert.equal(update('04.252.011/0001-10').type,'PJ');
+ assert.equal(update('12.ABC.345/01DE-35').taxId,'12ABC34501DE35');
+ assert.throws(()=>update('111.111.111-11'),/dígito verificador/);
+ assert.throws(()=>update('04.252.011/0001-11'),/dígito verificador/);
+});

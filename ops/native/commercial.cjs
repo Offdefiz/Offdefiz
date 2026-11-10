@@ -5,7 +5,7 @@ const {token,digest}=require('./auth.cjs');
 const clean=(v,n)=>typeof v==='string'?v.trim().slice(0,n+1):'';
 const emailOf=v=>clean(v,254).toLowerCase();
 const emailOk=v=>v.length<=254&&/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(v);
-const roles=new Set(['gestor','secretaria','especialista','juridico','financeiro']);
+const roles=new Set(['gestor','socio_admin','advogado','estagiario','secretaria','especialista','juridico','financeiro']);
 const plans=new Set(['beta','trial']);
 const statuses=new Set(['new','contacted','demo','proposal','rejected']);
 const uuid=v=>typeof v==='string'&&/^[a-f0-9]{8}-[a-f0-9]{4}-[1-8][a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(v);

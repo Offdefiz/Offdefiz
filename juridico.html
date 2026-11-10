@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><meta name="theme-color" content="#30145F">
+<title>Gestão processual · Partelís</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#241937;background:#f6f4fb}
+*{box-sizing:border-box}body{margin:0}header{display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:white;padding:17px clamp(16px,4vw,50px);border-bottom:1px solid #e7deef}
+header img{width:145px;max-width:55vw}a{color:#5635a2}
+nav{display:flex;gap:15px;flex-wrap:wrap}main{max-width:1200px;padding:26px 16px 80px;margin:auto}
+h1{font-size:clamp(24px,4vw,35px)}h2{font-size:20px;margin-top:0}
+.card{background:#fff;border:1px solid #e4dcf0;border-radius:19px;padding:clamp(16px,3vw,24px);margin:17px 0;box-shadow:0 8px 30px #29144b07}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:650}input,select,textarea{font:inherit;min-height:42px;border:1px solid #cdc1e0;border-radius:9px;padding:9px 11px;background:white;color:#251939;width:100%}
+input[type=checkbox]{min-height:auto;width:auto}textarea{min-height:90px;resize:vertical}
+button{border:0;border-radius:10px;background:#30145f;color:white;padding:11px 16px;cursor:pointer;font-weight:700}
+button.secondary{background:#eee7fb;color:#30145f}button:disabled{opacity:.5;cursor:not-allowed}
+details{margin-top:15px}summary{cursor:pointer;font-weight:700}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.toolbar>*{flex:1 1 170px}#status{white-space:pre-wrap;overflow-wrap:anywhere}
+#status[data-error=true]{color:#9a213a}
+.row{display:flex;gap:12px;justify-content:space-between;align-items:center;border-bottom:1px solid #e8e2ef;padding:12px 0;flex-wrap:wrap}
+.row button{flex-shrink:0}.muted,small{color:#706680}.row strong{overflow-wrap:anywhere}
+.notice{background:#f0ebfa;border-left:4px solid #8d59ff;border-radius:10px;padding:13px}
+.empty{padding:16px;color:#686078}
+@media(max-width:730px){.grid{grid-template-columns:1fr}nav{gap:10px}}
+</style></head><body>
+<header><img src="/brand-horizontal.svg" alt="Partelís"><nav><a href="/app">CRM</a><a href="/contratos">Documentos</a><a href="/privacidade">Privacidade</a></nav></header>
+<main>
+<p class="muted">Partelís · Módulo jurídico multiárea</p><h1>Gestão de processos e atendimentos jurídicos</h1>
+<p class="notice">Versão de homologação. O cadastro não sincroniza tribunais. Nenhum andamento cria automaticamente prazo fatal; regras e alertas judiciais exigem homologação profissional.</p>
+<div class="card" role="status" aria-live="polite"><strong>Operação</strong><p id="status">Conferindo acesso ao escritório...</p></div>
+<section class="card"><h2>Áreas de atuação</h2>
+<div class="toolbar"><label>Área do escritório<select id="areaSelect"><option value="">Carregando...</option></select></label><button id="editArea" type="button" class="secondary">Editar configuração</button><button id="newArea" type="button" class="secondary">Nova área</button></div>
+<details id="areaEditor"><summary>Configuração das áreas</summary><form id="areaForm" class="grid">
+<label>Identificador estável<input id="areaCode" pattern="[a-z][a-z0-9_]*" required></label>
+<label>Nome<input id="areaName" required maxlength="120"></label>
+<label>Fases, uma por linha<textarea id="areaStages" required></textarea></label>
+<label>Campos personalizados (JSON configurável)<textarea id="areaFields" placeholder='[{"key":"unidade","label":"Unidade","type":"text"}]'></textarea></label>
+<label>Classes TPU sugeridas (JSON array)<textarea id="areaClasses" placeholder="[]"></textarea></label>
+<label>Assuntos TPU sugeridos (JSON array)<textarea id="areaSubjects" placeholder="[]"></textarea></label>
+<label>Modelos de documento associados (JSON array)<textarea id="areaTemplates" placeholder="[]"></textarea></label>
+<div><button type="submit">Salvar área</button></div></form>
+</details></section>
+<section class="card"><h2>Processos e procedimentos</h2>
+<div class="toolbar"><label>Filtrar por área<select id="processArea"><option value="">Todas as áreas</option></select></label><button id="refresh" class="secondary" type="button">Atualizar listagem</button></div>
+<div id="processList" class="empty">Carregando...</div>
+<details id="processEditor"><summary>Cadastrar processo, procedimento ou consultivo</summary>
+<form id="processForm" class="grid">
+<label>Área de atuação<select id="newProcessArea" required></select></label>
+<label>Título do assunto<input name="title" maxlength="200" required></label>
+<label>Tipo<select name="kind"><option value="judicial">Judicial</option><option value="administrative">Administrativo</option><option value="extrajudicial">Extrajudicial</option><option value="consultive">Consultivo</option></select></label>
+<label>Número CNJ (opcional)<input name="process_number" placeholder="0000000-00.2026.8.13.0000"></label>
+<label>Tribunal<input name="court"></label><label>Órgão julgador<input name="judicial_body"></label>
+<label>Comarca<input name="district"></label><label>Grau<input name="degree"></label>
+<label>Rito<input name="procedure_type"></label>
+<label>Valor da causa (R$, opcional)<input name="claim" inputmode="decimal" placeholder="1500,00"></label>
+<label>Fase configurada<select name="phase" id="newProcessPhase" required></select></label>
+<label>Sigilo processual <span><input type="checkbox" name="secret"> Restringir visualização por permissão específica</span></label>
+<div id="customInputs" class="grid" style="grid-column:1/-1"></div>
+<div><button type="submit">Cadastrar processo</button></div>
+</form></details></section>
+<section class="card" id="detailCard" hidden><h2 id="detailTitle">Processo</h2>
+<p id="detailInfo"></p><div class="toolbar"><button type="button" id="archive">Arquivar</button><button type="button" id="reopen" class="secondary">Reabrir</button></div>
+<h3>Movimentações manuais</h3><div id="movementList" class="empty">Sem movimentações.</div>
+<form id="movementForm" class="grid"><label>Data<input type="date" name="date" required></label>
+<label>Código TPU (opcional)<input name="tpu_code"></label>
+<label>Descrição<input name="description" required maxlength="3000"></label>
+<div><button type="submit">Adicionar movimentação</button></div></form>
+<h3>Vincular pessoa ao processo</h3>
+<form id="partyForm" class="grid"><label>Pessoa<select id="partyPerson" required></select></label>
+<label>Papel (cliente, parte contrária, testemunha, perito ou outro)<input name="role" maxlength="80" required></label>
+<div><button type="submit">Vincular parte</button></div></form>
+</section>
+<section class="card"><h2>Pessoas físicas e jurídicas</h2><div id="peopleList" class="empty">Carregando...</div>
+<details><summary>Cadastrar pessoa</summary><form id="personForm" class="grid">
+<label>Tipo<select name="kind"><option value="PF">Pessoa física</option><option value="PJ">Pessoa jurídica</option></select></label>
+<label>Nome ou denominação<input name="display_name" required maxlength="200"></label>
+<label>CPF ou CNPJ<input name="tax_id"></label><label>Razão social (PJ)<input name="legal_name"></label>
+<label>RG (PF)<input name="rg"></label><label>Estado civil (PF)<input name="marital_status"></label>
+<label>Profissão (PF)<input name="profession"></label><label>CEP<input name="zip_code"></label>
+<div><button type="submit">Cadastrar pessoa</button></div>
+</form></details></section>
+</main><script src="/juridico.js" defer></script></body></html>

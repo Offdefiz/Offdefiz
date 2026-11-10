@@ -3,7 +3,7 @@
   else { root.Partelis = factory(); root.Caixa = root.Partelis; }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function() {
   'use strict';
-  const roles = {gestor:'Gestor',secretaria:'SDR / secretaria',especialista:'Especialista',juridico:'Jurídico',financeiro:'Financeiro'};
+  const roles = {gestor:'Gestor',socio_admin:'Sócio / administrador',advogado:'Advogado',estagiario:'Estagiário',secretaria:'SDR / secretaria',especialista:'Especialista',juridico:'Jurídico',financeiro:'Financeiro'};
   const stages = {triagem:'Lead novo',agendamento:'Agendado',diagnostico:'Diagnóstico realizado',proposta:'Proposta',negociacao:'Negociação',fechamento:'Fechamento agendado',assinatura:'Aguardando assinatura',nutricao:'Nutrição / recall',contratado:'Ganho / contratado',perdido:'Perdido'};
   const rights = {
     client:['gestor','secretaria','especialista'], clientUpdate:['gestor','secretaria','especialista'], debt:['gestor','secretaria','especialista'],
@@ -12,7 +12,24 @@
     legal:['gestor','juridico'], task:['gestor','secretaria','especialista','juridico','financeiro']
   };
   function assert(value,message) { if (!value) throw new Error(message); }
-  function can(role,action) { return (rights[action] || []).includes(role); }
+  function can(role,action) {
+    const effective=role==='socio_admin'?'gestor':role==='advogado'?'juridico':role;
+    return (rights[action] || []).includes(effective) || (role==='estagiario'&&action==='task');
+  }
+  // CPF e CNPJ numérico/alfanumérico: mesma regra para todas as áreas do Direito.
+  function fiscalIdValid(value) {
+    const n=String(value||'').replace(/[^a-z0-9]/gi,'').toUpperCase();
+    if(n.length===11) {
+      if(!/^\d{11}$/.test(n)||/^(\d)\1{10}$/.test(n))return false;
+      const digit=len=>{const sum=Array.from(n.slice(0,len),(c,i)=>Number(c)*(len+1-i)).reduce((a,b)=>a+b,0);const r=(sum*10)%11;return r===10?0:r;};
+      return digit(9)===Number(n[9])&&digit(10)===Number(n[10]);
+    }
+    if(n.length!==14||!/^[A-Z0-9]{12}\d{2}$/.test(n)||/^(.)\1{13}$/.test(n))return false;
+    const check=(prefix,w)=>{const sum=Array.from(prefix,(c,i)=>(c.charCodeAt(0)-48)*w[i]).reduce((a,b)=>a+b,0);const r=sum%11;return r<2?0:11-r;};
+    const first=check(n.slice(0,12),[5,4,3,2,9,8,7,6,5,4,3,2]);
+    const second=check(n.slice(0,12)+first,[6,5,4,3,2,9,8,7,6,5,4,3,2]);
+    return n.slice(12)===String(first)+String(second);
+  }
   function required(value,label) { const s=String(value || '').trim(); assert(s && s.length<=1000,label+' é obrigatório e deve ter até 1.000 caracteres.'); return s; }
   function date(value) { assert(/^\d{4}-\d{2}-\d{2}$/.test(value || ''),'Informe uma data válida.'); const d=new Date(value+'T12:00:00Z'); assert(!isNaN(d) && d.toISOString().slice(0,10)===value,'Informe uma data válida.'); return value; }
   function today() { const p=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()); return ['year','month','day'].map(k=>p.find(v=>v.type===k).value).join('-'); }
@@ -46,10 +63,10 @@
     } else if(action==='clientUpdate') {
       const c=get(s.clients,p.clientId);
       const clean=(value,max)=>String(value||'').trim().slice(0,max);
-      const email=clean(p.email,150),phone=clean(p.phone,24),taxId=clean(p.taxId,18).replace(/[^0-9]/g,'');
+      const email=clean(p.email,150),phone=clean(p.phone,24),taxId=clean(p.taxId,24).replace(/[^a-z0-9]/gi,'').toUpperCase();
       assert(!email||/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),'E-mail inválido.');
       assert(!phone||phone.replace(/\D/g,'').length>=10,'Telefone deve conter DDD.');
-      assert(!taxId||[11,14].includes(taxId.length),'CPF ou CNPJ deve conter 11 ou 14 dígitos.');
+      assert(!taxId||fiscalIdValid(taxId),'CPF ou CNPJ inválido: confira o dígito verificador.');
       c.name=required(p.name,'Nome do cliente').slice(0,150);
       c.email=email;c.phone=phone;c.taxId=taxId;c.type=taxId.length===14?'PJ':taxId.length===11?'PF':(p.type==='PJ'?'PJ':'PF');
       c.city=clean(p.city,80);c.state=clean(p.state,2).toUpperCase();c.updated=day;
@@ -139,8 +156,8 @@
       else {assert(!i.paidAt,'Recebimento já confirmado.');const paidAt=date(p.paidAt);assert(paidAt<=day,'Recebimento não pode estar no futuro.');i.paidAt=paidAt;description='Recebimento integral confirmado manualmente';}result=i;
     } else if(action==='legal') {const c=get(s.cases,p.id);assert(['Kick-off','Documentação pendente','Em análise','Em execução','Concluído'].includes(p.status),'Etapa jurídica inválida.');c.status=p.status;result=c;description='Acompanhamento jurídico: '+p.status;
     } else if(action==='task') {
-      if(p.id) {const t=get(s.tasks,p.id);assert(role==='gestor'||t.owner===role,'Conclua apenas tarefas do seu perfil.');assert(!t.done,'Tarefa já concluída.');t.done=true;t.completedAt=day;result=t;description='Tarefa concluída';}
-      else {if(p.oppId)opportunity(p.oppId);assert(roles[p.owner],'Responsável inválido.');assert(role==='gestor'||p.owner===role,'Atribua tarefas ao seu perfil.');result={id:uid('task'),oppId:p.oppId || null,title:required(p.title,'Tarefa'),owner:p.owner,due:date(p.due),done:false,created:day};s.tasks.push(result);description='Tarefa criada';}
+      if(p.id) {const t=get(s.tasks,p.id);assert((['gestor','socio_admin'].includes(role))||t.owner===role,'Conclua apenas tarefas do seu perfil.');assert(!t.done,'Tarefa já concluída.');t.done=true;t.completedAt=day;result=t;description='Tarefa concluída';}
+      else {if(p.oppId)opportunity(p.oppId);assert(roles[p.owner],'Responsável inválido.');assert((['gestor','socio_admin'].includes(role))||p.owner===role,'Atribua tarefas ao seu perfil.');result={id:uid('task'),oppId:p.oppId || null,title:required(p.title,'Tarefa'),owner:p.owner,due:date(p.due),done:false,created:day};s.tasks.push(result);description='Tarefa criada';}
     }
     assert(result,'Ação inválida.');
     if(['stage','meeting','proposal','followup'].includes(action)){const o=opportunity(result.oppId||result.id);if(!['contratado','perdido'].includes(o.stage)){const t=s.tasks.find(t=>t.oppId===o.id&&t.kind==='followup'&&!t.done);if(t){t.title=o.next;t.due=o.due;t.owner=o.owner;}else s.tasks.push({id:uid('task'),oppId:o.id,kind:'followup',title:o.next,owner:o.owner,due:o.due,done:false,created:day});}}

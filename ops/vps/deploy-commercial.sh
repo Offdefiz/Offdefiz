@@ -5,7 +5,7 @@ set -Eeuo pipefail
 umask 027
 EXPECTED="${1:-}"
 REPO="https://github.com/Offdefiz/Offdefiz.git"
-BRANCH="feature/partelis-comercial-vps-20261104"
+BRANCH="main"
 BASE="/srv/partelis"
 APP="$BASE/app"
 RELEASES="$BASE/releases"
@@ -55,7 +55,7 @@ CANDIDATE="$(mktemp -d "$BASE/.commercial-XXXXXXXX")"
 chown partelis:partelis "$CANDIDATE"
 runuser -u partelis -- git clone --quiet --filter=blob:none --no-checkout "$REPO" "$CANDIDATE"
 runuser -u partelis -- git -C "$CANDIDATE" fetch --quiet --depth 1 origin "refs/heads/$BRANCH"
-runuser -u partelis -- git -C "$CANDIDATE" checkout --quiet --detach FETCH_HEAD
+runuser -u partelis -- git -C "$CANDIDATE" checkout --quiet --detach "$EXPECTED"
 ACTUAL="$(git -C "$CANDIDATE" rev-parse HEAD)"
 [[ "$ACTUAL" == "$EXPECTED" ]] || error "Revisão não corresponde ao SHA autorizado."
 [[ -f "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql" ]] || error "Migração incremental ausente."
@@ -68,8 +68,13 @@ echo "[3/8] Testes multi-escritório no banco descartável"
 runuser -u postgres -- createdb -O partelis "$VERIFY_DB"
 runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$CANDIDATE/ops/native/schema.sql"
 runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql"
+for migration in "$CANDIDATE"/ops/native/migrations/2026-11-10-*.sql; do
+  runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d "$VERIFY_DB" < "$migration"
+done
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs PGDATABASE="$VERIFY_DB" /usr/bin/node "$CANDIDATE/ops/native/verify.cjs"
 runuser -u partelis -- env NODE_PATH=/usr/share/nodejs PGDATABASE="$VERIFY_DB" /usr/bin/node "$CANDIDATE/ops/native/commercial.verify.cjs"
+runuser -u partelis -- env NODE_PATH=/usr/share/nodejs PGDATABASE="$VERIFY_DB" /usr/bin/node "$CANDIDATE/ops/native/legal.verify.cjs"
+runuser -u partelis -- env NODE_PATH=/usr/share/nodejs PGDATABASE="$VERIFY_DB" /usr/bin/node "$CANDIDATE/ops/native/ops.verify.cjs"
 
 echo "[4/8] Backup EXTERNO criptografado obrigatório (falha bloqueia deploy)"
 systemctl start partelis-backup.service || error "Backup externo não configurado ou falhou. Corrija antes de publicar."
@@ -89,6 +94,9 @@ echo "Backup e restauração validados, sem expor dados no log."
 
 echo "[6/8] Migração aditiva no banco real"
 runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d partelis < "$CANDIDATE/ops/native/migrations/2026-11-04-sales-onboarding.sql"
+for migration in "$CANDIDATE"/ops/native/migrations/2026-11-10-*.sql; do
+  runuser -u partelis -- psql -v ON_ERROR_STOP=1 -q -d partelis < "$migration"
+done
 
 echo "[7/8] Troca do serviço preservando a versão anterior"
 OLD="$RELEASES/app-$STAMP"

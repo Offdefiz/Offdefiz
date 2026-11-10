@@ -140,7 +140,18 @@ async function createProcess(actor,body){
 }
 async function listPeople(actor){
  requireRole(actor.role,'legalRead');
- const {rows}=await pool.query('SELECT id,kind,display_name,tax_id,legal_name,updated_at FROM cj_legal_people WHERE workspace_id=$1 ORDER BY updated_at DESC LIMIT 100',[actor.workspace]);
+ const {rows}=await pool.query(
+  'SELECT p.id,p.kind,p.display_name,p.tax_id,p.legal_name,p.updated_at FROM cj_legal_people p '+
+  'WHERE p.workspace_id=$1 AND ('+
+  'NOT EXISTS(SELECT 1 FROM cj_process_parties x WHERE x.workspace_id=p.workspace_id AND x.person_id=p.id) '+
+  'OR EXISTS(SELECT 1 FROM cj_process_parties x JOIN cj_legal_processes c '+
+  'ON c.workspace_id=x.workspace_id AND c.id=x.process_id '+
+  'WHERE x.workspace_id=p.workspace_id AND x.person_id=p.id '+
+  'AND (NOT c.secret OR $3::boolean OR EXISTS('+
+  'SELECT 1 FROM cj_process_access a WHERE a.workspace_id=c.workspace_id AND a.process_id=c.id '+
+  'AND a.user_id=$2 AND a.can_read)))) '+
+  'ORDER BY p.updated_at DESC LIMIT 100',
+  [actor.workspace,actor.userId,manager(actor.role)]);
  return {items:rows};
 }
 async function createPerson(actor,body){

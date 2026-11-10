@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Operação do Partelís · Administração</title>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#f7f5fb;color:#291d39}*{box-sizing:border-box}
+body{margin:0}header{background:white;border-bottom:1px solid #e6ddf1;padding:15px clamp(16px,4vw,48px);display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap}
+header img{width:150px}header nav{display:flex;gap:15px;flex-wrap:wrap}a{color:#5a309f}
+main{max-width:1100px;margin:auto;padding:24px 16px 80px}.muted,small{color:#71687f}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:13px}
+.cards article,.panel{background:white;border:1px solid #e6ddec;border-radius:18px;padding:20px;margin:15px 0}
+.cards strong{display:block;font-size:2rem;color:#30145f}h1{font-size:clamp(25px,4vw,36px)}
+.row{padding:14px 0;border-bottom:1px solid #e8e3ee;display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap}
+.row .info{flex:1 1 350px;overflow-wrap:anywhere}.row .controls{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+button{border:0;border-radius:9px;background:#30145f;color:white;padding:10px 14px;font-weight:700;cursor:pointer}
+select,input{border:1px solid #cfc3dd;border-radius:8px;padding:9px;font:inherit;min-height:42px;max-width:100%}
+#status[data-error=true]{color:#a62438}.notice{background:#f0eafa;border-left:4px solid #8d59ff;border-radius:8px;padding:12px}
+</style></head><body>
+<header><img src="/brand-horizontal.svg" alt="Partelís"><nav><a href="/admin">Admin principal</a><a href="/admin/comercial">Comercial</a><a href="/app">Aplicativo</a></nav></header>
+<main><p class="muted">Partelís / Proprietário</p><h1>Gestão dos escritórios e feedback</h1>
+<p class="notice">Presença é uma estimativa dos últimos dois minutos, não uma garantia de usuário conectado. Escritórios pagantes só contam se houver confirmação do provedor de cobrança; trials não são pagamentos.</p>
+<p id="status" role="status" aria-live="polite">Carregando dados autorizados...</p>
+<section class="cards" id="metrics" aria-label="Indicadores administrativos"></section>
+<section class="panel"><h2>Beta testers</h2><p>Marque explicitamente usuários cadastrados. Nenhuma conta é identificada automaticamente pelo nome.</p><div id="users"></div></section>
+<section class="panel"><h2>Sugestões e tarefas de melhoria</h2>
+<p>Transforme feedback em uma tarefa priorizada. Cada sugestão gera no máximo uma tarefa e preserva seu registro original.</p>
+<div id="feedback"></div></section>
+<button id="reload" type="button">Atualizar painel</button>
+</main><script src="/ops-admin.js" defer></script></body></html>
