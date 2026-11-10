@@ -143,6 +143,56 @@ async function run(){
   test.equal((await r.json()).items.length,1);
  }finally{global.fetch=originalFetch;delete process.env.DATAJUD_API_KEY;delete process.env.PARTELIS_DATAJUD_ENABLED;}
 
+
+ const CNJ=require('./cnj.cjs');
+ const ca={workspace:a.workspace_id,userId:a.user_id,role:'gestor'};
+ const cb={workspace:b.workspace_id,userId:b.user_id,role:'gestor'};
+ const cj={workspace:a.workspace_id,userId:junior.user_id,role:'estagiario'};
+ await test.rejects(()=>CNJ.inbox(cb,open.id),e=>e.status===404);
+ await test.rejects(()=>CNJ.inbox(cj,secret.id),e=>e.status===404);
+ const originalFetchDjen=global.fetch;
+ process.env.PARTELIS_DJEN_ENABLED='true';
+ try{
+  const publicRow=await pool.query('SELECT id,process_number FROM cj_legal_processes WHERE workspace_id=$1 AND NOT secret AND process_number IS NOT NULL LIMIT 1',[a.workspace_id]);
+  const pc=publicRow.rows[0];
+  global.fetch=async(url)=>{
+   test.ok(String(url).startsWith('https://comunicaapi.pje.jus.br/api/v1/comunicacao?'));
+   return {ok:true,json:async()=>({items:[{id:123,numero_processo:pc.process_number,
+    data_disponibilizacao:'2026-11-10',texto:'<b>Intimação</b> para revisão humana'}]})};
+  };
+  await test.rejects(()=>CNJ.enqueue(cb,pc.id,{provider:'djen'}),e=>e.status===404);
+  await test.rejects(()=>CNJ.syncDjen(ca,secret.id),e=>e.status===403);
+  const firstJob=await CNJ.enqueue(ca,pc.id,{provider:'djen'});
+  test.equal(firstJob.queued,true);
+  test.equal((await CNJ.enqueue(ca,pc.id,{provider:'djen'})).queued,false);
+  test.equal(await CNJ.runOne(),true);
+  let box=await CNJ.inbox(ca,pc.id);
+  test.equal(box.items.length,1);test.equal(box.items[0].read_at,null);
+  test.equal(box.items[0].review_status,'pending_human_review');
+  test.equal(box.items[0].summary.includes('<b>'),false);
+  await CNJ.syncDjen(ca,pc.id);
+  test.equal((await CNJ.inbox(ca,pc.id)).items.length,1,'Publicações não duplicam');
+  await test.rejects(()=>CNJ.review(cb,pc.id,{publication_id:box.items[0].id}),e=>e.status===404);
+  await CNJ.review(ca,pc.id,{publication_id:box.items[0].id,status:'reviewed'});
+  box=await CNJ.inbox(ca,pc.id);
+  test.equal(box.items[0].review_status,'reviewed');test.ok(box.items[0].read_at);
+  await CNJ.monitor(ca,pc.id,{provider:'djen',enabled:true});
+  await CNJ.tick();await CNJ.tick();
+  const jobs=await pool.query("SELECT count(*)::int AS n FROM cj_cnj_jobs WHERE workspace_id=$1 AND process_id=$2 AND status='queued'",[a.workspace_id,pc.id]);
+  test.equal(jobs.rows[0].n,1);
+  global.fetch=async()=>{throw Error('SENSITIVE_BODY_MUST_NOT_LOG');};
+  await CNJ.runOne();
+  const retry=await pool.query("SELECT attempts,last_error_code,status,available_at>now() AS delayed FROM cj_cnj_jobs WHERE workspace_id=$1 AND process_id=$2 AND status='queued'",[a.workspace_id,pc.id]);
+  test.equal(retry.rows[0].last_error_code,'SYNC_FAILED');test.equal(retry.rows[0].delayed,true);
+  await pool.query("UPDATE cj_cnj_jobs SET available_at=now() WHERE workspace_id=$1 AND status='queued'",[a.workspace_id]);
+  await pool.query("UPDATE cj_memberships SET role='estagiario' WHERE user_id=$1",[a.user_id]);
+  await CNJ.runOne();
+  const failed=await pool.query("SELECT last_error_code FROM cj_cnj_jobs WHERE workspace_id=$1 AND status='failed'",[a.workspace_id]);
+  test.equal(failed.rows[0].last_error_code,'ACCESS_DENIED');
+  await pool.query("UPDATE cj_memberships SET role='gestor' WHERE user_id=$1",[a.user_id]);
+ }finally{global.fetch=originalFetchDjen;delete process.env.PARTELIS_DJEN_ENABLED;}
+ console.log('OK: DJEN, caixa de intimações, leitura, revisão, fila idempotente, retry e revogação de acesso.');
+
  const {rows:[count]}=await pool.query(
   "SELECT count(*)::integer AS total FROM cj_legal_access_audit WHERE workspace_id=$1",[a.workspace_id]);
  test.ok(count.total>=6,'Acesso e mutações com auditoria');
