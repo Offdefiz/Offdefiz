@@ -34,3 +34,14 @@ test('reuniões pendentes entram em atraso pelo horário de Brasília sem altera
  for(const status of ['realizada','cancelada','reagendada','nao_compareceu'])assert.equal(C.meetingOverdue({...m,status},new Date('2026-11-02T17:00:00Z')),false);
  assert.equal(C.meetingOverdue({...m,status:'agendada'},new Date('2026-11-02T17:00:00Z')),true);
 });
+
+test('novos perfis são compatíveis com permissões existentes sem ampliar acesso financeiro',()=>{
+ assert.ok(C.roles.socio_admin&&C.roles.advogado&&C.roles.estagiario);
+ assert.equal(C.can('socio_admin','payment'),true);
+ assert.equal(C.can('socio_admin','contract'),true);
+ assert.equal(C.can('advogado','legal'),true);
+ assert.equal(C.can('advogado','payment'),false);
+ assert.equal(C.can('estagiario','task'),true);
+ assert.equal(C.can('estagiario','contract'),false);
+ assert.equal(C.can('financeiro','legal'),false);
+});
