@@ -24,7 +24,7 @@ async function tenant(route,options={}){
     if(method==='PATCH'){
       const field=Object.hasOwn(body,'theme')?'theme':'data';
       const revision=Number(searchParams.get('revision')?.slice(3));
-      const manager=field==='theme'?" AND EXISTS(SELECT 1 FROM cj_memberships WHERE user_id=$1 AND workspace_id=$2 AND role='gestor')":'';
+      const manager=field==='theme'?" AND EXISTS(SELECT 1 FROM cj_memberships WHERE user_id=$1 AND workspace_id=$2 AND role IN ('gestor','socio_admin'))":'';
       return (await pool.query('UPDATE cj_state s SET '+field+'=$4,revision=s.revision+1,updated_at=now() WHERE workspace_id=$2 AND revision=$3 AND '+member+manager+' RETURNING revision,theme',[user.id,workspace,revision,body[field]])).rows;
     }
   }
