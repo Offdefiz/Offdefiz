@@ -79,6 +79,12 @@ async function run(){
  test.equal(r.status,404,'B não vincula parte a processo A');
  r=await call('/api/legal/processes/'+secret.id+'/parties',a.cookie,{person_id:person.id,role:'testemunha'});
  test.equal(r.status,201);
+ const secretPeople=await call('/api/legal/people',junior.cookie);
+ test.equal(secretPeople.status,200);
+ test.equal((await secretPeople.json()).items.some(p=>p.id===person.id),false,
+  'Pessoa vinculada apenas a processo sigiloso não pode aparecer ao estagiário');
+ const ownerPeople=await call('/api/legal/people',a.cookie);
+ test.equal((await ownerPeople.json()).items.some(p=>p.id===person.id),true);
  r=await call('/api/legal/processes/'+open.id+'/archive',a.cookie,{});
  test.equal(r.status,201);test.equal((await r.json()).status,'archived');
  r=await call('/api/legal/processes/'+open.id+'/reopen',a.cookie,{});
