@@ -180,7 +180,7 @@ if(route==='/api/support/grant'&&req.method==='POST'){if(!['gestor','socio_admin
 if(route==='/api/state'&&req.method==='GET')return send(res,200,{...row,user:{email:who.user.email,role:who.membership.role}});
 if(route==='/api/action'&&req.method==='POST'){const p=await body(req);if(p.revision!==row.revision)throw new Fault(409,'Outra pessoa atualizou este escritório. Recarregue para ver a versão mais recente.');const role=who.membership.role;let output;try{output=C.execute(C.validate(row.data),role,p.action,p.data);}catch(error){throw new Fault(400,error.message);}output.state.audit[0].actorId=who.user.id;
 const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{data:output.state,revision:row.revision+1,updated_at:new Date().toISOString()}});if(!changed.length)throw new Fault(409,'Atualização simultânea. Recarregue antes de continuar.');return send(res,200,{state:output.state,result:output.result,revision:changed[0].revision});}
-if(route==='/api/theme'&&req.method==='POST'){if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Somente o gestor altera a identidade do escritório.');const p=await body(req);if(!/^#[0-9a-f]{6}$/i.test(p.accent)||!String(p.name||'').trim()||p.name.length>60)throw new Fault(400,'Confira o nome e a cor da marca.');let proposal=row.theme?.proposal||null;
+if(route==='/api/theme'&&req.method==='POST'){if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Somente o gestor altera a identidade do escritório.');const p=await body(req);if(!/^#[0-9a-f]{6}$/i.test(p.accent)||!String(p.name||'').trim()||p.name.length>60)throw new Fault(400,'Confira o nome e a cor da marca.');let proposal=row.theme?.proposal||null,practice=row.theme?.practice||null;
 if(p.proposal!==undefined){
  const cfg=p.proposal;
  if(!cfg||typeof cfg!=='object'||Array.isArray(cfg))throw new Fault(400,'Configurações de proposta inválidas.');
@@ -190,7 +190,17 @@ if(p.proposal!==undefined){
  if(!dataImage(cfg.logo,270000)||!dataImage(cfg.cover,540000))throw new Fault(413,'Imagem de proposta excede o limite. Otimize o arquivo.');
  proposal={primary:cfg.primary,secondary:cfg.secondary,responsible:cfg.responsible.trim(),oab:cfg.oab.trim(),days:cfg.days,payment:cfg.payment.trim(),logo:cfg.logo||'',cover:cfg.cover||''};
 }
-const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{theme:{...row.theme,name:p.name.trim(),accent:p.accent,...(proposal?{proposal}:{})},revision:row.revision+1}});if(!changed.length)throw new Fault(409,'Recarregue antes de alterar a marca.');return send(res,200,{theme:changed[0].theme,revision:changed[0].revision});}
+if(p.practice!==undefined){
+  const cfg=p.practice,areas=require('./legal-service-catalog.js').AREA_NAMES;
+  if(!cfg||typeof cfg!=='object'||Array.isArray(cfg)
+    ||typeof cfg.primaryArea!=='string'||!Object.hasOwn(areas,cfg.primaryArea)
+    ||!Array.isArray(cfg.enabledAreas)||cfg.enabledAreas.length<1||cfg.enabledAreas.length>14
+    ||cfg.enabledAreas.some(code=>typeof code!=='string'||!Object.hasOwn(areas,code))
+    ||new Set(cfg.enabledAreas).size!==cfg.enabledAreas.length
+    ||!cfg.enabledAreas.includes(cfg.primaryArea))throw new Fault(400,'Revise as áreas de atuação do escritório.');
+  practice={primaryArea:cfg.primaryArea,enabledAreas:cfg.enabledAreas.slice(),version:1};
+ }
+ const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{theme:{...row.theme,name:p.name.trim(),accent:p.accent,...(proposal?{proposal}:{}),...(practice?{practice}:{})},revision:row.revision+1}});if(!changed.length)throw new Fault(409,'Recarregue antes de alterar a marca.');return send(res,200,{theme:changed[0].theme,revision:changed[0].revision});}
 throw new Fault(404,'Recurso indisponível.');}
 if(route==='/'||route==='/contato'||route==='/contratar'){
   res.setHeader('Content-Type','text/html; charset=utf-8');
