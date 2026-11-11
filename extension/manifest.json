@@ -1,0 +1,1 @@
+{"manifest_version":3,"name":"Partelís · WhatsApp para Kanban","version":"0.1.0","description":"Crie cards vinculados aos clientes do Partelís a partir de uma conversa aberta.","content_scripts":[{"matches":["https://web.whatsapp.com/*"],"js":["content.js"]}]}
