@@ -57,7 +57,7 @@
     const s=JSON.parse(JSON.stringify(state)),p=data || {};let result,description='';
     const opportunity=id=>get(s.opportunities,id);
     if(action==='client') {
-      const c={id:uid('cli'),name:required(p.name,'Nome fictício'),source:required(p.source,'Origem'),created:day};s.clients.push(c);
+      const c={id:uid('cli'),name:required(p.name,'Nome do cliente'),source:required(p.source,'Origem'),created:day};s.clients.push(c);
       const o={id:uid('opp'),clientId:c.id,area:required(p.area,'Área'),owner:required(p.owner,'Responsável'),stage:'triagem',next:required(p.next,'Próxima ação'),due:date(p.due),created:day};
       assert(roles[o.owner],'Responsável inválido.');s.opportunities.push(o);
       s.tasks.push({id:uid('task'),oppId:o.id,kind:'followup',title:o.next,owner:o.owner,due:o.due,done:false,created:day});result=o;description='Atendimento criado com próxima ação e responsável';
