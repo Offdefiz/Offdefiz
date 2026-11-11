@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Partelís · Proposta jurídica contextual</title>
+<style>
+:root{--cor:#25143f;--sec:#8461c8;--ink:#211934;--muted:#5d5970;--soft:#f5f1fa;--line:#ded5eb}
+*{box-sizing:border-box}html,body{margin:0;height:100%;background:#161126;color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+.deck{height:100%;width:100%}.slide{display:none;position:absolute;inset:0;width:100%;height:100%;padding:4.4vw 5.3vw;background:#fff;overflow:auto;flex-direction:column}
+.slide.active{display:flex}.slide.cover{background:radial-gradient(circle at 88% 17%,#604397 0%,transparent 35%),linear-gradient(135deg,var(--cor),#160d27);color:#fff}
+.kicker{font-size:clamp(10px,1.08vw,17px);font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--sec)}
+.cover .kicker{color:#d8baff}.cover h1{font-size:clamp(34px,5.9vw,92px);max-width:900px;font-weight:850;line-height:1.07;letter-spacing:-.055em;margin:8vh 0 3vh}
+.cover .lede{max-width:880px;color:#ece3fa;font-size:clamp(16px,2vw,31px)}.cover .rule{height:7px;background:var(--sec);width:112px;border-radius:50px;margin:28px 0}
+h2{font-size:clamp(32px,4.4vw,69px);line-height:1.1;letter-spacing:-.05em;margin:16px 0 3.5vh;color:var(--cor)}
+h3{font-size:clamp(19px,2.1vw,30px);margin:0 0 12px;color:var(--cor)}p,li{font-size:clamp(14px,1.6vw,24px);line-height:1.5}
+.muted{color:var(--muted)}.big{font-size:clamp(18px,2.1vw,31px)}.line{height:1px;background:var(--line);margin:30px 0}
+.page-footer{margin-top:auto;padding-top:24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-size:clamp(11px,1vw,16px);color:var(--muted)}
+.cover .page-footer{border-color:#ffffff3b;color:#ded3f3}
+.logo{max-width:280px;max-height:76px;object-fit:contain;object-position:left}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}
+.panel{background:var(--soft);border:1px solid var(--line);border-radius:24px;padding:26px;min-width:0}
+.card{border-left:5px solid var(--sec);padding:10px 0 10px 22px;margin:10px 0}
+.card .num{display:block;color:var(--sec);font-size:13px;font-weight:900}.card h3{font-size:clamp(18px,1.9vw,27px);margin:5px 0}.card p{font-size:clamp(13px,1.3vw,18px);margin:0}
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:26px;row-gap:12px}
+.etapas{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.etapa{border:1px solid var(--line);border-radius:18px;padding:18px;background:var(--soft)}
+.etapa .tag{display:block;font-size:12px;color:var(--sec);font-weight:800;margin-bottom:6px}.etapa h3{font-size:clamp(15px,1.6vw,22px);margin:0 0 7px}
+.etapa p{font-size:clamp(12px,1.15vw,17px);margin:0;color:var(--muted)}.etapa .dot{display:none}
+.money{font-size:clamp(42px,5vw,78px);color:var(--cor);font-weight:850;letter-spacing:-.05em;line-height:1}
+.pill{display:inline-block;background:var(--soft);padding:12px 18px;border-radius:14px;color:var(--cor);font-weight:700;font-size:clamp(13px,1.2vw,19px)}
+ul{padding-left:24px}li{margin-bottom:12px}.note{font-size:clamp(12px,1.2vw,17px);color:var(--muted)}
+.prog{position:fixed;bottom:16px;right:24px;color:#d1bfdc;font:700 13px system-ui;z-index:9}
+@media(max-width:650px){.slide{padding:28px 22px}.grid,.cards,.etapas{grid-template-columns:1fr}.panel{padding:16px}.cover h1{margin-top:15vh}.slide{overflow:auto}}
+</style></head>
+<body><div class="deck">
+<section class="slide cover active">
+<span class="kicker">PROPOSTA PROFISSIONAL DE SERVIÇOS JURÍDICOS</span>
+<img class="logo" data-t="ESCRITORIO_LOGO" alt="">
+<div class="rule"></div><h1 data-t="SERVICO_NOME">Serviço jurídico</h1>
+<p class="lede"><span data-t="AREA_NOME">Área</span> · <span data-t="MODALIDADE_ATUACAO">Atuação</span></p>
+<p class="lede">Preparada para <strong data-t="CLIENTE_NOME">Cliente</strong></p>
+<div class="page-footer"><span data-t="ESCRITORIO_NOME">Escritório</span><span data-t="DATA_PROPOSTA">Data</span></div>
+</section>
+<section class="slide"><span class="kicker">01 / Entendimento</span><h2>Contexto e objetivo</h2>
+<div class="panel"><h3>Diagnóstico preliminar</h3><p class="big" data-t="DIAGNOSTICO_TEXTO">Diagnóstico a completar.</p></div>
+<div class="line"></div><h3>Objeto da atuação</h3><p class="big" data-t="SERVICO_ESCOPO">Objeto a definir.</p>
+<div class="page-footer"><span data-t="ESCRITORIO_NOME">Escritório</span><span>Escopo sujeito a validação profissional</span></div>
+</section>
+<section class="slide"><span class="kicker">02 / Serviços</span><h2>O que está incluído</h2>
+<div class="cards" data-field="ESCOPO"></div>
+<p class="note">Os atos efetivamente contratados serão os descritos na versão aprovada e no instrumento contratual.</p>
+<div class="page-footer"><span data-t="CLIENTE_NOME">Cliente</span><span>Delimitação de serviços</span></div>
+</section>
+<section class="slide"><span class="kicker">03 / Operação</span><h2>Etapas previstas</h2>
+<div class="etapas" data-field="ETAPAS"></div><p class="note">O cronograma é operacional e indicativo. Prazos legais ou judiciais dependem da análise dos autos e de conferência profissional.</p>
+<div class="page-footer"><span data-t="ESCRITORIO_NOME">Escritório</span><span data-t="MODALIDADE_ATUACAO">Atuação</span></div>
+</section>
+<section class="slide"><span class="kicker">04 / Transparência</span><h2>Limites e documentos</h2>
+<div class="grid"><div class="panel"><h3>Documentação inicial sugerida</h3><p data-t="DOCUMENTOS_INICIAIS">Documentos a indicar.</p></div><div class="panel"><h3>Exclusões da contratação</h3><p data-t="SERVICO_EXCLUSOES">Escopo a delimitar.</p></div></div>
+<p class="note">Documentos e informações pessoais devem ser tratados conforme sigilo profissional e controles de acesso.</p>
+<div class="page-footer"><span data-t="CLIENTE_NOME">Cliente</span><span>Materiais a conferir</span></div>
+</section>
+<section class="slide"><span class="kicker">05 / Condições comerciais individuais</span><h2>Honorários propostos</h2>
+<div class="panel"><p class="muted">Valor total fixo da proposta</p><div class="money" data-t="HONORARIO_INICIAL">Valor</div>
+<p><strong data-t="PARCELAS_QTD">0</strong> parcela(s) de <strong data-t="PARCELA_VALOR">0</strong> após a entrada prevista.</p>
+<p>Condição de êxito: <strong data-t="EXITO_PERCENTUAL">0%</strong> · Base: <span data-t="EXITO_BASE">Não prevista</span>.</p>
+<p data-t="EXITO_CONDICOES">Condições de êxito</p></div>
+<p class="note">Forma de pagamento: <span data-t="FORMA_PAGAMENTO">A combinar</span>. Custas, despesas, limites de patrocínio, hipótese de acordo e tabela da OAB aplicável serão conferidos na contratação.</p>
+<div class="page-footer"><span data-t="RESPONSAVEL">Responsável</span><span data-t="OAB">OAB</span></div>
+</section>
+<section class="slide"><span class="kicker">06 / Próximos passos</span><h2>Como seguir</h2>
+<ul data-field="PROXIMOS_PASSOS"><li>Revisar as condições propostas.</li></ul>
+<div class="panel"><h3>Validade</h3><p>Até <strong data-t="VALIDADE">Data</strong>.</p><p class="note">A proposta não substitui contrato, procuração, análise técnica, documento de acordo nem garante desfecho. Sua aceitação seguirá o fluxo formal do escritório.</p></div>
+<div class="page-footer"><span data-t="ESCRITORIO_NOME">Escritório</span><span data-t="RESPONSAVEL">Responsável</span></div>
+</section></div>
+<div class="prog" id="progress">1 / 7</div>
+<script>
+const DADOS=/*DADOS_INICIO*/{}/*DADOS_FIM*/;
+(function(){
+let index=0;const slides=[...document.querySelectorAll('.slide')];
+function show(n){index=Math.max(0,Math.min(slides.length-1,n));slides.forEach((s,i)=>s.classList.toggle('active',i===index));document.getElementById('progress').textContent=(index+1)+' / '+slides.length;}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='PageDown')show(index+1);if(e.key==='ArrowLeft'||e.key==='PageUp')show(index-1);});
+show(0);
+})();
+</script></body></html>

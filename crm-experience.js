@@ -58,18 +58,46 @@ function moveChrome(){
 }
 function renderSettings(){
  const root=$('#crm-settings-root');if(!root)return;
- const manager=lastRole==='gestor',accent=window.CJ_THEME?.accent||'#30145F',workspace=window.CJ_THEME?.name||(inCloud()?'Meu escritório':'Escritório demonstrativo');
+ const manager=['gestor','socio_admin'].includes(lastRole),accent=window.CJ_THEME?.accent||'#30145F',workspace=window.CJ_THEME?.name||(inCloud()?'Meu escritório':'Escritório demonstrativo');
  root.innerHTML='<div class="crm-setting-intro"><div><h2>Seu ambiente, do seu jeito.</h2><p>Personalização, segurança, ajuda e acesso à sua conta — tudo em um só lugar.</p></div><span class="crm-setting-symbol">⚙</span></div>'+
  '<div class="crm-setting-grid">'+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('user')+'</div><h3>Minha conta</h3><p>Foto, nome de exibição, e-mail e senha.</p><div class="crm-setting-account">'+avatar('md')+'<span><strong>'+esc(displayName())+'</strong><small>'+esc(email())+'</small></span></div><button class="btn crm-card-link" data-action="navigate" data-id="profile">Editar meu perfil <span>→</span></button></section>'+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('palette')+'</div><h3>Aparência</h3><p>Ajuste o modo de visualização sem afetar as preferências dos colegas.</p><div class="crm-theme-preview"><span class="crm-color-dot" style="background:'+(/^#[0-9a-f]{6}$/i.test(accent)?accent:'#30145F')+'"></span><span>'+esc(document.body.classList.contains('dark')?'Modo escuro':'Modo claro')+'</span></div><button type="button" class="btn crm-card-link crm-mode-switch" role="switch" aria-label="Modo escuro" aria-checked="'+String(document.body.classList.contains('dark'))+'" data-ux-action="toggle-theme"><span>Modo escuro</span><span class="crm-switch-track" aria-hidden="true"><span></span></span></button></section>'+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('building')+'</div><h3>Identidade do escritório</h3><p>Nome e cores utilizadas nas telas e propostas do seu escritório.</p><div class="crm-workspace-chip"><span class="crm-color-dot" style="background:'+(/^#[0-9a-f]{6}$/i.test(accent)?accent:'#30145F')+'"></span>'+esc(workspace)+'</div>'+(manager?'<button type="button" class="btn crm-card-link" data-ux-action="brand">Personalizar escritório <span>→</span></button>':'<p class="crm-permission-hint">Somente o gestor pode editar a identidade.</p>')+'</section>'+
+ '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('layers')+'</div><h3>Especialidades do escritório</h3><p>Escolha uma área principal e as demais áreas atendidas. As opções de novos atendimentos serão priorizadas sem modificar históricos.</p><p class="crm-permission-hint">'+esc(window.PartelisServices?.AREA_NAMES?.[window.CJ_THEME?.practice?.primaryArea]||'Especialidade principal não configurada')+'</p>'+(manager&&inCloud()?'<button type="button" class="btn crm-card-link" data-ux-action="practice">Configurar especialidades <span>→</span></button>':'<p class="crm-permission-hint">Configuração disponível ao gestor no ambiente real.</p>')+'</section>'+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('help')+'</div><h3>Ajuda e treinamento</h3><p>Aprenda os fluxos e acompanhe o que mudou na plataforma.</p><div class="crm-stack-actions"><button type="button" class="btn" data-ux-action="tour">Iniciar tutorial guiado</button><button type="button" class="btn" data-ux-action="news">Novidades e versões</button>'+(inCloud()?'<button type="button" class="btn" data-ux-action="feedback">Reportar problema ou sugestão</button>':'')+'</div></section>'+
  (manager&&inCloud()?'<section class="crm-setting-card crm-setting-card-wide"><div class="crm-setting-card-icon">'+uxIcon('headset')+'</div><h3>Suporte remoto Partelís</h3><p>Autorize temporariamente a equipe Partelís a visualizar os dados do seu escritório para diagnóstico. O acesso é somente leitura, dura até 60 minutos e fica registrado.</p><div class="crm-support-status" id="crm-support-status" role="status">Consultando autorização…</div><div class="crm-support-actions"><button type="button" class="btn primary" data-ux-action="support-approve">Autorizar por 60 minutos</button><button type="button" class="btn" data-ux-action="support-revoke">Revogar acesso</button></div></section>':'')+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('layers')+'</div><h3>Recursos do aplicativo</h3><p>Gerencie seu acesso e consulte as ferramentas disponíveis.</p><div class="crm-stack-actions">'+(inCloud()?'<a class="btn" href="/conta">Alterar minha senha</a>':'')+'<a class="btn" href="/cliente/demo" target="_blank" rel="noopener">Ver portal do cliente (demo)</a>'+(lastRole==='gestor'?'<button type="button" class="btn" data-action="navigate" data-id="integrations">Integrações</button>':'')+'<button type="button" class="btn" data-action="navigate" data-id="about">Sobre o produto</button></div></section>'+
  (!inCloud()?'<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('test')+'</div><h3>Perfil de demonstração</h3><p>Alterne entre as permissões simuladas para testar o protótipo.</p><label for="crm-demo-role" class="crm-input-label">Simular perfil</label><select id="crm-demo-role">'+Object.entries(window.Caixa.roles).map(([k,v])=>'<option value="'+esc(k)+'" '+(lastRole===k?'selected':'')+'>'+esc(v)+'</option>').join('')+'</select></section>':'')+
  '</div>';
  if(manager&&inCloud())loadSupportStatus();
+}
+async function editPractice(){
+  if(!inCloud()||!['gestor','socio_admin'].includes(lastRole))return;
+  const areas=Object.entries(window.PartelisServices?.AREA_NAMES||{});
+  if(!areas.length){toast('O catálogo jurídico não está disponível.',true);return;}
+  const saved=window.CJ_THEME?.practice||{},selected=new Set(saved.enabledAreas?.length?saved.enabledAreas:areas.map(([code])=>code));
+  const primary=saved.primaryArea||areas[0][0];
+  const d=document.createElement('dialog');d.id='crm-practice-dialog';d.className='crm-search-dialog';
+  d.innerHTML='<div class="crm-search-modal" style="padding:24px;max-height:85vh;overflow:auto"><h2 style="margin-top:0">Perfil de atuação do escritório</h2><p>Escolha a principal especialidade e as áreas que o escritório atende. Nenhum cliente, processo ou proposta existente será alterado.</p><form id="crm-practice-form"><label for="crm-main-area">Área principal</label><select id="crm-main-area" style="width:100%;padding:12px;margin:8px 0 20px">'+areas.map(([code,label])=>'<option value="'+esc(code)+'"'+(code===primary?' selected':'')+'>'+esc(label)+'</option>').join('')+'</select><fieldset style="border:1px solid #8c83a0;border-radius:12px;padding:16px"><legend>Áreas atendidas</legend>'+areas.map(([code,label])=>'<label style="display:flex;align-items:center;gap:12px;margin:10px 0"><input type="checkbox" name="area" value="'+esc(code)+'"'+(selected.has(code)?' checked':'')+'><span>'+esc(label)+'</span></label>').join('')+'</fieldset><p id="crm-practice-message" role="status"></p><div style="display:flex;gap:12px;justify-content:flex-end;margin-top:20px"><button type="button" class="btn" id="crm-practice-cancel">Cancelar</button><button type="submit" class="btn primary" id="crm-practice-save">Salvar especialidades</button></div></form></div>';
+  document.body.append(d);
+  d.querySelector('#crm-practice-cancel').onclick=()=>d.close();
+  d.addEventListener('close',()=>d.remove());
+  d.querySelector('#crm-practice-form').addEventListener('submit',async ev=>{
+    ev.preventDefault();const save=d.querySelector('#crm-practice-save'),status=d.querySelector('#crm-practice-message');
+    const primaryArea=d.querySelector('#crm-main-area').value;
+    const enabledAreas=[...new Set([primaryArea,...[...d.querySelectorAll('input[name=area]:checked')].map(x=>x.value)])];
+    save.disabled=true;status.textContent='Salvando especialidades…';
+    try{
+      const theme=window.CJ_THEME||{};
+      const response=await fetch('/api/theme',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({name:theme.name||'Meu escritório',accent:theme.accent||'#30145F',practice:{primaryArea,enabledAreas}})});
+      const data=await response.json();if(!response.ok)throw Error(data.error||'Falha ao atualizar especialidades.');
+      window.CJ_THEME=data.theme;
+      toast('Especialidades salvas. Atualizando opções dos atendimentos.');
+      d.close();location.reload();
+    }catch(error){status.textContent=error.message;save.disabled=false;}
+  });
+  d.showModal();
 }
 function renderProfile(){
  const root=$('#crm-profile-root');if(!root)return;
@@ -158,6 +186,7 @@ document.addEventListener('click',ev=>{
  else if(action==='search')openSearch();
  else if(action==='close-search')$('#crm-search-dialog')?.close();
  else if(action==='brand')window.PartelisBrandEditor?.();
+  else if(action==='practice')editPractice();
  else if(action==='toggle-theme'){const dark=!document.body.classList.contains('dark');window.PartelisAppearance.setMode(dark?'dark':'light');renderSettings();toast('Modo '+(dark?'escuro':'claro')+' ativado neste dispositivo.');}
  else if(action==='tour')window.PartelisHelp?.tour();
  else if(action==='news')window.PartelisHelp?.news();

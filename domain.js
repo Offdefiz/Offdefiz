@@ -3,6 +3,7 @@
   else { root.Partelis = factory(); root.Caixa = root.Partelis; }
 })(typeof globalThis !== 'undefined' ? globalThis : this, function() {
   'use strict';
+  const services=typeof window!=='undefined'?window.PartelisServices:typeof require==='function'?require('./legal-service-catalog.js'):null;
   const roles = {gestor:'Gestor',socio_admin:'Sócio / administrador',advogado:'Advogado',estagiario:'Estagiário',secretaria:'SDR / secretaria',especialista:'Especialista',juridico:'Jurídico',financeiro:'Financeiro'};
   const stages = {triagem:'Lead novo',agendamento:'Agendado',diagnostico:'Diagnóstico realizado',proposta:'Proposta',negociacao:'Negociação',fechamento:'Fechamento agendado',assinatura:'Aguardando assinatura',nutricao:'Nutrição / recall',contratado:'Ganho / contratado',perdido:'Perdido'};
   const rights = {
@@ -56,7 +57,7 @@
     const s=JSON.parse(JSON.stringify(state)),p=data || {};let result,description='';
     const opportunity=id=>get(s.opportunities,id);
     if(action==='client') {
-      const c={id:uid('cli'),name:required(p.name,'Nome fictício'),source:required(p.source,'Origem'),created:day};s.clients.push(c);
+      const c={id:uid('cli'),name:required(p.name,'Nome do cliente'),source:required(p.source,'Origem'),created:day};s.clients.push(c);
       const o={id:uid('opp'),clientId:c.id,area:required(p.area,'Área'),owner:required(p.owner,'Responsável'),stage:'triagem',next:required(p.next,'Próxima ação'),due:date(p.due),created:day};
       assert(roles[o.owner],'Responsável inválido.');s.opportunities.push(o);
       s.tasks.push({id:uid('task'),oppId:o.id,kind:'followup',title:o.next,owner:o.owner,due:o.due,done:false,created:day});result=o;description='Atendimento criado com próxima ação e responsável';
@@ -127,11 +128,15 @@
       } else {
         assert(!prev || prev.status!=='aceita','A versão aceita já segue para contratação.');const valid=date(p.validUntil);assert(valid>=day,'A validade não pode estar no passado.');
         const terms=p.down!==undefined?proposalTerms(p):null;
-        const visual=p.visual||{},validTemplate=['passivo','revisional','superendividamento','holding'];
+        const visual=p.visual||{},validTemplate=['passivo','revisional','superendividamento','holding','generico'];
+        const serviceId=String(visual.serviceId||'').trim(),service=serviceId?services?.get(serviceId):null;
+        assert(!serviceId||service,'Serviço jurídico inválido. Atualize o catálogo.');
+        if(service&&services.matchArea(o.area)!=='outra')assert(service.areaCode===services.matchArea(o.area),'O serviço selecionado não pertence à área do atendimento.');
         const text=(v,max)=>String(v||'').trim().slice(0,max);
         const lines=(input,sep=false,max=8)=>text(input,2500).split(/\n+/).map(v=>v.trim()).filter(Boolean).slice(0,max).map(v=>sep?{title:text(v.split('|')[0],70),deadline:text(v.split('|').slice(1).join('|'),110)||'A definir'}:v.slice(0,200));
         let chartJson=text(visual.chartJson,10000);if(chartJson){try{const parsed=JSON.parse(chartJson);assert(parsed&&typeof parsed==='object'&&!Array.isArray(parsed),'JSON inválido');}catch{throw new Error('Confira os dados dos gráficos (JSON).');}}
-        const proposalVisual={template:validTemplate.includes(visual.template)?visual.template:'passivo',diagnosis:text(visual.diagnosis,1000),firstDue:text(visual.firstDue,10),successConditions:text(visual.successConditions,500),steps:lines(visual.stepsText,true,8),nextSteps:lines(visual.nextText,false,8),chartJson};
+        const proposalVisual={template:service&&service.areaCode!=='bancario'?'generico':validTemplate.includes(visual.template)?visual.template:'generico',
+          serviceId:service?.id||'',serviceName:service?.title||'',areaName:service?.areaName||o.area,modality:service?.modality||'',catalogVersion:service?.version||'',serviceScope:service?.scope||'',serviceExclusions:service?.exclusions||'',serviceDocuments:service?.documents?.slice()||[],serviceSteps:service?.steps?.slice()||[],diagnosis:text(visual.diagnosis,1000),firstDue:text(visual.firstDue,10),successConditions:text(visual.successConditions,500),steps:lines(visual.stepsText,true,8),nextSteps:lines(visual.nextText,false,8),chartJson};
         if(proposalVisual.firstDue)date(proposalVisual.firstDue);
         result={id:uid('prop'),oppId:o.id,version:prev?prev.version+1:1,scope:required(p.scope,'Escopo'),amount:terms?terms.down+terms.count*terms.unit:cents(p.amount),terms,visual:proposalVisual,validUntil:valid,status:'rascunho',created:day};
         if(prev)prev.status='substituida';s.proposals.push(result);o.stage='proposta';o.next='Apresentar proposta v'+result.version;o.due=day;description='Proposta v'+result.version+' criada; versões anteriores preservadas';

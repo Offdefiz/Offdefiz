@@ -1,12 +1,13 @@
 /* Partelís — renderer for the four immutable proposal designs. No private data leaves the browser. */
 (function(factory){const api=factory();if(typeof module!=='undefined'&&module.exports)module.exports=api;if(typeof window!=='undefined')window.PartelisProposal=api;})(function(){'use strict';
-const TEMPLATES={passivo:'proposta_passivo_bancario.html',revisional:'proposta_acao_revisional.html',superendividamento:'proposta_superendividamento.html',holding:'proposta_holding.html'};
+const TEMPLATES={passivo:'proposta_passivo_bancario.html',revisional:'proposta_acao_revisional.html',superendividamento:'proposta_superendividamento.html',holding:'proposta_holding.html',generico:'proposta_multiarea.html'};
 const DEFAULT={primary:'#0f2a44',secondary:'#b08d57',days:15,payment:'Cartão de crédito ou boleto bancário',responsible:'',oab:'',logo:'',cover:''};
 const money=cents=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(cents/100);
 const escaped=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const brazilDate=d=>{if(!/^\d{4}-\d{2}-\d{2}$/.test(String(d||'')))return '';const [y,m,day]=d.split('-');return day+'/'+m+'/'+y;};
 const number=(v)=>Number.isFinite(Number(v))?Number(v):0;
-const kindFromArea=area=>{const a=String(area||'').toLowerCase();return a.includes('superendivid')?'superendividamento':a.includes('revisional')?'revisional':a.includes('holding')?'holding':'passivo';};
+const kindFromArea=area=>{const a=String(area||'').toLowerCase();return a.includes('superendivid')?'superendividamento':a.includes('revisional')?'revisional':a.includes('holding')?'holding':/banc|passivo|crédito|credito/.test(a)?'passivo':'generico';};
+const services=typeof window!=='undefined'?window.PartelisServices:typeof require==='function'?require('./legal-service-catalog.js'):null;
 function toWords(cents){
  if(!Number.isSafeInteger(cents)||cents<0||cents>100000000000)throw Error('Valor fora dos limites para escrita por extenso.');
  const u=['zero','um','dois','três','quatro','cinco','seis','sete','oito','nove'],teens=['dez','onze','doze','treze','quatorze','quinze','dezesseis','dezessete','dezoito','dezenove'],tens=['','','vinte','trinta','quarenta','cinquenta','sessenta','setenta','oitenta','noventa'],hundreds=['','cento','duzentos','trezentos','quatrocentos','quinhentos','seiscentos','setecentos','oitocentos','novecentos'];
@@ -45,7 +46,7 @@ function chartFor(kind,values,debts){
   result.quitacao=Array.isArray(q?.labels)&&Array.isArray(q?.saldo)&&q.labels.length>=2&&q.labels.length===q.saldo.length&&q.labels.length<=18&&q.saldo.every(x=>Number.isFinite(x)&&x>=0&&x<=100)?{labels:q.labels.map(x=>String(x).slice(0,20)),saldo:q.saldo}:{labels:['0','12'],saldo:[0,0]};
   result.cenarios=safeEntries(values?.cenarios);
  }else{
-  result.patrimonio=safeEntries(values?.patrimonio);result.tributacao=safeEntries(values?.tributacao);
+  if(kind==='holding'){result.patrimonio=safeEntries(values?.patrimonio);result.tributacao=safeEntries(values?.tributacao);}
  }
  return result;
 }
@@ -58,6 +59,7 @@ function buildValues({proposal,client,office,settings,debts}){
  if(!Number.isFinite(Number(t.successPercent))||Number(t.successPercent)<0||Number(t.successPercent)>100||!t.successBase)throw Error('Informe o percentual e a base do êxito (use 0% e Não previsto quando não houver).');
  const split=installments(amount,count,down);
  const kind=TEMPLATES[visual.template]?visual.template:kindFromArea(visual.area||proposal.area||'');
+ const service=services?.context(visual.serviceId,visual.areaName||visual.area||p.area);
  const chart=chartFor(kind,rawChart(visual.chartJson),debts||[]);
  const date=String(p.created||new Date().toISOString().slice(0,10)),valid=String(p.validUntil||'');
  const data={
@@ -67,7 +69,13 @@ function buildValues({proposal,client,office,settings,debts}){
  PARCELAS_QTD:String(split.count),PARCELA_VALOR:money(split.amount),PARCELA_VENCIMENTO_PRIMEIRA:brazilDate(visual.firstDue||'' )||'A definir em contrato',
  FORMA_PAGAMENTO:brand.payment,EXITO_PERCENTUAL:String(number(t.successPercent)).replace('.',',')+'%',
  EXITO_BASE: t.successBase,EXITO_CONDICOES:visual.successConditions|| (number(t.successPercent) ? 'Conforme condição de êxito prevista no contrato, sem garantia de resultado.' : 'Não há honorários de êxito previstos.'),
- DIAGNOSTICO_TEXTO:visual.diagnosis||'Diagnóstico a complementar com os documentos e dados do cliente.'
+ DIAGNOSTICO_TEXTO:visual.diagnosis||'O diagnóstico dependerá da conferência dos fatos, documentos e riscos pelo advogado.',
+  AREA_NOME:visual.areaName||service?.areaName||String(visual.area||p.area||'A definir'),
+  SERVICO_NOME:visual.serviceName||service?.title||'Serviço jurídico a definir',
+  MODALIDADE_ATUACAO:visual.modality||service?.modality||'A definir',
+  SERVICO_ESCOPO:visual.serviceScope||service?.scope||'Escopo sujeito à definição profissional.',
+  SERVICO_EXCLUSOES:visual.serviceExclusions||service?.exclusions||'Atos não incluídos deverão ser definidos em contratação específica.',
+  DOCUMENTOS_INICIAIS:(visual.serviceDocuments?.length?visual.serviceDocuments:service?.documents||[]).join(' • ')||'Conforme avaliação do responsável'
  };
  const totalDebt=(debts||[]).reduce((a,d)=>a+Number(d.amount||0),0);
  const extras={
@@ -86,7 +94,8 @@ function buildValues({proposal,client,office,settings,debts}){
   if(typeof value==='string'||typeof value==='number')data[key]=String(value).slice(0,300);
  }
  const scope=visual.scopeItems||String(p.scope||'').split(/\n+/).map(x=>({title:'Serviço contratado',description:x}));
- const steps=visual.steps||[],next=visual.nextSteps||[];
+ const steps=visual.steps?.length?visual.steps:(kind==='generico'?(visual.serviceSteps?.length?visual.serviceSteps:service?.steps||[]).map(title=>({title,deadline:'A definir'})):[]);
+ const next=visual.nextSteps?.length?visual.nextSteps:(kind==='generico'?['Validar documentação e escopo','Formalizar contrato, se aceito']:[]);
  return {kind,data,chart,scope,steps,next,settings:brand,split,office};
 }
 function renderTemplate(source,opts,parse){
@@ -121,7 +130,7 @@ function renderTemplate(source,opts,parse){
  if(!/\/\*DADOS_INICIO\*\/[\s\S]*?\/\*DADOS_FIM\*\//.test(raw))throw Error('Modelo sem marcadores DADOS.');
  script.textContent=raw.replace(/\/\*DADOS_INICIO\*\/[\s\S]*?\/\*DADOS_FIM\*\//,'/*DADOS_INICIO*/'+chartText+'/*DADOS_FIM*/');
  if(model.kind==='holding'&&!doc.getElementById('donut'))script.textContent=script.textContent.replace("donut('#donut',DADOS.patrimonio,'R$ 2,4 mi','patrimônio');",''); // Original holding template references a nonexistent chart.
- const chartAvailability=model.kind==='passivo'?{donut:model.chart.composicao.length,legend:model.chart.composicao.length,cenarios:model.chart.cenarios.length}:model.kind==='revisional'?{grafico:model.chart.meses[0]!=='—',recuperar:model.chart.recuperar.length}:model.kind==='superendividamento'?{renda:model.chart.renda.length,quitacao:Array.isArray(rawChart(opts.proposal?.visual?.chartJson)?.quitacao?.labels),cenarios:model.chart.cenarios.length}:{patrimonio:model.chart.patrimonio.length,tributacao:model.chart.tributacao.length};
+ const chartAvailability=model.kind==='passivo'?{donut:model.chart.composicao.length,legend:model.chart.composicao.length,cenarios:model.chart.cenarios.length}:model.kind==='revisional'?{grafico:model.chart.meses[0]!=='—',recuperar:model.chart.recuperar.length}:model.kind==='superendividamento'?{renda:model.chart.renda.length,quitacao:Array.isArray(rawChart(opts.proposal?.visual?.chartJson)?.quitacao?.labels),cenarios:model.chart.cenarios.length}:model.kind==='holding'?{patrimonio:model.chart.patrimonio.length,tributacao:model.chart.tributacao.length}:{};
  // The static SVG templates remain unchanged. Empty charts are clearly labelled as lacking supporting evidence.
  const blank=[];
  for(const [key,available] of Object.entries(chartAvailability))if(!available)blank.push(key);
