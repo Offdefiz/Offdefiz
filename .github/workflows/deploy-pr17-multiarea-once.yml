@@ -1,4 +1,4 @@
-name: Partelís multiárea · publicação controlada PR17
+name: Partelís · publicação controlada comercial
 
 on:
   push:
@@ -14,8 +14,8 @@ concurrency:
 
 jobs:
   verify:
-    # Token exclusivo da integração da PR #17. Futuras atualizações da main não publicam automaticamente.
-    if: contains(github.event.head_commit.message, 'partelis-pr17-release-20261111')
+    # Publicação somente de revisões explicitamente marcadas. Não publica outros pushes na main.
+    if: contains(github.event.head_commit.message, 'partelis-pr17-release-20261111') || contains(github.event.head_commit.message, 'partelis-cookie-release-20261111')
     runs-on: ubuntu-24.04
     outputs:
       revision: ${{ steps.revision.outputs.value }}
