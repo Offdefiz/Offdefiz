@@ -173,13 +173,14 @@ const SERVICES=Object.freeze(defs);
 const INDEX=new Map(SERVICES.map(item=>[item.id,item]));
 function norm(value){return String(value||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
 const aliases={
+ civel:['civel','civil'],
  bancario:['bancario','passivo bancario','revisional','superendividamento','busca e apreensao'],
  penal:['penal','criminal','crime','execucao penal'],
  empresarial_societario:['empresarial e societario','societario','empresarial','holding','comercial'],
  familia_sucessoes:['familia e sucessoes','familia','sucessoes'],
  digital_dados:['digital e protecao de dados','digital','lgpd','protecao de dados'],
 };
-function matchArea(name){const n=norm(name);for(const [code,label] of Object.entries(AREA_NAMES)){if(norm(label)===n||norm(code)===n)return code;}for(const [code,list] of Object.entries(aliases)){if(list.some(s=>norm(s)===n))return code;}return 'outra';}
+function matchArea(name){const n=norm(name).replace(/^direito (do |da |de )?/,'');for(const [code,label] of Object.entries(AREA_NAMES)){if(norm(label)===n||norm(code)===n)return code;}for(const [code,list] of Object.entries(aliases)){if(list.some(s=>norm(s)===n))return code;}return 'outra';}
 function list(area){if(!area)return SERVICES.slice();const code=Object.prototype.hasOwnProperty.call(AREA_NAMES,area)?area:matchArea(area);return SERVICES.filter(s=>s.areaCode===code);}
 function get(id){return INDEX.get(String(id||''))||null;}
 function context(serviceId,areaName){const item=get(serviceId);if(item)return item;const area=matchArea(areaName);return Object.freeze({id:'',areaCode:area,areaName:AREA_NAMES[area],title:'Serviço jurídico a definir',mode:'consultivo',modality:'Atuação a definir',scope:'Objeto e limites a serem descritos pelo advogado.',exclusions:'Serviços não previstos exigem contratação específica.',intake:INTAKE[area],documents:DOCUMENTS[area],steps:FLOWS.consultivo,agreementPossible:false,version:VERSION,reviewRequired:true});}
