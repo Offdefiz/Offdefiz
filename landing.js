@@ -10,10 +10,10 @@ form.addEventListener('submit',async event=>{
   try{
     const response=await fetch('/api/public/leads',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
     const payload=await response.json();
-    if(!response.ok)throw Error(payload.error||'N�o foi poss�vel registrar. Tente novamente.');
-    form.reset();status.textContent='Condi��o solicitada. Entraremos em contato pelo e-mail informado.';
+    if(!response.ok)throw Error(payload.error||'Não foi possível registrar. Tente novamente.');
+    form.reset();status.textContent='Condição solicitada. Entraremos em contato pelo e-mail informado.';
   }catch(e){status.classList.add('error');status.textContent=e.message}
-  finally{button.disabled=false;button.textContent='Reservar minha condi��o'}
+  finally{button.disabled=false;button.textContent='Reservar minha condição'}
 });
 // The LED animation can be paused without changing the offer link.
 const ticker=document.querySelector('.bf-banner'),toggle=document.querySelector('.ticker-toggle');
@@ -21,5 +21,6 @@ if(ticker&&toggle)toggle.addEventListener('click',()=>{
   const paused=ticker.classList.toggle('is-paused');
   toggle.setAttribute('aria-pressed',String(paused));
   toggle.setAttribute('aria-label',paused?'Retomar letreiro':'Pausar letreiro');
-  toggle.textContent=paused?'?':'?';
+  toggle.textContent=paused?'▶':'Ⅱ';
 });
+
