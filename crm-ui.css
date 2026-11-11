@@ -315,3 +315,51 @@ body.office-ui.crm-ready.dark{background:radial-gradient(ellipse at 90% 0,color-
 .office-ui.crm-ready.dark .crm-global-search,.office-ui.crm-ready.dark .demo-tag{background:var(--paper);color:var(--muted)}
 .crm-ready #nav{overflow-x:hidden}
 
+
+
+/* One coherent dark palette for the application, including overlays and controls. */
+body.office-ui.crm-ready.dark{
+ --paper:#14111c;--surface:#211b2b;--ink:#f4f0fa;--muted:#bdb1cf;--line:#44384f;
+ --mint:color-mix(in srgb,var(--workspace-accent) 25%,#292132);
+ --ui-accent:color-mix(in srgb,var(--workspace-accent) 38%,#fff);
+ --ui-button:color-mix(in srgb,var(--workspace-accent) 40%,#a375ff);
+ --green:var(--ui-accent);--deep:var(--ui-accent);--red:#ffb4c0;--gold:#f6d58d;
+ --glass-fill:#211b2b;--glass-border:#44384f;--glass-highlight:none;
+ background:radial-gradient(ellipse at 90% 0,#54318422,transparent 46%),var(--paper);color:var(--ink)
+}
+body.office-ui.crm-ready.dark :is(.sidebar,.topbar,.panel,.metric,.chart-card,.lane,.opp-card,.crm-setting-card,.crm-profile-card,.dialog,.crm-popover,.crm-search-dialog,.crm-feedback-dialog){background:var(--surface);color:var(--ink);border-color:var(--line)}
+body.office-ui.crm-ready.dark :is(.workspace,.crm-client-hero,.crm-theme-preview,.crm-workspace-chip,.crm-profile-banner,.detail-block,.version,.flow-step,.crm-search-result-icon){background:var(--paper);color:var(--ink);border-color:var(--line)}
+body.office-ui.crm-ready.dark :is(input,select,textarea,.field input,.field select,.field textarea,.search input,.profile-select){background:var(--paper);color:var(--ink);border-color:#625070;color-scheme:dark}
+body.office-ui.crm-ready.dark :is(input,textarea)::placeholder{color:#aa9bbd;opacity:1}
+body.office-ui.crm-ready.dark .btn:not(.primary){background:#2c2338;color:var(--ink);border-color:#625070;box-shadow:none}
+body.office-ui.crm-ready.dark .btn:not(.primary):hover{background:#3c2e4d}
+body.office-ui.crm-ready.dark :is(.btn.primary,.crm-create-btn){background:var(--ui-button);border-color:#a981ef;color:#fff;box-shadow:0 4px 14px #0002}
+body.office-ui.crm-ready.dark :is(.btn.primary,.crm-create-btn):hover{background:color-mix(in srgb,var(--ui-button) 80%,#fff)}
+body.office-ui.crm-ready.dark :is(.crm-nav-toggle,.crm-global-search,.demo-tag,.crm-search-escape){background:var(--paper);border:1px solid var(--line);color:var(--muted)}
+body.office-ui.crm-ready.dark :is(.crm-card-link,.crm-popover>button,.crm-search-result){color:var(--ink)}
+body.office-ui.crm-ready.dark :is(.crm-popover>button,.crm-search-result):hover{background:var(--mint);color:#fff}
+body.office-ui.crm-ready.dark .crm-popover>button.crm-logout{color:#ffb4c0}
+body.office-ui.crm-ready.dark :is(.crm-color-dot,.crm-setting-card-icon){border-color:#78618f}
+body.office-ui.crm-ready.dark .crm-setting-card-icon{background:#39294c;color:#d4bcff}
+body.office-ui.crm-ready.dark .crm-setting-intro{background:linear-gradient(110deg,#2a2037,#382546);border-color:#5c4477}
+body.office-ui.crm-ready.dark :is(.panel-head,th,.lane-head){background:#2a2234;color:var(--ink);border-color:var(--line)}
+body.office-ui.crm-ready.dark :is(td,.task,.agenda-item,.detail-row,.log){border-color:var(--line)}
+body.office-ui.crm-ready.dark :is(.metric svg,.link,.agenda-time){color:var(--ui-accent)}
+body.office-ui.crm-ready.dark .bar-track{background:#433452}
+body.office-ui.crm-ready.dark .bar-fill{background:var(--ui-accent)}
+body.office-ui.crm-ready.dark .badge.gray{background:#3d314b;color:#e4d8f5}
+body.office-ui.crm-ready.dark .badge.red{background:#522d3b;color:#ffbfcb}
+body.office-ui.crm-ready.dark .badge.gold{background:#4c3c25;color:#f6d58d}
+body.office-ui.crm-ready.dark .badge.blue{background:#263d56;color:#b7dcff}
+body.office-ui.crm-ready.dark .tabs button{color:var(--muted);background:transparent}
+body.office-ui.crm-ready.dark .tabs button.active{background:#47315f;color:#f4eaff;border-color:#755893}
+body.office-ui.crm-ready.dark .toast{background:#d5b9ff;color:#241434}
+body.office-ui.crm-ready.dark :is(.section-desc,.bottom-note,.hint){color:var(--muted)}
+.crm-ready .crm-mode-switch{display:flex;align-items:center;justify-content:space-between;gap:20px}
+.crm-switch-track{display:inline-flex!important;align-items:center;width:38px;height:22px;border-radius:99px;background:#b8b1c4;padding:3px;flex:none;transition:background .2s}
+.crm-switch-track>span{width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 4px #0002;transition:transform .2s;display:block}
+.crm-mode-switch[aria-checked="true"] .crm-switch-track{background:#8d59ff}
+.crm-mode-switch[aria-checked="true"] .crm-switch-track>span{transform:translateX(16px)}
+.crm-ready .side-end{padding-top:12px}.crm-ready .side-end>.profile{border-top:0;padding-top:0}
+@media(min-width:651px){.office-ui.crm-ready.sidebar-collapsed .side-end{display:block}.office-ui.crm-ready.sidebar-collapsed .profile{padding:0}.office-ui.crm-ready.sidebar-collapsed .crm-account-trigger{justify-content:center;padding:4px 0}}
+

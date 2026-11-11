@@ -62,7 +62,7 @@ function renderSettings(){
  root.innerHTML='<div class="crm-setting-intro"><div><h2>Seu ambiente, do seu jeito.</h2><p>Personalização, segurança, ajuda e acesso à sua conta — tudo em um só lugar.</p></div><span class="crm-setting-symbol">⚙</span></div>'+
  '<div class="crm-setting-grid">'+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('user')+'</div><h3>Minha conta</h3><p>Foto, nome de exibição, e-mail e senha.</p><div class="crm-setting-account">'+avatar('md')+'<span><strong>'+esc(displayName())+'</strong><small>'+esc(email())+'</small></span></div><button class="btn crm-card-link" data-action="navigate" data-id="profile">Editar meu perfil <span>→</span></button></section>'+
- '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('palette')+'</div><h3>Aparência</h3><p>Ajuste o modo de visualização sem afetar as preferências dos colegas.</p><div class="crm-theme-preview"><span class="crm-color-dot" style="background:'+(/^#[0-9a-f]{6}$/i.test(accent)?accent:'#30145F')+'"></span><span>'+esc(document.body.classList.contains('dark')?'Modo escuro':'Modo claro')+'</span></div><button type="button" class="btn crm-card-link" data-ux-action="toggle-theme">Alternar claro e escuro <span>→</span></button></section>'+
+ '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('palette')+'</div><h3>Aparência</h3><p>Ajuste o modo de visualização sem afetar as preferências dos colegas.</p><div class="crm-theme-preview"><span class="crm-color-dot" style="background:'+(/^#[0-9a-f]{6}$/i.test(accent)?accent:'#30145F')+'"></span><span>'+esc(document.body.classList.contains('dark')?'Modo escuro':'Modo claro')+'</span></div><button type="button" class="btn crm-card-link crm-mode-switch" role="switch" aria-label="Modo escuro" aria-checked="'+String(document.body.classList.contains('dark'))+'" data-ux-action="toggle-theme"><span>Modo escuro</span><span class="crm-switch-track" aria-hidden="true"><span></span></span></button></section>'+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('building')+'</div><h3>Identidade do escritório</h3><p>Nome e cores utilizadas nas telas e propostas do seu escritório.</p><div class="crm-workspace-chip"><span class="crm-color-dot" style="background:'+(/^#[0-9a-f]{6}$/i.test(accent)?accent:'#30145F')+'"></span>'+esc(workspace)+'</div>'+(manager?'<button type="button" class="btn crm-card-link" data-ux-action="brand">Personalizar escritório <span>→</span></button>':'<p class="crm-permission-hint">Somente o gestor pode editar a identidade.</p>')+'</section>'+
  '<section class="crm-setting-card"><div class="crm-setting-card-icon">'+uxIcon('help')+'</div><h3>Ajuda e treinamento</h3><p>Aprenda os fluxos e acompanhe o que mudou na plataforma.</p><div class="crm-stack-actions"><button type="button" class="btn" data-ux-action="tour">Iniciar tutorial guiado</button><button type="button" class="btn" data-ux-action="news">Novidades e versões</button>'+(inCloud()?'<button type="button" class="btn" data-ux-action="feedback">Reportar problema ou sugestão</button>':'')+'</div></section>'+
  (manager&&inCloud()?'<section class="crm-setting-card crm-setting-card-wide"><div class="crm-setting-card-icon">'+uxIcon('headset')+'</div><h3>Suporte remoto Partelís</h3><p>Autorize temporariamente a equipe Partelís a visualizar os dados do seu escritório para diagnóstico. O acesso é somente leitura, dura até 60 minutos e fica registrado.</p><div class="crm-support-status" id="crm-support-status" role="status">Consultando autorização…</div><div class="crm-support-actions"><button type="button" class="btn primary" data-ux-action="support-approve">Autorizar por 60 minutos</button><button type="button" class="btn" data-ux-action="support-revoke">Revogar acesso</button></div></section>':'')+
@@ -142,7 +142,8 @@ function openSearch(){
 function searchResults(){
  const input=$('#crm-search-input'),root=$('#crm-search-results');if(!input||!root)return;
  const q=input.value.toLowerCase().trim();
- const pages=[...document.querySelectorAll('#nav [data-action="navigate"],.crm-utility-nav [data-action="navigate"]')].map(n=>({kind:'navigate',id:n.dataset.id,label:n.textContent.trim()}));
+ const pages=[...document.querySelectorAll('#nav [data-action="navigate"]')].map(n=>({kind:'navigate',id:n.dataset.id,label:n.textContent.trim()}));
+ pages.push({kind:'navigate',id:'settings',label:'Configurações'},{kind:'navigate',id:'profile',label:'Meu perfil'});
  const results=pages.filter(x=>!q||x.label.toLowerCase().includes(q)).map(x=>({kind:x.kind,id:x.id,label:x.label,category:'Página'}));
  if($('#nav [data-id="funnel"]')&&lastState?.clients&&q.length>1){for(const client of lastState.clients){if(!String(client.name||'').toLowerCase().includes(q))continue;const opp=lastState.opportunities?.find(o=>o.clientId===client.id);if(opp)results.push({kind:'detail',id:opp.id,label:client.name,category:'Atendimento'});}}
  root.innerHTML=results.slice(0,12).map(x=>'<button type="button" class="crm-search-result" data-ux-result="'+esc(x.kind)+'" data-result-id="'+esc(x.id)+'"><span class="crm-search-result-icon">'+(x.kind==='navigate'?'▣':'◉')+'</span><span>'+esc(x.label)+'</span><small>'+x.category+'</small></button>').join('')||'<p class="crm-search-empty">Nenhum resultado encontrado.</p>';
@@ -157,7 +158,7 @@ document.addEventListener('click',ev=>{
  else if(action==='search')openSearch();
  else if(action==='close-search')$('#crm-search-dialog')?.close();
  else if(action==='brand')window.PartelisBrandEditor?.();
- else if(action==='toggle-theme'){const dark=!document.body.classList.contains('dark');localStorage.setItem('cj-mode',dark?'dark':'light');document.body.classList.toggle('dark',dark);window.dispatchEvent(new CustomEvent('caixa-theme-saved'));renderSettings();toast('Aparência atualizada neste dispositivo.');}
+ else if(action==='toggle-theme'){const dark=!document.body.classList.contains('dark');window.PartelisAppearance.setMode(dark?'dark':'light');renderSettings();toast('Modo '+(dark?'escuro':'claro')+' ativado neste dispositivo.');}
  else if(action==='tour')window.PartelisHelp?.tour();
  else if(action==='news')window.PartelisHelp?.news();
  else if(action==='feedback')window.PartelisFeedback?.open();
@@ -183,6 +184,7 @@ function animatePage(page){
   activeMotion.add(animation);animation.onfinish=animation.oncancel=()=>activeMotion.delete(animation);
  });
 }
+window.addEventListener('partelis-appearance-changed',()=>{if(lastPage==='settings')renderSettings();});
 window.addEventListener('caixa-render',ev=>{
  lastState=ev.detail.state;lastRole=ev.detail.role;lastPage=ev.detail.page;
  moveChrome();if(!profileLoaded)loadProfile();
@@ -193,3 +195,4 @@ window.addEventListener('caixa-render',ev=>{
 });
  if($('#nav')){lastRole=$('#roleSelect')?.value||'gestor';moveChrome();loadProfile();}
 })();
+
