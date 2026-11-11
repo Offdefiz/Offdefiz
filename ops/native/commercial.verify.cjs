@@ -23,7 +23,19 @@ async function run(){
     return cookies(r);
   };
   // Prova: marketing não é ambiente de cliente; demo não consulta PostgreSQL.
-  assert.match(await(await request('/')).text(),/Solicitar apresentação e proposta/);
+  const home=await request('/');
+  assert.equal(home.status,200);
+  assert.equal(home.headers.get('x-robots-tag'),null);
+  const homeHtml=await home.text();
+  assert.match(homeHtml,/<form id="sales-form"/);
+  assert.match(homeHtml,/rel="canonical" href="https:\/\/partelis\.com\.br\/"/);
+  assert.match(homeHtml,/application\/ld\+json/);
+  assert.match(await(await request('/robots.txt')).text(),/Sitemap: https:\/\/partelis\.com\.br\/sitemap\.xml/);
+  const sitemap=await request('/sitemap.xml');
+  assert.equal(sitemap.status,200);
+  assert.match(sitemap.headers.get('content-type'),/application\/xml/);
+  assert.match(await sitemap.text(),/<loc>https:\/\/partelis\.com\.br\/<\/loc>/);
+  assert.match((await request('/demo')).headers.get('x-robots-tag'),/noindex/);
   assert.match(await(await request('/demo')).text(),/window.CLOUD=false/);
   assert.match(await(await request('/app')).text(),/window.CLOUD=true/);
   assert.equal((await request('/api/admin/commercial/list')).status,401);
