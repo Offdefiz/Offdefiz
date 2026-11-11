@@ -58,6 +58,7 @@ test('regra de negócio persiste serviço por versão, compatível com propostas
  assert.equal(model.data.AREA_NOME,'Penal');
  const legacy=C.execute(state,'gestor','proposal',{oppId:oid,scope:'Revisão sem catálogo',amount:1800,validUntil:'2026-11-25',visual:{template:'holding'}},day);
  assert.equal(legacy.result.visual.template,'holding');
+ const corporate=C.execute(empty(),'gestor','client',{name:'Empresa Exemplo',source:'Indicação',area:'Empresarial e Societário',owner:'especialista',next:'Reunião',due:day},day);const corporateP=C.execute(corporate.state,'gestor','proposal',{oppId:corporate.result.id,scope:'Contrato empresarial',amount:1500,validUntil:'2026-11-25',visual:{serviceId:'empresarial_societario.contratos',template:'holding'}},day);assert.equal(corporateP.result.visual.template,'generico');
  assert.equal(state.proposals[0].visual.serviceId,'penal.acao_penal');
 });
 test('apresentação multiárea tem 7 páginas, tokens seguros e não contém indicadores bancários fictícios',()=>{
