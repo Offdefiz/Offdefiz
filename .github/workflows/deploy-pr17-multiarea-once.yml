@@ -1,4 +1,4 @@
-name: Partelís · publicação controlada comercial
+name: Partelís · publicação automática em produção
 
 on:
   push:
@@ -14,8 +14,6 @@ concurrency:
 
 jobs:
   verify:
-    # Publicação somente de revisões explicitamente marcadas. Não publica outros pushes na main.
-    if: contains(github.event.head_commit.message, 'partelis-pr17-release-20261111') || contains(github.event.head_commit.message, 'partelis-cookie-release-20261111')
     runs-on: ubuntu-24.04
     outputs:
       revision: ${{ steps.revision.outputs.value }}
@@ -68,7 +66,14 @@ jobs:
           VPS_PORT: ${{ secrets.PARTELIS_VPS_PORT }}
         run: |
           set -euo pipefail
-          test -n "$DEPLOY_KEY" && test -n "$HOST_KEY" && test -n "$VPS_HOST" && test -n "$VPS_PORT"
+          missing=0
+          for variable in DEPLOY_KEY HOST_KEY VPS_HOST VPS_PORT; do
+            if [[ -z "${!variable}" ]]; then
+              echo "::error::Credencial de produção ausente: $variable. Configure os segredos PARTELIS_* no ambiente production."
+              missing=1
+            fi
+          done
+          (( missing == 0 ))
           [[ "$VPS_PORT" =~ ^[0-9]{1,5}$ ]]
           install -d -m 0700 "$HOME/.ssh"
           printf '%s\n' "$DEPLOY_KEY" > "$HOME/.ssh/id_ed25519"

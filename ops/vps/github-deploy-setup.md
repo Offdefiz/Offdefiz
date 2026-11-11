@@ -1,8 +1,19 @@
 # Publicação protegida pela VPS
 
-O workflow `Publicar Partelís na VPS` é manual e usa uma revisão Git fixa. O job
-`deploy` deve usar o ambiente protegido `production` com revisores definidos
-no GitHub. Sem os quatro segredos abaixo, a publicação falha antes do SSH.
+O workflow `Partelís · publicação automática em produção` publica cada push no
+`main` após build, testes de regressão e integração PostgreSQL. Não exige uma
+mensagem especial de commit. A revisão publicada é o SHA fixo daquele push.
+O workflow manual `Publicar Partelís na VPS` continua disponível para uma revisão
+específica. Ambos usam o ambiente `production` e a mesma fila de publicação,
+sem interromper um deploy em execução. Sem os quatro segredos abaixo, a
+publicação falha antes do SSH.
+
+Para o fluxo autorizado de publicação automática, o ambiente `production` não
+deve exigir aprovação manual. A integração no `main` continua sujeita às regras
+do repositório e deve acontecer depois de validar a alteração. Uma alteração só
+está publicada quando o job de deploy termina com sucesso e o healthcheck do
+site confirma o funcionamento. Falha de acesso ou de deploy deve ser reportada
+como bloqueio de publicação, sem considerar o trabalho concluído.
 
 Segredos do ambiente `production`:
 
