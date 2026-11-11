@@ -1,0 +1,90 @@
+name: Partelís multiárea · publicação controlada PR17
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: partelis-production
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    # Token exclusivo da integração da PR #17. Futuras atualizações da main não publicam automaticamente.
+    if: contains(github.event.head_commit.message, 'partelis-pr17-release-20261111')
+    runs-on: ubuntu-24.04
+    outputs:
+      revision: ${{ steps.revision.outputs.value }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Fixar revisão e verificar pacote
+        id: revision
+        run: |
+          set -euo pipefail
+          test "$(git rev-parse HEAD)" = "${{ github.sha }}"
+          echo "value=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+          bash -n ops/vps/deploy-commercial.sh
+          npm install --ignore-scripts
+          npm run build
+          npm test
+          npm run test:deploy
+      - name: Integração PostgreSQL, escritórios e permissões
+        env:
+          PGDATABASE: partelis_verify_ci
+        run: |
+          set -euo pipefail
+          sudo systemctl start postgresql
+          sudo -u postgres createuser --createdb "$(id -un)"
+          createdb "$PGDATABASE"
+          psql -v ON_ERROR_STOP=1 -f ops/native/schema.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-04-sales-onboarding.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-multiarea-foundation.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-ops-metrics.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-cnj-inbox.sql
+          node ops/native/verify.cjs
+          node ops/native/commercial.verify.cjs
+          node ops/native/legal.verify.cjs
+          node ops/native/ops.verify.cjs
+
+  deploy:
+    needs: verify
+    runs-on: ubuntu-24.04
+    environment: production
+    steps:
+      - name: Preparar credenciais de SSH com host validado
+        env:
+          DEPLOY_KEY: ${{ secrets.PARTELIS_DEPLOY_KEY }}
+          HOST_KEY: ${{ secrets.PARTELIS_VPS_HOST_KEY }}
+          VPS_HOST: ${{ secrets.PARTELIS_VPS_HOST }}
+          VPS_PORT: ${{ secrets.PARTELIS_VPS_PORT }}
+        run: |
+          set -euo pipefail
+          test -n "$DEPLOY_KEY" && test -n "$HOST_KEY" && test -n "$VPS_HOST" && test -n "$VPS_PORT"
+          [[ "$VPS_PORT" =~ ^[0-9]{1,5}$ ]]
+          install -d -m 0700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 0600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$HOST_KEY" > "$HOME/.ssh/known_hosts"
+          chmod 0600 "$HOME/.ssh/known_hosts"
+          ssh-keygen -F "$VPS_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null || \
+            ssh-keygen -F "[$VPS_HOST]:$VPS_PORT" -f "$HOME/.ssh/known_hosts" >/dev/null
+      - name: Deploy com backup, healthcheck e rollback pela rotina existente
+        env:
+          VPS_HOST: ${{ secrets.PARTELIS_VPS_HOST }}
+          VPS_PORT: ${{ secrets.PARTELIS_VPS_PORT }}
+          REVISION: ${{ needs.verify.outputs.revision }}
+        run: |
+          set -euo pipefail
+          ssh -p "$VPS_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            "partelis-deploy@$VPS_HOST" \
+            "sudo -n /usr/local/sbin/partelis-deploy-commercial '$REVISION'"
