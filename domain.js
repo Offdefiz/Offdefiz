@@ -6,7 +6,7 @@
   const roles = {gestor:'Gestor',socio_admin:'Sócio / administrador',advogado:'Advogado',estagiario:'Estagiário',secretaria:'SDR / secretaria',especialista:'Especialista',juridico:'Jurídico',financeiro:'Financeiro'};
   const stages = {triagem:'Lead novo',agendamento:'Agendado',diagnostico:'Diagnóstico realizado',proposta:'Proposta',negociacao:'Negociação',fechamento:'Fechamento agendado',assinatura:'Aguardando assinatura',nutricao:'Nutrição / recall',contratado:'Ganho / contratado',perdido:'Perdido'};
   const rights = {
-    client:['gestor','secretaria','especialista'], clientUpdate:['gestor','secretaria','especialista'], debt:['gestor','secretaria','especialista'],
+    whatsappCapture:['gestor','secretaria','especialista'], client:['gestor','secretaria','especialista'], clientUpdate:['gestor','secretaria','especialista'], debt:['gestor','secretaria','especialista'],
     stage:['gestor','secretaria','especialista'], meeting:['gestor','secretaria','especialista'],
     proposal:['gestor','especialista'], contract:['gestor','especialista'], payment:['gestor','financeiro'], followup:['gestor','secretaria','especialista'],
     legal:['gestor','juridico'], task:['gestor','secretaria','especialista','juridico','financeiro']
@@ -55,7 +55,28 @@
     day=date(day || today());assert(can(role,action),'Este perfil não pode executar essa ação.');
     const s=JSON.parse(JSON.stringify(state)),p=data || {};let result,description='';
     const opportunity=id=>get(s.opportunities,id);
-    if(action==='client') {
+    if(action==='whatsappCapture') {
+      const raw=String(p.phone||'').replace(/\D/g,'');
+      const normalize=v=>{let n=String(v||'').replace(/\D/g,'');return n.length===10||n.length===11?'55'+n:n;};
+      const phone=normalize(raw);
+      assert(/^\d{10,15}$/.test(phone),'Informe o telefone completo com código do país e DDD.');
+      assert(typeof p.captureId==='string'&&/^[a-zA-Z0-9-]{16,80}$/.test(p.captureId),'Identificador de captura inválido.');
+      const previous=s.opportunities.find(o=>o.captureId===p.captureId);
+      if(previous)return {state:s,result:previous};
+      const matches=s.clients.filter(c=>normalize(c.phone)===phone);
+      assert(matches.length<=1,'Há cadastros duplicados para este telefone. Revise no Partelís.');
+      let c=matches[0];
+      const existing=c&&s.opportunities.find(o=>o.clientId===c.id&&!['contratado','perdido'].includes(o.stage));
+      if(existing&&p.newOpportunity!==true)return {state:s,result:existing};
+      const area=required(p.area,'Área').slice(0,100),owner=required(p.owner,'Responsável');
+      assert(roles[owner],'Responsável inválido.');
+      const next=required(p.next,'Próxima ação').slice(0,300),due=date(p.due);
+      if(!c){c={id:uid('cli'),name:required(p.name,'Nome').slice(0,150),phone,source:'WhatsApp',created:day};s.clients.push(c);}
+      const o={id:uid('opp'),clientId:c.id,area,owner,stage:'triagem',next,due,created:day,captureId:p.captureId,source:'WhatsApp',note:String(p.note||'').trim().slice(0,2000)};
+      s.opportunities.push(o);
+      s.tasks.push({id:uid('task'),oppId:o.id,kind:'followup',title:next,owner,due,done:false,created:day});
+      result=o;description='Card criado pelo WhatsApp; cadastro de cliente reaproveitado quando existente';
+    } else if(action==='client') {
       const c={id:uid('cli'),name:required(p.name,'Nome fictício'),source:required(p.source,'Origem'),created:day};s.clients.push(c);
       const o={id:uid('opp'),clientId:c.id,area:required(p.area,'Área'),owner:required(p.owner,'Responsável'),stage:'triagem',next:required(p.next,'Próxima ação'),due:date(p.due),created:day};
       assert(roles[o.owner],'Responsável inválido.');s.opportunities.push(o);
@@ -191,4 +212,5 @@
   function validate(s) {assert(s&&s.schema===1,'Formato de dados incompatível.');['clients','debts','opportunities','meetings','proposals','contracts','installments','cases','tasks','audit'].forEach(k=>assert(Array.isArray(s[k]),'Dados incompletos: '+k));return s;}
   return {meetingOverdue,roles,stages,can,today,shift,month,cents,money,latest,execute,metrics,seed,validate};
 });
+
 
