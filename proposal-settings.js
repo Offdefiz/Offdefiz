@@ -6,7 +6,7 @@ function paint(){
  const grid=$('#crm-settings-root .crm-setting-grid');if(!grid||$('#crm-proposal-settings-card'))return;
  const card=document.createElement('section');card.className='crm-setting-card';card.id='crm-proposal-settings-card';
  const p=current();const manager=window.CJ_USER?.role==='gestor'||!window.CLOUD;
- card.innerHTML='<div class="crm-setting-card-icon">▧</div><h3>Propostas comerciais</h3><p>Configure uma identidade para os quatro modelos de sete slides, sem alterar o tema do aplicativo.</p><div class="crm-theme-preview"><span class="crm-color-dot" style="background:'+esc(p.primary)+'"></span><span class="crm-color-dot" style="background:'+esc(p.secondary)+'"></span><span>Apresentações do escritório</span></div>'+(manager?'<button type="button" class="btn crm-card-link" id="crm-proposal-settings-open">Configurar modelos <span>→</span></button>':'<p class="crm-permission-hint">Somente o gestor configura as apresentações.</p>');
+ card.innerHTML='<div class="crm-setting-card-icon">▧</div><h3>Propostas comerciais</h3><p>Configure uma identidade para as apresentações visuais do escritório, sem alterar o tema do aplicativo.</p><div class="crm-theme-preview"><span class="crm-color-dot" style="background:'+esc(p.primary)+'"></span><span class="crm-color-dot" style="background:'+esc(p.secondary)+'"></span><span>Apresentações do escritório</span></div>'+(manager?'<button type="button" class="btn crm-card-link" id="crm-proposal-settings-open">Configurar modelos <span>→</span></button>':'<p class="crm-permission-hint">Somente o gestor configura as apresentações.</p>');
  grid.append(card);card.querySelector('button')?.addEventListener('click',open);
 }
 const encodePhoto=async(file,type)=>{
