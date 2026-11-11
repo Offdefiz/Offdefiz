@@ -294,3 +294,13 @@
 @media(max-width:370px){.crm-ready .crm-header-context .mobile-brand{font-size:0;gap:0}.crm-ready .crm-header-context .mobile-brand img{width:25px;height:25px}}
 @media(prefers-reduced-motion:reduce){.crm-ready *,.crm-ready *:before,.crm-ready *:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.crm-ready .metric:hover,.crm-ready .chart-card:hover,.crm-ready .crm-setting-card:hover,.crm-ready #nav button:hover{transform:none}}
 
+
+/* Keep the full brand signature legible and give navigation more room. */
+.crm-ready .brand small{font-size:7.5px;letter-spacing:.55px;white-space:nowrap}
+.crm-ready .brand{padding-bottom:18px}.crm-ready .workspace{padding:10px 12px;margin-bottom:12px}
+.crm-ready .crm-utility-nav{grid-template-columns:1fr 1fr;gap:5px;margin-bottom:8px}
+.crm-ready .crm-utility-nav button{font-size:10px;min-height:36px;padding:8px 5px;gap:5px;justify-content:center;background:var(--paper);border:1px solid var(--line);border-radius:9px}
+.crm-ready .crm-utility-nav button>span:first-child{font-size:14px;width:16px}.crm-ready .profile{padding-top:8px}.crm-ready .crm-account-trigger{padding:5px}
+@media(min-width:651px){.crm-ready.sidebar-collapsed .crm-utility-nav{grid-template-columns:1fr}.crm-ready.sidebar-collapsed .crm-utility-nav button{font-size:0}}
+@media(max-width:650px){.crm-ready .brand small{font-size:8px}.crm-ready .crm-utility-nav button{font-size:11px}}
+
