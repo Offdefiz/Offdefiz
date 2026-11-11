@@ -1,40 +1,55 @@
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),C=require('./domain.js');
-// A implantação comercial utiliza exclusivamente PostgreSQL local da VPS.
+// A implanta��o comercial utiliza exclusivamente PostgreSQL local da VPS.
 const native=process.env.PARTELIS_STORAGE==='postgres'?require('./ops/native/store.cjs'):null;
 const commercial=native?require('./ops/native/commercial.cjs'):null;
 const net=require('node:net');
 class Fault extends Error{constructor(status,message){super(message);this.status=status;}}
 async function store(route,opts={}) {
-  if(!native)throw new Fault(503,'Serviço de dados indisponível: configure PostgreSQL local.');
+  if(!native)throw new Fault(503,'Servi�o de dados indispon�vel: configure PostgreSQL local.');
   return native.tenant(route,opts);
 }
 function cookies(req){return Object.fromEntries((req.headers.cookie||'').split(';').map(x=>{const i=x.indexOf('=');return [x.slice(0,i).trim(),decodeURIComponent(x.slice(i+1))];}));}
 function session(res,data,secure){const attrs='; HttpOnly; SameSite=Lax; Path=/'+(secure?'; Secure':'');res.setHeader('Set-Cookie',['cj_access='+encodeURIComponent(data.access_token)+'; Max-Age=3600'+attrs,'cj_refresh='+encodeURIComponent(data.refresh_token)+'; Max-Age=604800'+attrs]);}
-async function identity(req,res){let {cj_access:token,cj_refresh:refresh}=cookies(req),user;if(!token&&!refresh)throw new Fault(401,'Entre para continuar.');try{user=await store('/auth/v1/user',{token});}catch(e){if(!refresh)throw new Fault(401,'Entre novamente.');const d=await store('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:refresh}});token=d.access_token;user=d.user;session(res,d,secureRequest(req));}const membership=await store('/rest/v1/cj_memberships?user_id=eq.'+encodeURIComponent(user.id)+'&select=workspace_id,role',{token});if(!membership?.length)throw new Fault(403,'Sua conta ainda não foi liberada neste escritório.');return {token,user,membership:membership[0]};}
+async function identity(req,res){let {cj_access:token,cj_refresh:refresh}=cookies(req),user;if(!token&&!refresh)throw new Fault(401,'Entre para continuar.');try{user=await store('/auth/v1/user',{token});}catch(e){if(!refresh)throw new Fault(401,'Entre novamente.');const d=await store('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:refresh}});token=d.access_token;user=d.user;session(res,d,secureRequest(req));}const membership=await store('/rest/v1/cj_memberships?user_id=eq.'+encodeURIComponent(user.id)+'&select=workspace_id,role',{token});if(!membership?.length)throw new Fault(403,'Sua conta ainda n�o foi liberada neste escrit�rio.');return {token,user,membership:membership[0]};}
 // Owner console: verified identity and confirmed email stored in local PostgreSQL.
 const ownerEmail=()=>String(process.env.PARTELIS_OWNER_EMAIL||'').trim().toLowerCase();
 async function ownerIdentity(req,res){let {cj_access:token,cj_refresh:refresh}=cookies(req);if(!token&&!refresh)throw new Fault(401,'Entre para continuar.');let user;try{user=await store('/auth/v1/user',{token});}catch(e){if(!refresh)throw new Fault(401,'Entre novamente.');const d=await store('/auth/v1/token?grant_type=refresh_token',{method:'POST',body:{refresh_token:refresh}});token=d.access_token;user=d.user;session(res,d,secureRequest(req));}return {token,user};}
-async function owner(req,res){const who=await ownerIdentity(req,res);if(!ownerEmail()||!who.user.email_confirmed_at||String(who.user.email||'').toLowerCase()!==ownerEmail())throw new Fault(403,'Acesso restrito ao proprietário do Partelís.');return who;}
+async function owner(req,res){const who=await ownerIdentity(req,res);if(!ownerEmail()||!who.user.email_confirmed_at||String(who.user.email||'').toLowerCase()!==ownerEmail())throw new Fault(403,'Acesso restrito ao propriet�rio do Partel�s.');return who;}
 async function adminDb(table,options={}) {
-  if(!native)throw new Fault(503,'Administração indisponível: PostgreSQL local não configurado.');
+  if(!native)throw new Fault(503,'Administra��o indispon�vel: PostgreSQL local n�o configurado.');
   return native.admin(table,options);
 }
 const allowedStage=['lead','contacted','demo','proposal','won','lost'];
 function secureRequest(req){return req.headers['x-forwarded-proto']==='https'||process.env.PUBLIC_APP_URL?.startsWith('https:');}
-async function body(req){let b='';for await(const c of req){b+=c;if(Buffer.byteLength(b)>1500000)throw new Fault(413,'Solicitação muito grande.');}try{return JSON.parse(b||'{}');}catch{throw new Fault(400,'Dados inválidos.');}}
+async function body(req){let b='';for await(const c of req){b+=c;if(Buffer.byteLength(b)>1500000)throw new Fault(413,'Solicita��o muito grande.');}try{return JSON.parse(b||'{}');}catch{throw new Fault(400,'Dados inv�lidos.');}}
 function send(res,status,data){res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'});res.end(JSON.stringify(data));}
 const attempts=new Map();function limit(req){const peer=req.socket.remoteAddress;
 const forwarded=String(req.headers['x-real-ip']||'');
 const ip=(peer==='127.0.0.1'||peer==='::1'||peer==='::ffff:127.0.0.1')&&net.isIP(forwarded)?forwarded:peer;
 const now=Date.now(),a=attempts.get(ip)||{at:now,n:0};if(now-a.at>600000){a.at=now;a.n=0;}if(++a.n>30)throw new Fault(429,'Aguarde alguns minutos antes de tentar novamente.');attempts.set(ip,a);if(attempts.size>10000)attempts.clear();}
-function page(demo=false){return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#30145F"><meta name="description" content="Partelís: gestão jurídica inteligente para escritórios"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="manifest" href="/manifest.webmanifest"><title>Partelís · Gestão jurídica inteligente</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><link rel="stylesheet" href="/liquid-glass.css"><link rel="stylesheet" href="/crm-ui.css"></head><body><script>window.CLOUD='+(!demo)+';</script><script src="/domain.js"></script><script src="/enhancements.js"></script><script src="/insights.js"></script><script src="/proposal-engine.js"></script><script src="/app.js"></script><script src="/presence.js"></script><script src="/feedback.js"></script><script src="/onboarding.js"></script><script src="/crm-experience.js"></script><script src="/proposal-settings.js"></script></body></html>';}
+function page(demo=false){return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#30145F"><meta name="description" content="Partel�s: gest�o jur�dica inteligente para escrit�rios"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="manifest" href="/manifest.webmanifest"><title>Partel�s � Gest�o jur�dica inteligente</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><link rel="stylesheet" href="/liquid-glass.css"><link rel="stylesheet" href="/crm-ui.css"></head><body><script>window.CLOUD='+(!demo)+';</script><script src="/domain.js"></script><script src="/enhancements.js"></script><script src="/insights.js"></script><script src="/proposal-engine.js"></script><script src="/app.js"></script><script src="/presence.js"></script><script src="/feedback.js"></script><script src="/onboarding.js"></script><script src="/crm-experience.js"></script><script src="/proposal-settings.js"></script></body></html>';}
 const server=http.createServer(async(req,res)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('X-Frame-Options','SAMEORIGIN');res.setHeader('Cache-Control','no-store');res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'");
 try{const route=new URL(req.url,'http://local').pathname;
-if(req.method!=='GET'&&req.method!=='HEAD'){const origin=req.headers.origin,expected=process.env.PUBLIC_APP_URL||'http://'+req.headers.host;if(!origin||new URL(origin).origin!==new URL(expected).origin)throw new Fault(403,'Origem não autorizada.');}
+// Index only public marketing content; application routes remain outside search.
+const indexable=new Set(['/','/privacidade']);
+if(!indexable.has(route)&&! /\.(css|js|svg|webmanifest)$/.test(route))res.setHeader('X-Robots-Tag','noindex, nofollow');
+if((req.method==='GET'||req.method==='HEAD')&&(route==='/robots.txt'||route==='/sitemap.xml')){
+  res.removeHeader('X-Robots-Tag');
+  const robots='User-agent: *\nAllow: /\nDisallow: /api/\nDisallow: /auth/\nSitemap: https://partelis.com.br/sitemap.xml\n';
+  const sitemap='<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://partelis.com.br/</loc></url><url><loc>https://partelis.com.br/privacidade</loc></url></urlset>\n';
+  res.setHeader('Content-Type',route==='/robots.txt'?'text/plain; charset=utf-8':'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control','public, max-age=3600');
+  return res.end(req.method==='HEAD'?'':route==='/robots.txt'?robots:sitemap);
+}
+if((req.method==='GET'||req.method==='HEAD')&&(route==='/contato'||route==='/contratar')){
+  res.writeHead(301,{Location:'/#contato'});return res.end();
+}
+
+if(req.method!=='GET'&&req.method!=='HEAD'){const origin=req.headers.origin,expected=process.env.PUBLIC_APP_URL||'http://'+req.headers.host;if(!origin||new URL(origin).origin!==new URL(expected).origin)throw new Fault(403,'Origem n�o autorizada.');}
 
 // Public marketing is deliberately separate from the real app and demo.
 if(route==='/api/public/leads'&&req.method==='POST'){
-  if(!commercial)throw new Fault(503,'Solicitações indisponíveis neste ambiente.');
+  if(!commercial)throw new Fault(503,'Solicita��es indispon�veis neste ambiente.');
   limit(req);const p=await body(req);
   const answer=await commercial.createLead(p);
   return send(res,201,answer);
@@ -45,7 +60,7 @@ if(route==='/admin/comercial'&&req.method==='GET'){
   return res.end(fs.readFileSync(path.join(__dirname,'admin-commercial.html')));
 }
 if(route.startsWith('/api/admin/commercial/')){
-  if(!commercial)throw new Fault(503,'Administração disponível somente na VPS.');
+  if(!commercial)throw new Fault(503,'Administra��o dispon�vel somente na VPS.');
   limit(req);
   const actor=(await owner(req,res)).user.id;
   const p=req.method==='POST'?await body(req):{};
@@ -61,20 +76,20 @@ if(route.startsWith('/api/admin/commercial/')){
 if(route==='/ativar'&&req.method==='GET'){
 res.setHeader('Referrer-Policy','no-referrer');
 res.setHeader('Content-Type','text/html; charset=utf-8');
-return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Criar senha · Partelís</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><body class="login-page"><main class="login-shell"><section class="login-story"><img src="/brand-horizontal.svg" alt="Partelís" width="220"><h1>Bem-vinda ao Partelís.</h1><p>Seu convite pessoal para testar o escritório com dados fictícios.</p></section><section class="login-card"><h2>Crie sua senha</h2><p>Continue para validar seu convite e escolher uma senha exclusiva.</p><button id="activate" class="btn primary">Criar minha senha</button><p id="message" role="status"></p></section></main><script>const params=new URLSearchParams(location.hash.slice(1));const token=params.get("token_hash");history.replaceState(null,"","/ativar");document.querySelector("#activate").onclick=async function(){this.disabled=true;try{const r=await fetch("/auth/activate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token_hash:token})});const d=await r.json();if(!r.ok)throw new Error(d.error);location.replace("/conta");}catch(e){document.querySelector("#message").textContent=e.message;this.disabled=false;}};</script></body></html>');
+return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Criar senha � Partel�s</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><body class="login-page"><main class="login-shell"><section class="login-story"><img src="/brand-horizontal.svg" alt="Partel�s" width="220"><h1>Bem-vinda ao Partel�s.</h1><p>Seu convite pessoal para testar o escrit�rio com dados fict�cios.</p></section><section class="login-card"><h2>Crie sua senha</h2><p>Continue para validar seu convite e escolher uma senha exclusiva.</p><button id="activate" class="btn primary">Criar minha senha</button><p id="message" role="status"></p></section></main><script>const params=new URLSearchParams(location.hash.slice(1));const token=params.get("token_hash");history.replaceState(null,"","/ativar");document.querySelector("#activate").onclick=async function(){this.disabled=true;try{const r=await fetch("/auth/activate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token_hash:token})});const d=await r.json();if(!r.ok)throw new Error(d.error);location.replace("/conta");}catch(e){document.querySelector("#message").textContent=e.message;this.disabled=false;}};</script></body></html>');
 }
 if(route==='/auth/activate'&&req.method==='POST'){
 limit(req);const p=await body(req);
-if(typeof p.token_hash!=='string'||!/^[a-f0-9]{40,128}$/i.test(p.token_hash))throw new Fault(400,'Convite inválido. Abra o link completo recebido.');
-let d;try{d=await store('/auth/v1/verify',{method:'POST',body:{token_hash:p.token_hash,type:'email'}});}catch{throw new Fault(400,'Este convite expirou ou já foi utilizado. Solicite um novo link.');}
+if(typeof p.token_hash!=='string'||!/^[a-f0-9]{40,128}$/i.test(p.token_hash))throw new Fault(400,'Convite inv�lido. Abra o link completo recebido.');
+let d;try{d=await store('/auth/v1/verify',{method:'POST',body:{token_hash:p.token_hash,type:'email'}});}catch{throw new Fault(400,'Este convite expirou ou j� foi utilizado. Solicite um novo link.');}
 const member=await store('/rest/v1/cj_memberships?user_id=eq.'+encodeURIComponent(d.user.id)+'&select=workspace_id',{token:d.access_token});
-if(!member?.length)throw new Fault(403,'Este acesso ainda não foi liberado para os testes.');
+if(!member?.length)throw new Fault(403,'Este acesso ainda n�o foi liberado para os testes.');
 session(res,d,secureRequest(req));return send(res,200,{ok:true});
 }
 
 if(route==='/admin'&&req.method==='GET'){await owner(req,res);res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,'admin.html')));}
 if(route==='/api/profile'&&req.method==='GET'){const who=await ownerIdentity(req,res);const profiles=await store('/rest/v1/cj_user_profiles?user_id=eq.'+encodeURIComponent(who.user.id)+'&select=display_name,avatar_data,updated_at',{token:who.token});return send(res,200,{profile:profiles[0]||null,email:who.user.email});}
-if(route==='/api/profile'&&req.method==='POST'){limit(req);const who=await ownerIdentity(req,res),p=await body(req);const display_name=String(p.display_name||'').trim(),avatar_data=p.avatar_data;if(display_name.length<2||display_name.length>80||typeof p.avatar_data!=='string'&&avatar_data!==null)throw new Fault(400,'Confira o nome e a foto.');if(avatar_data!==null&&(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar_data)||avatar_data.length>160000))throw new Fault(400,'A foto deve ser JPG, PNG ou WebP de até 120 KB após otimização.');const profiles=await store('/rest/v1/cj_user_profiles?on_conflict=user_id',{token:who.token,method:'POST',body:{user_id:who.user.id,display_name,avatar_data,updated_at:new Date().toISOString()},prefer:'resolution=merge-duplicates,return=representation'});return send(res,200,{profile:profiles[0],email:who.user.email});}
+if(route==='/api/profile'&&req.method==='POST'){limit(req);const who=await ownerIdentity(req,res),p=await body(req);const display_name=String(p.display_name||'').trim(),avatar_data=p.avatar_data;if(display_name.length<2||display_name.length>80||typeof p.avatar_data!=='string'&&avatar_data!==null)throw new Fault(400,'Confira o nome e a foto.');if(avatar_data!==null&&(!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(avatar_data)||avatar_data.length>160000))throw new Fault(400,'A foto deve ser JPG, PNG ou WebP de at� 120 KB ap�s otimiza��o.');const profiles=await store('/rest/v1/cj_user_profiles?on_conflict=user_id',{token:who.token,method:'POST',body:{user_id:who.user.id,display_name,avatar_data,updated_at:new Date().toISOString()},prefer:'resolution=merge-duplicates,return=representation'});return send(res,200,{profile:profiles[0],email:who.user.email});}
 if(route==='/api/feedback'&&req.method==='POST'){limit(req);const who=await identity(req,res),p=await body(req);if(!['bug','idea','usability'].includes(p.kind)||typeof p.message!=='string'||p.message.trim().length<8||p.message.length>3000||typeof p.page!=='string'||p.page.length>200)throw new Fault(400,'Confira os campos do feedback.');await adminDb('cj_beta_feedback',{method:'POST',body:{workspace_id:who.membership.workspace_id,user_id:who.user.id,kind:p.kind,message:p.message.trim(),page:p.page},prefer:'return=minimal'});return send(res,200,{ok:true});}
 if(route==='/admin/operacoes'&&req.method==='GET'){
  await owner(req,res);
@@ -82,7 +97,7 @@ if(route==='/admin/operacoes'&&req.method==='GET'){
  return res.end(fs.readFileSync(path.join(__dirname,'ops-admin.html')));
 }
 if(route.startsWith('/api/admin/ops/')){
- if(!native)throw new Fault(503,'Métricas operacionais requerem PostgreSQL.');
+ if(!native)throw new Fault(503,'M�tricas operacionais requerem PostgreSQL.');
  limit(req);
  const actorId=(await owner(req,res)).user.id;
  const ops=require('./ops/native/ops.cjs');
@@ -97,26 +112,26 @@ if(route.startsWith('/api/admin/ops/')){
 }
 if(route.startsWith('/api/admin/')){limit(req);await owner(req,res);const p=req.method==='POST'?await body(req):{};if(route==='/api/admin/dashboard'&&req.method==='GET'){const [tenants,deals,feedback]=await Promise.all([adminDb('cj_admin_tenants'),adminDb('cj_admin_deals?order=created_at.desc'),adminDb('cj_beta_feedback?order=created_at.desc')]);return send(res,200,{tenants,deals,feedback});}
 if(route==='/api/admin/workspaces'&&req.method==='GET'){const rows=await adminDb('cj_memberships?select=workspace_id,role,user_id');const unique=[...new Set(rows.map(x=>x.workspace_id))];const grants=await adminDb('cj_support_grants');return send(res,200,{workspaces:unique.map(id=>({id,users:rows.filter(x=>x.workspace_id===id).length,grant:grants.find(g=>g.workspace_id===id&& !g.revoked_at&&new Date(g.expires_at)>new Date())?true:false}))});}
-if(route==='/api/admin/support'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.workspace_id||'')))throw new Fault(400,'Escritório inválido.');const grants=await adminDb('cj_support_grants?workspace_id=eq.'+encodeURIComponent(p.workspace_id));const grant=grants[0];if(!grant||grant.revoked_at||new Date(grant.expires_at)<=new Date())throw new Fault(403,'O escritório precisa autorizar o suporte.');const rows=await adminDb('cj_state?workspace_id=eq.'+encodeURIComponent(p.workspace_id)+'&select=revision,data,theme');if(!rows.length)throw new Fault(404,'Ambiente indisponível.');await adminDb('cj_support_audit',{method:'POST',body:{workspace_id:p.workspace_id,owner_id:(await owner(req,res)).user.id,event:'support_read'},prefer:'return=minimal'});return send(res,200,{workspace_id:p.workspace_id,revision:rows[0].revision,theme:rows[0].theme,data:rows[0].data,read_only:true});}
+if(route==='/api/admin/support'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.workspace_id||'')))throw new Fault(400,'Escrit�rio inv�lido.');const grants=await adminDb('cj_support_grants?workspace_id=eq.'+encodeURIComponent(p.workspace_id));const grant=grants[0];if(!grant||grant.revoked_at||new Date(grant.expires_at)<=new Date())throw new Fault(403,'O escrit�rio precisa autorizar o suporte.');const rows=await adminDb('cj_state?workspace_id=eq.'+encodeURIComponent(p.workspace_id)+'&select=revision,data,theme');if(!rows.length)throw new Fault(404,'Ambiente indispon�vel.');await adminDb('cj_support_audit',{method:'POST',body:{workspace_id:p.workspace_id,owner_id:(await owner(req,res)).user.id,event:'support_read'},prefer:'return=minimal'});return send(res,200,{workspace_id:p.workspace_id,revision:rows[0].revision,theme:rows[0].theme,data:rows[0].data,read_only:true});}
 if(route==='/api/admin/deal'&&req.method==='POST'){if(!String(p.name||'').trim()||String(p.name).length>100||!String(p.next_action||'').trim()||String(p.next_action).length>200||!/^\d{4}-\d{2}-\d{2}$/.test(String(p.next_date||''))||!Number.isFinite(Number(p.value||0))||Number(p.value||0)<0)throw new Fault(400,'Confira os dados da oportunidade.');await adminDb('cj_admin_deals',{method:'POST',body:{name:String(p.name).trim(),contact:String(p.contact||'').slice(0,120),value:Number(p.value||0),next_action:String(p.next_action).trim(),next_date:p.next_date},prefer:'return=minimal'});return send(res,200,{ok:true});}
-if(route==='/api/admin/deal-status'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.id||''))||!allowedStage.includes(p.stage))throw new Fault(400,'Etapa inválida.');await adminDb('cj_admin_deals',{method:'PATCH',query:'?id=eq.'+encodeURIComponent(p.id),body:{stage:p.stage},prefer:'return=minimal'});return send(res,200,{ok:true});}
-if(route==='/api/admin/feedback-status'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.id||''))||!['open','reviewing','resolved'].includes(p.status))throw new Fault(400,'Status inválido.');await adminDb('cj_beta_feedback',{method:'PATCH',query:'?id=eq.'+encodeURIComponent(p.id),body:{status:p.status},prefer:'return=minimal'});return send(res,200,{ok:true});}
-throw new Fault(404,'Recurso indisponível.');}
+if(route==='/api/admin/deal-status'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.id||''))||!allowedStage.includes(p.stage))throw new Fault(400,'Etapa inv�lida.');await adminDb('cj_admin_deals',{method:'PATCH',query:'?id=eq.'+encodeURIComponent(p.id),body:{stage:p.stage},prefer:'return=minimal'});return send(res,200,{ok:true});}
+if(route==='/api/admin/feedback-status'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.id||''))||!['open','reviewing','resolved'].includes(p.status))throw new Fault(400,'Status inv�lido.');await adminDb('cj_beta_feedback',{method:'PATCH',query:'?id=eq.'+encodeURIComponent(p.id),body:{status:p.status},prefer:'return=minimal'});return send(res,200,{ok:true});}
+throw new Fault(404,'Recurso indispon�vel.');}
 if(route==='/health')return send(res,200,{status:'ok',configured:!!native&&await native.health()});
 if(route==='/auth/login'&&req.method==='POST'){limit(req);const p=await body(req);const d=await store('/auth/v1/token?grant_type=password',{method:'POST',body:{email:p.email,password:p.password}});session(res,d,secureRequest(req));return send(res,200,{ok:true});}
-if(route==='/auth/signup'&&req.method==='POST')throw new Fault(403,'Novas contas são criadas por convite aprovado pelo Partelís.');
+if(route==='/auth/signup'&&req.method==='POST')throw new Fault(403,'Novas contas s�o criadas por convite aprovado pelo Partel�s.');
 if(route==='/auth/logout'&&req.method==='POST'){const token=cookies(req).cj_access;if(token||native)await store('/auth/v1/logout',{token,method:'POST',...(native?{body:{refresh_token:cookies(req).cj_refresh}}:{})}).catch(()=>{});res.setHeader('Set-Cookie',['cj_access=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/','cj_refresh=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/']);return send(res,200,{ok:true});}
-// Catálogo original em modo SOMENTE pré-validação; nunca cria documento ou assinatura.
+// Cat�logo original em modo SOMENTE pr�-valida��o; nunca cria documento ou assinatura.
 if(route==='/juridico'&&req.method==='GET'){
  const who=await identity(req,res);
  if(!require('./lib/legal-core.cjs').may(who.membership.role,'legalRead'))
-  throw new Fault(403,'Perfil sem acesso à gestão processual.');
+  throw new Fault(403,'Perfil sem acesso � gest�o processual.');
  res.setHeader('Content-Type','text/html; charset=utf-8');
  return res.end(fs.readFileSync(path.join(__dirname,'juridico.html')));
 }
 if(route==='/contratos'&&req.method==='GET'){
  const who=await identity(req,res);
- if(!C.can(who.membership.role,'contract'))throw new Fault(403,'Perfil sem acesso à preparação documental.');
+ if(!C.can(who.membership.role,'contract'))throw new Fault(403,'Perfil sem acesso � prepara��o documental.');
  res.setHeader('Content-Type','text/html; charset=utf-8');
  return res.end(fs.readFileSync(path.join(__dirname,'contracts-preflight.html')));
 }
@@ -128,26 +143,26 @@ if(route==='/api/contracts/catalog'&&req.method==='GET'){
 if(route==='/api/contracts/preflight'&&req.method==='POST'){
  limit(req);
  const who=await identity(req,res);
- if(!C.can(who.membership.role,'contract'))throw new Fault(403,'Perfil sem acesso à pré-validação documental.');
+ if(!C.can(who.membership.role,'contract'))throw new Fault(403,'Perfil sem acesso � pr�-valida��o documental.');
  const payload=await body(req);
  if(!payload||typeof payload!=='object'||Array.isArray(payload)||
   typeof payload.modalidade!=='string'||typeof payload.tipo!=='string'||
   payload.modalidade.length>100||payload.tipo.length>100)
-  throw new Fault(400,'Modelo documental inválido.');
+  throw new Fault(400,'Modelo documental inv�lido.');
  let result;
  try{result=require('./zapsign-preflight.cjs').preflight(payload.modalidade,payload.tipo,payload.values);}
- catch(e){throw new Fault(400,'Modelo documental inexistente ou dados inválidos.');}
+ catch(e){throw new Fault(400,'Modelo documental inexistente ou dados inv�lidos.');}
  return send(res,result.ok?200:422,result);
 }
 if(route==='/api/presence'&&req.method==='POST'){
- if(!native)throw new Fault(503,'Presença indisponível neste ambiente.');
+ if(!native)throw new Fault(503,'Presen�a indispon�vel neste ambiente.');
  limit(req);
  const who=await identity(req,res);
  return send(res,200,await require('./ops/native/ops.cjs').heartbeat(
   who.membership.workspace_id,who.user.id));
 }
 if(route.startsWith('/api/legal/')){
- if(!native)throw new Fault(503,'Gestão processual indisponível neste ambiente.');
+ if(!native)throw new Fault(503,'Gest�o processual indispon�vel neste ambiente.');
  limit(req);
  const who=await identity(req,res);
  const p=req.method==='POST'?await body(req):{};
@@ -158,25 +173,25 @@ if(route.startsWith('/api/legal/')){
  return send(res,req.method==='POST'?201:200,result);
 }
 if(route.startsWith('/api/')){const who=await identity(req,res);const base='/rest/v1/cj_state?workspace_id=eq.'+who.membership.workspace_id;const rows=await store(base+'&select=revision,data,theme',{token:who.token});let row=rows[0];
-if(!row)throw new Fault(503,'O escritório precisa ser inicializado pelo administrador.');
+if(!row)throw new Fault(503,'O escrit�rio precisa ser inicializado pelo administrador.');
 if(route==='/api/password'&&req.method==='POST'){const p=await body(req);if(String(p.password||'').length<8)throw new Fault(400,'Use pelo menos 8 caracteres.');await store('/auth/v1/user',{token:who.token,method:'PUT',body:{password:p.password}});return send(res,200,{ok:true});}
 if(route==='/api/support/status'&&req.method==='GET'){const grants=await adminDb('cj_support_grants?workspace_id=eq.'+encodeURIComponent(who.membership.workspace_id));const g=grants[0];return send(res,200,{allowed:['gestor','socio_admin'].includes(who.membership.role),active:!!(g&&!g.revoked_at&&new Date(g.expires_at)>new Date()),expires_at:g&&!g.revoked_at?g.expires_at:null});}
-if(route==='/api/support/grant'&&req.method==='POST'){if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Somente o gestor autoriza o suporte.');const p=await body(req);if(p.action==='revoke'){await adminDb('cj_support_grants',{method:'PATCH',query:'?workspace_id=eq.'+encodeURIComponent(who.membership.workspace_id),body:{revoked_at:new Date().toISOString()},prefer:'return=minimal'});return send(res,200,{ok:true});}if(p.action!=='approve'||p.confirm!==true)throw new Fault(400,'Confirme a autorização.');await adminDb('cj_support_grants',{method:'POST',body:{workspace_id:who.membership.workspace_id,approved_by:who.user.id,expires_at:new Date(Date.now()+60*60*1000).toISOString(),revoked_at:null,reason:'Suporte técnico solicitado'},prefer:'resolution=merge-duplicates,return=minimal'});return send(res,200,{ok:true,expires_in_minutes:60});}
+if(route==='/api/support/grant'&&req.method==='POST'){if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Somente o gestor autoriza o suporte.');const p=await body(req);if(p.action==='revoke'){await adminDb('cj_support_grants',{method:'PATCH',query:'?workspace_id=eq.'+encodeURIComponent(who.membership.workspace_id),body:{revoked_at:new Date().toISOString()},prefer:'return=minimal'});return send(res,200,{ok:true});}if(p.action!=='approve'||p.confirm!==true)throw new Fault(400,'Confirme a autoriza��o.');await adminDb('cj_support_grants',{method:'POST',body:{workspace_id:who.membership.workspace_id,approved_by:who.user.id,expires_at:new Date(Date.now()+60*60*1000).toISOString(),revoked_at:null,reason:'Suporte t�cnico solicitado'},prefer:'resolution=merge-duplicates,return=minimal'});return send(res,200,{ok:true,expires_in_minutes:60});}
 if(route==='/api/state'&&req.method==='GET')return send(res,200,{...row,user:{email:who.user.email,role:who.membership.role}});
-if(route==='/api/action'&&req.method==='POST'){const p=await body(req);if(p.revision!==row.revision)throw new Fault(409,'Outra pessoa atualizou este escritório. Recarregue para ver a versão mais recente.');const role=who.membership.role;let output;try{output=C.execute(C.validate(row.data),role,p.action,p.data);}catch(error){throw new Fault(400,error.message);}output.state.audit[0].actorId=who.user.id;
-const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{data:output.state,revision:row.revision+1,updated_at:new Date().toISOString()}});if(!changed.length)throw new Fault(409,'Atualização simultânea. Recarregue antes de continuar.');return send(res,200,{state:output.state,result:output.result,revision:changed[0].revision});}
-if(route==='/api/theme'&&req.method==='POST'){if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Somente o gestor altera a identidade do escritório.');const p=await body(req);if(!/^#[0-9a-f]{6}$/i.test(p.accent)||!String(p.name||'').trim()||p.name.length>60)throw new Fault(400,'Confira o nome e a cor da marca.');let proposal=row.theme?.proposal||null;
+if(route==='/api/action'&&req.method==='POST'){const p=await body(req);if(p.revision!==row.revision)throw new Fault(409,'Outra pessoa atualizou este escrit�rio. Recarregue para ver a vers�o mais recente.');const role=who.membership.role;let output;try{output=C.execute(C.validate(row.data),role,p.action,p.data);}catch(error){throw new Fault(400,error.message);}output.state.audit[0].actorId=who.user.id;
+const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{data:output.state,revision:row.revision+1,updated_at:new Date().toISOString()}});if(!changed.length)throw new Fault(409,'Atualiza��o simult�nea. Recarregue antes de continuar.');return send(res,200,{state:output.state,result:output.result,revision:changed[0].revision});}
+if(route==='/api/theme'&&req.method==='POST'){if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Somente o gestor altera a identidade do escrit�rio.');const p=await body(req);if(!/^#[0-9a-f]{6}$/i.test(p.accent)||!String(p.name||'').trim()||p.name.length>60)throw new Fault(400,'Confira o nome e a cor da marca.');let proposal=row.theme?.proposal||null;
 if(p.proposal!==undefined){
  const cfg=p.proposal;
- if(!cfg||typeof cfg!=='object'||Array.isArray(cfg))throw new Fault(400,'Configurações de proposta inválidas.');
+ if(!cfg||typeof cfg!=='object'||Array.isArray(cfg))throw new Fault(400,'Configura��es de proposta inv�lidas.');
  const color=v=>/^#[0-9a-f]{6}$/i.test(String(v||'')),short=(v,n)=>typeof v==='string'&&v.length<=n;
- if(!color(cfg.primary)||!color(cfg.secondary)||!short(cfg.responsible,100)||!short(cfg.oab,50)||!short(cfg.payment,140)||!Number.isInteger(cfg.days)||cfg.days<1||cfg.days>90)throw new Fault(400,'Confira a personalização da proposta.');
+ if(!color(cfg.primary)||!color(cfg.secondary)||!short(cfg.responsible,100)||!short(cfg.oab,50)||!short(cfg.payment,140)||!Number.isInteger(cfg.days)||cfg.days<1||cfg.days>90)throw new Fault(400,'Confira a personaliza��o da proposta.');
  const dataImage=(v,lim)=>typeof v==='string'&&(!v||v.length<=lim&&/^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/=]+$/i.test(v));
  if(!dataImage(cfg.logo,270000)||!dataImage(cfg.cover,540000))throw new Fault(413,'Imagem de proposta excede o limite. Otimize o arquivo.');
  proposal={primary:cfg.primary,secondary:cfg.secondary,responsible:cfg.responsible.trim(),oab:cfg.oab.trim(),days:cfg.days,payment:cfg.payment.trim(),logo:cfg.logo||'',cover:cfg.cover||''};
 }
 const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{theme:{...row.theme,name:p.name.trim(),accent:p.accent,...(proposal?{proposal}:{})},revision:row.revision+1}});if(!changed.length)throw new Fault(409,'Recarregue antes de alterar a marca.');return send(res,200,{theme:changed[0].theme,revision:changed[0].revision});}
-throw new Fault(404,'Recurso indisponível.');}
+throw new Fault(404,'Recurso indispon�vel.');}
 if(route==='/'||route==='/contato'||route==='/contratar'){
   res.setHeader('Content-Type','text/html; charset=utf-8');
   return res.end(fs.readFileSync(path.join(__dirname,'landing.html')));
@@ -189,8 +204,7 @@ if(route==='/privacidade'){
   res.setHeader('Content-Type','text/html; charset=utf-8');
   return res.end(fs.readFileSync(path.join(__dirname,'privacy.html')));
 }
-const files={'/landing.css':'landing.css','/landing.js':'landing.js','/admin-commercial.js':'admin-commercial.js','/proposal-engine.js':'proposal-engine.js','/proposal-settings.js':'proposal-settings.js','/conhecer':'onboarding-quiz.html','/crm-ui.css':'crm-ui.css','/crm-experience.js':'crm-experience.js','/release-notes.json':'release-notes.json','/onboarding.js':'onboarding.js','/admin.js':'admin.js','/feedback.js':'feedback.js','/favicon.svg':'favicon.svg','/brand-symbol.svg':'brand-symbol.svg','/brand-horizontal.svg':'brand-horizontal.svg','/brand-horizontal-white.svg':'brand-horizontal-white.svg','/manifest.webmanifest':'manifest.webmanifest','/partelis.css':'partelis.css','/liquid-glass.css':'liquid-glass.css','/identidade':'brand-video.html','/cliente/demo':'cliente.html','/cliente.js':'cliente.js','/cliente.css':'cliente.css','/cliente.webmanifest':'cliente.webmanifest','/style.css':'style.css','/modern.css':'modern.css','/domain.js':'domain.js','/app.js':'app.js','/enhancements.js':'enhancements.js','/insights.js':'insights.js','/login':'login.html','/ops-admin.js':'ops-admin.js','/presence.js':'presence.js','/juridico.js':'juridico.js','/contracts-preflight.js':'contracts-preflight.js','/login.js':'login.js','/conta':'account.html','/account.js':'account.js','/apresentacao':'presentation.html','/presentation.js':'presentation.js'};if(req.method==='GET'&&/^\/templates\/proposta_(?:passivo_bancario|acao_revisional|superendividamento|holding)\.html$/.test(route)){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,route.slice(1))));}if(files[route]&&req.method==='GET'){const f=files[route];res.setHeader('Content-Type',f.endsWith('.json')?'application/json; charset=utf-8':f.endsWith('.js')?'application/javascript; charset=utf-8':f.endsWith('.css')?'text/css; charset=utf-8':f.endsWith('.svg')?'image/svg+xml':f.endsWith('.webmanifest')?'application/manifest+json':'text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,f)));}throw new Fault(404,'Página não encontrada.');
-}catch(e){if(e.status===401&&req.url==='/' ){res.writeHead(302,{Location:'/login'});res.end();}else send(res,e.status||500,{error:e.status?e.message:'Falha temporária. Tente novamente.'});}});
-if(require.main===module)server.listen(process.env.PORT||4180,process.env.BIND_HOST||(native?'127.0.0.1':'0.0.0.0'),()=>console.log('Partelís iniciado'));
+const files={'/landing.css':'landing.css','/landing.js':'landing.js','/admin-commercial.js':'admin-commercial.js','/proposal-engine.js':'proposal-engine.js','/proposal-settings.js':'proposal-settings.js','/conhecer':'onboarding-quiz.html','/crm-ui.css':'crm-ui.css','/crm-experience.js':'crm-experience.js','/release-notes.json':'release-notes.json','/onboarding.js':'onboarding.js','/admin.js':'admin.js','/feedback.js':'feedback.js','/favicon.svg':'favicon.svg','/brand-symbol.svg':'brand-symbol.svg','/brand-horizontal.svg':'brand-horizontal.svg','/brand-horizontal-white.svg':'brand-horizontal-white.svg','/manifest.webmanifest':'manifest.webmanifest','/partelis.css':'partelis.css','/liquid-glass.css':'liquid-glass.css','/identidade':'brand-video.html','/cliente/demo':'cliente.html','/cliente.js':'cliente.js','/cliente.css':'cliente.css','/cliente.webmanifest':'cliente.webmanifest','/style.css':'style.css','/modern.css':'modern.css','/domain.js':'domain.js','/app.js':'app.js','/enhancements.js':'enhancements.js','/insights.js':'insights.js','/login':'login.html','/ops-admin.js':'ops-admin.js','/presence.js':'presence.js','/juridico.js':'juridico.js','/contracts-preflight.js':'contracts-preflight.js','/login.js':'login.js','/conta':'account.html','/account.js':'account.js','/apresentacao':'presentation.html','/presentation.js':'presentation.js'};if(req.method==='GET'&&/^\/templates\/proposta_(?:passivo_bancario|acao_revisional|superendividamento|holding)\.html$/.test(route)){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,route.slice(1))));}if(files[route]&&req.method==='GET'){const f=files[route];res.setHeader('Content-Type',f.endsWith('.json')?'application/json; charset=utf-8':f.endsWith('.js')?'application/javascript; charset=utf-8':f.endsWith('.css')?'text/css; charset=utf-8':f.endsWith('.svg')?'image/svg+xml':f.endsWith('.webmanifest')?'application/manifest+json':'text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,f)));}throw new Fault(404,'P�gina n�o encontrada.');
+}catch(e){if(e.status===401&&req.url==='/' ){res.writeHead(302,{Location:'/login'});res.end();}else send(res,e.status||500,{error:e.status?e.message:'Falha tempor�ria. Tente novamente.'});}});
+if(require.main===module)server.listen(process.env.PORT||4180,process.env.BIND_HOST||(native?'127.0.0.1':'0.0.0.0'),()=>console.log('Partel�s iniciado'));
 module.exports={server};
-
