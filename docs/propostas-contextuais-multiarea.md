@@ -1,6 +1,6 @@
 # Partelís · Propostas contextuais por área e serviço (v1)
 
-**Status:** alteração incrementável em PR; nenhuma migração de banco, ativação de acordo automatizado ou publicação na VPS é necessária para experimentar em homologação. O catálogo inicial foi preparado em 11/11/2026 e **requer revisão editorial jurídica antes de ser oferecido como modelo pronto para uso**.
+**Status:** alteração implementada na PR #17. A publicação da revisão aprovada é condicionada aos testes Node/PostgreSQL e ao deploy seguro com backup, healthcheck e rollback. O catálogo exige revisão editorial antes de ser usado como orientação jurídica pronta. O catálogo inicial foi preparado em 11/11/2026 e **requer revisão editorial jurídica antes de ser oferecido como modelo pronto para uso**.
 
 ## Objetivo
 
@@ -70,3 +70,22 @@ A lista não representa a totalidade de classes processuais e não é um ranking
 - [ ] Verificar acesso e escrita entre escritórios no PostgreSQL, sem vazamento.
 - [ ] Conferir revisão jurídica dos textos do catálogo com advogados das áreas específicas.
 - [ ] Só depois realizar merge e deploy com rollback e healthcheck.
+
+
+## Extensões implementadas nesta PR
+
+- **Perfil do escritório:** gestores e sócios administradores definem `practice.primaryArea` e `practice.enabledAreas` em Configurações → Especialidades do escritório. O backend valida 14 códigos de área e preserva a marca, as propostas e os dados anteriores. O seletor de novos atendimentos usa somente as áreas configuradas e coloca a principal primeiro. O escritório pode atuar em múltiplas áreas.
+- **Minuta de acordo distinta da proposta comercial:** para serviços do catálogo classificados como negociação, a ficha de atendimento e a visualização da proposta oferecem a opção de redigir uma **minuta preliminar de proposta de acordo**. A minuta abre em nova aba para revisão e PDF, com aviso expresso de não vinculação. **Não é gravada no servidor, não gera assinatura, não faz envio, não cria obrigação nem automatiza homologação.** A persistência e os fluxos jurídicos de acordos precisam de estrutura própria com controle de sigilo antes de serem ativados.
+- **Apresentação apropriada por serviço:** seleção de ação revisional ou superendividamento no bancário recomenda seus modelos correspondentes; demais serviços recebem modelo genérico para evitar linguagem indevida de dívida/holding.
+- **Proteção de dados legados:** identificador, modalidade, escopo, exclusões, documentos e etapas do serviço ficam registrados na versão da proposta, protegendo o conteúdo original contra alterações futuras de catálogo.
+
+## Publicação única condicionada
+
+O arquivo `.github/workflows/deploy-pr17-multiarea-once.yml` adiciona uma execução **uma única vez**, mediante merge cujo título contenha `partelis-pr17-release-20261111`. O workflow:
+
+1. Verifica commit SHA e script de implantação.
+2. Executa `npm run build`, `npm test` e `npm run test:deploy`.
+3. Sobe banco PostgreSQL descartável, aplica migrações conhecidas e executa verificadores de isolamento, legal e comercial.
+4. Somente após aprovação executa a rotina de publicação existente por SSH, com `production` environment, host verificado e rollback na VPS.
+
+O arquivo é inócuo para futuros merges sem o token. **CI e implantação executados devem ser confirmados pelos logs reais do GitHub Actions; a presença do workflow não demonstra que a VPS foi atualizada.** A remoção do workflow exclusivo pode ser feita em uma PR de limpeza após a execução confirmada.
