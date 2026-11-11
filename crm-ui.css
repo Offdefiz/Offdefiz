@@ -304,3 +304,14 @@
 @media(min-width:651px){.crm-ready.sidebar-collapsed .crm-utility-nav{grid-template-columns:1fr}.crm-ready.sidebar-collapsed .crm-utility-nav button{font-size:0}}
 @media(max-width:650px){.crm-ready .brand small{font-size:8px}.crm-ready .crm-utility-nav button{font-size:11px}}
 
+
+/* Override the legacy light canvas, whose :not selectors outrank body.dark. */
+body.office-ui.crm-ready.dark{background:radial-gradient(ellipse at 90% 0,color-mix(in srgb,var(--workspace-accent) 14%,transparent),transparent 42%),var(--paper);background-attachment:fixed;color:var(--ink)}
+.office-ui.crm-ready.dark .content{background:transparent}
+.office-ui.crm-ready.dark #nav button.active,.office-ui.crm-ready.dark .crm-utility-nav button.active{color:var(--ink)}
+.office-ui.crm-ready.dark #nav button.active svg,.office-ui.crm-ready.dark .crm-nav-toggle{color:var(--ui-accent)}
+.office-ui.crm-ready.dark .metric{--red:#ffb4be;--gold:#f8d88f}
+.office-ui.crm-ready.dark .panel-head{background:color-mix(in srgb,var(--paper) 60%,var(--surface));color:var(--ink)}
+.office-ui.crm-ready.dark .crm-global-search,.office-ui.crm-ready.dark .demo-tag{background:var(--paper);color:var(--muted)}
+.crm-ready #nav{overflow-x:hidden}
+
