@@ -73,9 +73,9 @@ function buildValues({proposal,client,office,settings,debts}){
   AREA_NOME:visual.areaName||service?.areaName||String(visual.area||p.area||'A definir'),
   SERVICO_NOME:visual.serviceName||service?.title||'Serviço jurídico a definir',
   MODALIDADE_ATUACAO:visual.modality||service?.modality||'A definir',
-  SERVICO_ESCOPO:service?.scope||'Escopo sujeito à definição profissional.',
-  SERVICO_EXCLUSOES:service?.exclusions||'Atos não incluídos deverão ser definidos em contratação específica.',
-  DOCUMENTOS_INICIAIS:(service?.documents||[]).join(' • ')||'Conforme avaliação do responsável'
+  SERVICO_ESCOPO:visual.serviceScope||service?.scope||'Escopo sujeito à definição profissional.',
+  SERVICO_EXCLUSOES:visual.serviceExclusions||service?.exclusions||'Atos não incluídos deverão ser definidos em contratação específica.',
+  DOCUMENTOS_INICIAIS:(visual.serviceDocuments?.length?visual.serviceDocuments:service?.documents||[]).join(' • ')||'Conforme avaliação do responsável'
  };
  const totalDebt=(debts||[]).reduce((a,d)=>a+Number(d.amount||0),0);
  const extras={
@@ -94,7 +94,7 @@ function buildValues({proposal,client,office,settings,debts}){
   if(typeof value==='string'||typeof value==='number')data[key]=String(value).slice(0,300);
  }
  const scope=visual.scopeItems||String(p.scope||'').split(/\n+/).map(x=>({title:'Serviço contratado',description:x}));
- const steps=visual.steps?.length?visual.steps:(kind==='generico'?(service?.steps||[]).map(title=>({title,deadline:'A definir'})):[]);
+ const steps=visual.steps?.length?visual.steps:(kind==='generico'?(visual.serviceSteps?.length?visual.serviceSteps:service?.steps||[]).map(title=>({title,deadline:'A definir'})):[]);
  const next=visual.nextSteps?.length?visual.nextSteps:(kind==='generico'?['Validar documentação e escopo','Formalizar contrato, se aceito']:[]);
  return {kind,data,chart,scope,steps,next,settings:brand,split,office};
 }
