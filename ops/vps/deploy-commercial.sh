@@ -118,7 +118,12 @@ CHECK_DIR="$(mktemp -d)"
 curl -fsS --retry 8 --retry-all-errors --retry-delay 2 --max-time 12 -o "$CHECK_DIR/health.json" https://partelis.com.br/health
 grep -q '"configured":true' "$CHECK_DIR/health.json" || error "Healthcheck público não passou."
 curl -fsS --max-time 12 -o "$CHECK_DIR/home.html" https://partelis.com.br/
-grep -q 'Solicitar apresentação e proposta' "$CHECK_DIR/home.html" || error "Site comercial não está servindo a nova versão."
+grep -q 'id="sales-form"' "$CHECK_DIR/home.html" || error "Formulário comercial indisponível após o deploy."
+grep -q 'cookie-consent.js' "$CHECK_DIR/home.html" || error "Gerenciador de cookies não está conectado à landing."
+curl -fsS --max-time 12 -o "$CHECK_DIR/cookies.html" https://partelis.com.br/cookies
+grep -q 'Política de Cookies' "$CHECK_DIR/cookies.html" || error "Política de Cookies não foi publicada."
+curl -fsS --max-time 12 -o "$CHECK_DIR/cookie-consent.js" https://partelis.com.br/cookie-consent.js
+grep -q 'pt_cookie_consent' "$CHECK_DIR/cookie-consent.js" || error "Controlador de cookies ausente em produção."
 curl -fsS --max-time 12 -o "$CHECK_DIR/demo.html" https://partelis.com.br/demo
 grep -q 'window.CLOUD=false' "$CHECK_DIR/demo.html" || error "Demonstração não está isolada."
 curl -fsS --max-time 12 -o "$CHECK_DIR/app.html" https://partelis.com.br/app
