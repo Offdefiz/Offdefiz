@@ -182,7 +182,7 @@
       d.querySelector('#f-scope').value=dft.scope;
       d.querySelector('#f-stepsText').value=dft.stepsText;
       d.querySelector('#f-nextText').value=dft.nextText;
-      if(s.areaCode!=='bancario'&&s.areaCode!=='empresarial_societario')templateSelect.value='generico';
+      templateSelect.value=s.areaCode==='bancario'?(s.id==='bancario.revisional'?'revisional':s.id==='bancario.superendividamento'?'superendividamento':'passivo'):'generico';
       document.dispatchEvent(new CustomEvent('crm-notice',{detail:{message:'Escopo e etapas sugeridos. Revise antes de salvar; não são prazos ou orientações jurídicas automáticas.'}}));
     });
     d.querySelector('#pricingAssist').onclick=()=>{
