@@ -35,6 +35,21 @@ function moveChrome(){
   const controls=document.createElement('div');controls.id='crm-top-controls';controls.innerHTML='<button type="button" class="crm-global-search" data-ux-action="search" aria-label="Buscar páginas e atendimentos"><span aria-hidden="true">⌕</span><span>Buscar no Partelís</span><kbd>⌘ K</kbd></button><button type="button" class="crm-create-btn" data-ux-action="create" aria-label="Criar novo registro"><span aria-hidden="true">＋</span><span>Novo</span></button>';
   top.insertBefore(controls,top.firstChild);
  }
+ // Keep navigation beside the breadcrumb, away from record/account actions.
+ const bar=$('.topbar'),menu=$('.top-actions [data-action="menu"]');
+ if(bar&&menu&&!$('.crm-header-context')){
+  const context=document.createElement('div');context.className='crm-header-context';
+  bar.insertBefore(context,bar.firstChild);context.append(menu);
+  menu.classList.add('crm-nav-toggle');
+  menu.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="3"/><path class="crm-panel-divider" d="M9 4v16"/><path class="crm-panel-arrow" d="m15 9-3 3 3 3"/></svg><span class="crm-menu-label">Menu</span>';
+  const crumb=$('.crumb'),mobile=$('.mobile-brand');if(crumb)context.append(crumb);if(mobile)context.append(mobile);
+ }
+ if(!$('.crm-sidebar-backdrop')){
+  const overlay=document.createElement('button');overlay.type='button';overlay.className='crm-sidebar-backdrop';overlay.dataset.action='menu';overlay.setAttribute('aria-label','Fechar navegação');overlay.tabIndex=-1;document.body.append(overlay);
+ }
+ const search=$('.crm-global-search>span:first-child');
+ if(search&&!search.querySelector('svg'))search.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 4 4"/></svg>';
+ const shortcut=$('.crm-global-search kbd');if(shortcut)shortcut.textContent=/Mac|iPhone|iPad/.test(navigator.platform)?'⌘ K':'Ctrl K';
  const side=$('.sidebar');if(side){
  const active=$('.crm-utility-nav .active');
  if(active)active.setAttribute('aria-current','page');
@@ -154,12 +169,27 @@ document.addEventListener('click',ev=>{
 });
 document.addEventListener('change',ev=>{if(ev.target.id==='crm-demo-role'){const real=$('#roleSelect');if(real){real.value=ev.target.value;real.dispatchEvent(new Event('change',{bubbles:true}));}}});
 document.addEventListener('keydown',ev=>{if((ev.ctrlKey||ev.metaKey)&&ev.key.toLowerCase()==='k'){ev.preventDefault();if(!$('#crm-search-dialog')?.open)openSearch();}if(ev.key==='Escape')closePopover();});
+let motionPage=null;
+const motionPreference=matchMedia('(prefers-reduced-motion: reduce)');
+const activeMotion=new Set();
+motionPreference.addEventListener('change',()=>{if(motionPreference.matches){activeMotion.forEach(a=>a.cancel());activeMotion.clear();}});
+function animatePage(page){
+ if(motionPage===page)return;motionPage=page;
+ activeMotion.forEach(a=>a.cancel());activeMotion.clear();
+ if(motionPreference.matches)return;
+ const nodes=[...document.querySelectorAll('#main>.heading,#main>.hero,#main>.metrics>.metric,#main>.panel,#main>.chart-grid>.chart-card,#main>.kanban>.lane,#main>.crm-client-stats>div')].slice(0,12);
+ nodes.forEach((node,i)=>{if(typeof node.animate!=='function')return;
+  const animation=node.animate([{opacity:0,transform:'translateY(14px)'},{opacity:1,transform:'translateY(0)'}],{duration:420,delay:Math.min(i*40,240),easing:'cubic-bezier(.22,1,.36,1)',fill:'backwards'});
+  activeMotion.add(animation);animation.onfinish=animation.oncancel=()=>activeMotion.delete(animation);
+ });
+}
 window.addEventListener('caixa-render',ev=>{
  lastState=ev.detail.state;lastRole=ev.detail.role;lastPage=ev.detail.page;
  moveChrome();if(!profileLoaded)loadProfile();
  if(lastPage==='settings')renderSettings();
  if(lastPage==='profile')renderProfile();
  if($('#crm-popover'))closePopover();
+ animatePage(lastPage);
 });
  if($('#nav')){lastRole=$('#roleSelect')?.value||'gestor';moveChrome();loadProfile();}
 })();
