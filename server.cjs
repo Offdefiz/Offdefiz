@@ -30,10 +30,16 @@ const now=Date.now(),a=attempts.get(ip)||{at:now,n:0};if(now-a.at>600000){a.at=n
 function page(demo=false){return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#30145F"><meta name="description" content="Partelís: gestão jurídica inteligente para escritórios"><link rel="icon" type="image/svg+xml" href="/favicon.svg"><link rel="manifest" href="/manifest.webmanifest"><title>Partelís · Gestão jurídica inteligente</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><link rel="stylesheet" href="/liquid-glass.css"><link rel="stylesheet" href="/crm-ui.css"></head><body><script>window.CLOUD='+(!demo)+';</script><script src="/legal-service-catalog.js"></script><script src="/domain.js"></script><script src="/enhancements.js"></script><script src="/insights.js"></script><script src="/proposal-engine.js"></script><script src="/app.js"></script><script src="/presence.js"></script><script src="/feedback.js"></script><script src="/onboarding.js"></script><script src="/crm-experience.js"></script><script src="/proposal-settings.js"></script></body></html>';}
 const server=http.createServer(async(req,res)=>{res.setHeader('X-Content-Type-Options','nosniff');res.setHeader('Referrer-Policy','same-origin');res.setHeader('X-Frame-Options','SAMEORIGIN');res.setHeader('Cache-Control','no-store');res.setHeader('Content-Security-Policy',"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'");
 try{const route=new URL(req.url,'http://local').pathname;
+if(route==='/api/public/payments/pagbank'&&req.method==='POST'){
+ if(!native)throw new Fault(503,'Recebimento de pagamentos indisponível.');
+ let raw=Buffer.alloc(0);for await(const chunk of req){raw=Buffer.concat([raw,Buffer.from(chunk)]);if(raw.length>131072)throw new Fault(413,'Notificação muito grande.');}
+ const gateway=require('./pagbank.cjs').service({repo:require('./ops/native/payments.cjs').repo});
+ return send(res,200,await gateway.webhook(raw,req.headers));
+}
 if(route==='/api/public/checkout'){
  const checkout=require('./checkout.cjs');
- if(req.method==='GET')return send(res,200,{plans:checkout.catalog()});
- if(req.method==='POST'){limit(req);const p=await body(req);const url=checkout.paymentUrl(p.plan,p.method);if(!url)throw new Fault(503,'Pagamento indisponível para esta opção. Fale com a equipe Partelís.');return send(res,200,{url});}
+ if(req.method==='GET'){const active=!!native&&require('./pagbank.cjs').configured();return send(res,200,{provider:active?'pagbank':null,plans:checkout.catalog().map(p=>active?{...p,methods:{pix:true,card:true}}:p)});}
+ if(req.method==='POST'){limit(req);const p=await body(req);if(native&&require('./pagbank.cjs').configured()){const origin=req.headers.origin;if(!origin||origin!==new URL(process.env.PUBLIC_APP_URL).origin)throw new Fault(403,'Origem não autorizada.');return send(res,200,await require('./pagbank.cjs').service({repo:require('./ops/native/payments.cjs').repo}).start(p));}const url=checkout.paymentUrl(p.plan,p.method);if(!url)throw new Fault(503,'Pagamento indisponível para esta opção. Fale com a equipe Partelís.');return send(res,200,{url});}
  throw new Fault(405,'Método não permitido.');
 }
 if(route==='/contratar'&&req.method==='GET'){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,'checkout.html')));}
@@ -71,6 +77,7 @@ if(route.startsWith('/api/admin/commercial/')){
   limit(req);
   const actor=(await owner(req,res)).user.id;
   const p=req.method==='POST'?await body(req):{};
+  if(route==='/api/admin/commercial/payments'&&req.method==='GET')return send(res,200,{payments:await require('./ops/native/payments.cjs').repo.listing()});
   if(route==='/api/admin/commercial/list'&&req.method==='GET')return send(res,200,await commercial.listing());
   if(route==='/api/admin/commercial/lead-status'&&req.method==='POST')return send(res,200,await commercial.updateLead(p));
   if(route==='/api/admin/commercial/provision'&&req.method==='POST')return send(res,201,await commercial.createWorkspace(p,actor));

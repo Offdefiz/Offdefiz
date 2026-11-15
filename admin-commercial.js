@@ -31,7 +31,7 @@ function render(){
     try{await api('POST','tenant-status',{workspace_id:t.workspace_id,status:sel.value});await refresh()}catch(e){msg(e.message,true);sel.value=t.status}
   }));
 }
-async function refresh(){try{current=await api('GET','list');render()}catch(e){msg('Não foi possível carregar: '+e.message,true)}}
+async function refresh(){try{current=await api('GET','list');render();await renderPayments()}catch(e){msg('Não foi possível carregar: '+e.message,true)}}
 async function bindForm(id,endpoint){
   const form=$('#'+id);
   form.addEventListener('submit',async e=>{
@@ -54,3 +54,9 @@ $('#assisted-recovery').addEventListener('submit',async e=>{
   }catch(err){msg(err.message,true)}finally{button.disabled=false}
 });
 refresh();
+
+async function renderPayments(){
+ try{const {payments}=await api('GET','payments');const labels={creating:'Criando checkout',waiting:'Aguardando pagamento',paid:'Pago',in_analysis:'Em análise',declined:'Recusado',canceled:'Cancelado',refunded:'Estornado',expired:'Expirado'};
+ $('#payments').innerHTML='<table><thead><tr><th>Escritório</th><th>Plano / valor</th><th>Pagamento</th><th>Referência</th></tr></thead><tbody>'+(payments.map(p=>'<tr><td><strong>'+esc(p.firm)+'</strong><small>'+esc(p.email)+'</small></td><td>'+esc(p.plan)+'<small>'+esc(new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(p.amount/100))+' · '+esc(p.method==='pix'?'Pix':'Cartão')+'</small></td><td>'+esc(labels[p.status]||p.status)+'<small>'+esc(p.paid_at?new Date(p.paid_at).toLocaleString('pt-BR'):'')+'</small></td><td><small>'+esc(p.id)+'</small></td></tr>').join('')||'<tr><td colspan="4">Nenhuma contratação iniciada.</td></tr>')+'</tbody></table>';
+ }catch{$('#payments').textContent='Não foi possível carregar os pagamentos.';}
+}
