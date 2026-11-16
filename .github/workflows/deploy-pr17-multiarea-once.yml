@@ -49,11 +49,13 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-ops-metrics.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-cnj-inbox.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-15-pagbank.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-16-commercial-reconciliation.sql
           node ops/native/verify.cjs
           node ops/native/commercial.verify.cjs
           node ops/native/legal.verify.cjs
           node ops/native/ops.verify.cjs
           node ops/native/payments.verify.cjs
+          node ops/native/reconciliation.verify.cjs
 
   deploy:
     needs: verify

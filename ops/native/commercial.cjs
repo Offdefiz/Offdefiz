@@ -33,8 +33,8 @@ async function createLead(input){
 }
 async function listing(){
   const [leads,tenants]=await Promise.all([
-    pool.query('SELECT id,firm_name,contact_name,email,phone,plan_interest,message,status,workspace_id,created_at FROM cj_sales_leads ORDER BY created_at DESC LIMIT 300'),
-    pool.query(`SELECT t.workspace_id,t.name,t.plan,t.status,t.created_at,
+    pool.query('SELECT l.id,l.firm_name,l.contact_name,l.email,l.phone,l.plan_interest,l.message,l.status,l.workspace_id,l.created_at,EXISTS(SELECT 1 FROM cj_payment_orders o WHERE o.lead_id=l.id) AS has_payment FROM cj_sales_leads l ORDER BY l.created_at DESC LIMIT 300'),
+    pool.query(`SELECT t.workspace_id,t.name,t.plan,t.status,t.created_at,t.renewal_due_at,
       count(m.user_id)::integer AS users,
       count(m.user_id) FILTER (WHERE u.email_confirmed_at IS NOT NULL AND u.password_hash IS NOT NULL)::integer AS activated,
       array_remove(array_agg(u.email ORDER BY u.email),NULL) AS emails
@@ -62,18 +62,7 @@ function newInvite(client,userId,secret){
     [digest(secret),userId]
   );
 }
-async function createWorkspace(input,actorId){
-  const leadId=input.lead_id;
-  if(leadId&&!uuid(leadId))throw fail(400,'Solicitação inválida.');
-  const selectedPlan=plans.has(input.plan)?input.plan:'trial';
-  const secret=token();
-  const created=await transaction(async client=>{
-    let name=clean(input.firm_name,120),email=emailOf(input.email);
-    if(leadId){
-      const {rows:[lead]}=await client.query('SELECT * FROM cj_sales_leads WHERE id=$1 FOR UPDATE',[leadId]);
-      if(!lead||lead.status==='approved'||lead.workspace_id)throw fail(409,'Solicitação já aprovada ou inexistente.');
-      name=lead.firm_name;email=lead.email;
-    }
+async function provisionWorkspace(client,{name,email,selectedPlan,secret,actorId,renewalDue=null}){
     if(name.length<2||name.length>120||!emailOk(email))throw fail(400,'Informe escritório e e-mail profissional válidos.');
     const {rows:[user]}=await client.query(
       'INSERT INTO native_users(email) VALUES($1) ON CONFLICT(email) DO UPDATE SET email=excluded.email RETURNING id',
@@ -84,11 +73,28 @@ async function createWorkspace(input,actorId){
     const {rows:[space]}=await client.query('INSERT INTO cj_workspaces(name) VALUES($1) RETURNING id',[name]);
     await client.query("INSERT INTO cj_memberships(user_id,workspace_id,role) VALUES($1,$2,'gestor')",[user.id,space.id]);
     await client.query('INSERT INTO cj_state(workspace_id,data) VALUES($1,$2)',[space.id,JSON.stringify(initialState())]);
-    await client.query("INSERT INTO cj_admin_tenants(workspace_id,name,plan,status) VALUES($1,$2,$3,'pending_activation')",[space.id,name,selectedPlan]);
+    await client.query("INSERT INTO cj_admin_tenants(workspace_id,name,plan,status,renewal_due_at) VALUES($1,$2,$3,'pending_activation',$4)",[space.id,name,selectedPlan,renewalDue]);
     await newInvite(client,user.id,secret);
-    if(leadId)await client.query("UPDATE cj_sales_leads SET status='approved',workspace_id=$2,updated_at=now() WHERE id=$1",[leadId,space.id]);
     await client.query("INSERT INTO cj_provision_audit(actor_id,workspace_id,user_id,event) VALUES($1,$2,$3,'workspace_created')",[actorId,space.id,user.id]);
     return {workspace_id:space.id,email,name};
+}
+async function createWorkspace(input,actorId){
+  const leadId=input.lead_id;
+  if(leadId&&!uuid(leadId))throw fail(400,'Solicitação inválida.');
+  const selectedPlan=plans.has(input.plan)?input.plan:'trial';
+  const secret=token();
+  const created=await transaction(async client=>{
+    let name=clean(input.firm_name,120),email=emailOf(input.email);
+    if(leadId){
+      const {rows:[lead]}=await client.query('SELECT * FROM cj_sales_leads WHERE id=$1 FOR UPDATE',[leadId]);
+      if(!lead||lead.status==='approved'||lead.workspace_id)throw fail(409,'Solicitação já aprovada ou inexistente.');
+      if((await client.query('SELECT 1 FROM cj_payment_orders WHERE lead_id=$1',[leadId])).rowCount)
+        throw fail(409,'Libere esta contratação pela lista de pagamentos.');
+      name=lead.firm_name;email=lead.email;
+    }
+    const provisioned=await provisionWorkspace(client,{name,email,selectedPlan,secret,actorId});
+    if(leadId)await client.query("UPDATE cj_sales_leads SET status='approved',workspace_id=$2,updated_at=now() WHERE id=$1",[leadId,provisioned.workspace_id]);
+    return provisioned;
   });
   return {...created,activation_url:'https://partelis.com.br/ativar#token_hash='+secret,expires_in_hours:48};
 }
@@ -97,8 +103,13 @@ async function inviteMember(input,actorId){
   if(!uuid(workspace)||!roles.has(role)||!emailOk(email))throw fail(400,'Confira o escritório, papel e e-mail.');
   const secret=token();
   const created=await transaction(async client=>{
-    const {rows:[space]}=await client.query('SELECT id FROM cj_workspaces WHERE id=$1 FOR UPDATE',[workspace]);
+    const {rows:[space]}=await client.query('SELECT w.id,t.plan FROM cj_workspaces w LEFT JOIN cj_admin_tenants t ON t.workspace_id=w.id WHERE w.id=$1 FOR UPDATE OF w',[workspace]);
     if(!space)throw fail(404,'Escritório não encontrado.');
+    const paidPlan=require('../../checkout.cjs').PLANS[space.plan];
+    if(paidPlan?.users){
+      const {rowCount}=await client.query('SELECT user_id FROM cj_memberships WHERE workspace_id=$1',[workspace]);
+      if(rowCount>=paidPlan.users)throw fail(409,'Limite de usuários do plano atingido.');
+    }
     const {rows:[user]}=await client.query(
       'INSERT INTO native_users(email) VALUES($1) ON CONFLICT(email) DO UPDATE SET email=excluded.email RETURNING id',[email]
     );
@@ -164,4 +175,4 @@ async function setWorkspaceStatus(input,actorId){
   });
   return r;
 }
-module.exports={createLead,listing,updateLead,createWorkspace,inviteMember,reissueInvite,setWorkspaceStatus,assistedRecovery};
+module.exports={provisionWorkspace,newInvite,createLead,listing,updateLead,createWorkspace,inviteMember,reissueInvite,setWorkspaceStatus,assistedRecovery};

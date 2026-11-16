@@ -27,6 +27,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-ops-metrics.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-cnj-inbox.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-15-pagbank.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-16-commercial-reconciliation.sql
           npm install --no-save --package-lock=false --ignore-scripts pg@8.13.1
       - name: Existing behavior and seven independent offices
         run: |
@@ -38,6 +39,7 @@ jobs:
           node ops/native/legal.verify.cjs
           node ops/native/ops.verify.cjs
           node ops/native/payments.verify.cjs
+          node ops/native/reconciliation.verify.cjs
       - name: Restore and compare all rows
         run: |
           pg_dump -Fc -f "$RUNNER_TEMP/partelis.dump"

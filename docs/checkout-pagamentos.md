@@ -32,12 +32,16 @@ Sem configuração válida, o gateway fica fechado e mantém o comportamento ant
 
 ## Operação dos acessos
 
-Após `PAID`, uma solicitação de contratação é criada automaticamente no painel `/admin/comercial`. O proprietário pode acompanhar a tabela “Pagamentos PagBank”, confirmar os dados e emitir o convite pelo fluxo existente. A criação do escritório e entrega do convite permanecem assistidas: não há envio de e-mail automático nem cancelamento/suspensão automática de acesso por inadimplência ou estorno nesta integração.
-A equipe deve configurar o plano e a data de renovação na operação comercial. O gateway não altera limites de usuários, permissões ou dados existentes.
+- O checkout guarda um pedido pendente com nome, escritório, e-mail, valor, plano e método antes de enviar ao PagBank. Com links estáticos a saída é a mesma, mas só o proprietário pode atestar que recebeu o pagamento.
+- Em **Admin → Gerenciar contas e contratações → Pedidos e pagamentos**, localize o cadastro pelo e-mail. Para links estáticos, confira a transação aprovada, valor, método e e-mail no PagBank. Clique em **Confirmar pagamento e liberar** e informe o e-mail que conferiu e a referência única. Não use o e-mail, comprovante avulso ou volta do checkout como prova de pagamento. Se não puder vincular a transação ao cadastro sem ambiguidade, não confirme.
+- Na integração por API, o PagBank informa o pagamento validado e o painel oferece **Liberar acesso**. Mantém-se a confirmação humana de liberação. O clique cria o escritório no plano comprado com o limite de usuários, registra o vencimento em 30 dias, gera um convite e tenta enviar o e-mail.
+- A renovação continua manual. O vencimento registrado é uma referência operacional, sem débito ou suspensão automática. As solicitações comerciais normais e os convites de avaliação e beta continuam separados.
+- Para envio automático, configure no ambiente privado do servidor `PARTELIS_EMAIL_API_KEY` (chave de envio da API Resend) e `PARTELIS_EMAIL_FROM` (endereço de um domínio já verificado). A mensagem vai apenas ao e-mail de acesso do cadastro. Se o provedor recusar ou não estiver configurado, o painel informa isso e permite copiar o link ou reenviar. Não há garantia de entrega na caixa de entrada só pelo aceite do provedor.
+- A migração de conciliação é aditiva e idempotente. A rotina da VPS a aplica antes de trocar o serviço. Em hospedeiros que apenas reiniciam o Node, o próprio serviço aplica essa mesma migração se ela estiver ausente. O usuário PostgreSQL da aplicação precisa ser o proprietário das tabelas, conforme a instalação da VPS.
 
 ## Verificação
 
-`node --test checkout.test.cjs pagbank.test.cjs` verifica fechamento sem configuração, preços, métodos, destinos de redirecionamento, assinatura bruta, idempotência, divergências de valor e consulta independente da notificação. `node ops/native/payments.verify.cjs` verifica a persistência, reenvios e estornos em um PostgreSQL descartável com o esquema aplicado.
+`node --test checkout.test.cjs pagbank.test.cjs` verifica fechamento sem configuração, preços, métodos, destinos de redirecionamento, assinatura bruta, idempotência, divergências de valor e consulta independente da notificação. `node ops/native/payments.verify.cjs` e `node ops/native/reconciliation.verify.cjs` verifica a persistência, reenvios e estornos em um PostgreSQL descartável com o esquema aplicado.
 
 Referências oficiais:
 - https://developer.pagbank.com.br/reference/criar-checkout

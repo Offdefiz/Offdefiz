@@ -38,8 +38,16 @@ if(route==='/api/public/payments/pagbank'&&req.method==='POST'){
 }
 if(route==='/api/public/checkout'){
  const checkout=require('./checkout.cjs');
- if(req.method==='GET'){const active=!!native&&require('./pagbank.cjs').configured();return send(res,200,{provider:active?'pagbank':null,plans:checkout.catalog().map(p=>active?{...p,methods:{pix:true,card:true}}:p)});}
- if(req.method==='POST'){limit(req);const p=await body(req);if(native&&require('./pagbank.cjs').configured()){const origin=req.headers.origin;if(!origin||origin!==new URL(process.env.PUBLIC_APP_URL).origin)throw new Fault(403,'Origem não autorizada.');return send(res,200,await require('./pagbank.cjs').service({repo:require('./ops/native/payments.cjs').repo}).start(p));}const url=checkout.paymentUrl(p.plan,p.method);if(!url)throw new Fault(503,'Pagamento indisponível para esta opção. Fale com a equipe Partelís.');return send(res,200,{url});}
+ if(req.method==='GET'){const active=!!native&&require('./pagbank.cjs').configured();return send(res,200,{provider:active?'pagbank':null,requires_buyer:!!native,plans:checkout.catalog().map(p=>active?{...p,methods:{pix:true,card:true}}:p)});}
+ if(req.method==='POST'){
+  limit(req);
+  if(native){const origin=req.headers.origin,expected=process.env.PUBLIC_APP_URL||'http://'+req.headers.host;if(!origin||origin!==new URL(expected).origin)throw new Fault(403,'Origem não autorizada.');}
+  const p=await body(req),gateway=require('./pagbank.cjs');
+  if(native&&gateway.configured())return send(res,200,await gateway.service({repo:require('./ops/native/payments.cjs').repo}).start(p));
+  const url=checkout.paymentUrl(p.plan,p.method);
+  if(!url)throw new Fault(503,'Pagamento indisponível para esta opção. Fale com a equipe Partelís.');
+  return send(res,200,native?await require('./ops/native/reconciliation.cjs').start(p,url):{url});
+ }
  throw new Fault(405,'Método não permitido.');
 }
 if(route==='/contratar'&&req.method==='GET'){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,'checkout.html')));}
@@ -78,6 +86,8 @@ if(route.startsWith('/api/admin/commercial/')){
   const actor=(await owner(req,res)).user.id;
   const p=req.method==='POST'?await body(req):{};
   if(route==='/api/admin/commercial/payments'&&req.method==='GET')return send(res,200,{payments:await require('./ops/native/payments.cjs').repo.listing()});
+  if(route==='/api/admin/commercial/confirm-payment'&&req.method==='POST')return send(res,200,await require('./ops/native/reconciliation.cjs').service().approve(p,actor));
+  if(route==='/api/admin/commercial/resend-payment-invite'&&req.method==='POST')return send(res,200,await require('./ops/native/reconciliation.cjs').service().resend(p,actor));
   if(route==='/api/admin/commercial/list'&&req.method==='GET')return send(res,200,await commercial.listing());
   if(route==='/api/admin/commercial/lead-status'&&req.method==='POST')return send(res,200,await commercial.updateLead(p));
   if(route==='/api/admin/commercial/provision'&&req.method==='POST')return send(res,201,await commercial.createWorkspace(p,actor));
@@ -90,7 +100,7 @@ if(route.startsWith('/api/admin/commercial/')){
 if(route==='/ativar'&&req.method==='GET'){
 res.setHeader('Referrer-Policy','no-referrer');
 res.setHeader('Content-Type','text/html; charset=utf-8');
-return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Criar senha · Partelís</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><body class="login-page"><main class="login-shell"><section class="login-story"><img src="/brand-horizontal.svg" alt="Partelís" width="220"><h1>Bem-vinda ao Partelís.</h1><p>Seu convite pessoal para testar o escritório com dados fictícios.</p></section><section class="login-card"><h2>Crie sua senha</h2><p>Continue para validar seu convite e escolher uma senha exclusiva.</p><button id="activate" class="btn primary">Criar minha senha</button><p id="message" role="status"></p></section></main><script>const params=new URLSearchParams(location.hash.slice(1));const token=params.get("token_hash");history.replaceState(null,"","/ativar");document.querySelector("#activate").onclick=async function(){this.disabled=true;try{const r=await fetch("/auth/activate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token_hash:token})});const d=await r.json();if(!r.ok)throw new Error(d.error);location.replace("/conta");}catch(e){document.querySelector("#message").textContent=e.message;this.disabled=false;}};</script></body></html>');
+return res.end('<!doctype html><html lang="pt-BR"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Criar senha · Partelís</title><link rel="stylesheet" href="/style.css"><link rel="stylesheet" href="/modern.css"><link rel="stylesheet" href="/partelis.css"><body class="login-page"><main class="login-shell"><section class="login-story"><img src="/brand-horizontal.svg" alt="Partelís" width="220"><h1>Boas-vindas ao Partelís.</h1><p>Use o seu convite pessoal para ativar o acesso ao seu escritório.</p></section><section class="login-card"><h2>Crie sua senha</h2><p>Continue para validar seu convite e escolher uma senha exclusiva.</p><button id="activate" class="btn primary">Criar minha senha</button><p id="message" role="status"></p></section></main><script>const params=new URLSearchParams(location.hash.slice(1));const token=params.get("token_hash");history.replaceState(null,"","/ativar");document.querySelector("#activate").onclick=async function(){this.disabled=true;try{const r=await fetch("/auth/activate",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({token_hash:token})});const d=await r.json();if(!r.ok)throw new Error(d.error);location.replace("/conta");}catch(e){document.querySelector("#message").textContent=e.message;this.disabled=false;}};</script></body></html>');
 }
 if(route==='/auth/activate'&&req.method==='POST'){
 limit(req);const p=await body(req);
@@ -230,7 +240,14 @@ if(route==='/privacidade'||route==='/cookies'){
 }
 const files={'/checkout.css':'checkout.css','/checkout.js':'checkout.js','/landing.css':'landing.css','/landing.js':'landing.js','/cookie-consent.css':'cookie-consent.css','/cookie-consent.js':'cookie-consent.js','/admin-commercial.js':'admin-commercial.js','/legal-service-catalog.js':'legal-service-catalog.js','/proposal-engine.js':'proposal-engine.js','/proposal-settings.js':'proposal-settings.js','/conhecer':'onboarding-quiz.html','/crm-ui.css':'crm-ui.css','/crm-experience.js':'crm-experience.js','/release-notes.json':'release-notes.json','/onboarding.js':'onboarding.js','/admin.js':'admin.js','/feedback.js':'feedback.js','/favicon.svg':'favicon.svg','/brand-symbol.svg':'brand-symbol.svg','/brand-horizontal.svg':'brand-horizontal.svg','/brand-horizontal-white.svg':'brand-horizontal-white.svg','/manifest.webmanifest':'manifest.webmanifest','/partelis.css':'partelis.css','/liquid-glass.css':'liquid-glass.css','/identidade':'brand-video.html','/cliente/demo':'cliente.html','/cliente.js':'cliente.js','/cliente.css':'cliente.css','/cliente.webmanifest':'cliente.webmanifest','/style.css':'style.css','/modern.css':'modern.css','/domain.js':'domain.js','/app.js':'app.js','/enhancements.js':'enhancements.js','/insights.js':'insights.js','/login':'login.html','/ops-admin.js':'ops-admin.js','/presence.js':'presence.js','/juridico.js':'juridico.js','/contracts-preflight.js':'contracts-preflight.js','/login.js':'login.js','/conta':'account.html','/account.js':'account.js','/apresentacao':'presentation.html','/presentation.js':'presentation.js'};if(req.method==='GET'&&/^\/templates\/proposta_(?:passivo_bancario|acao_revisional|superendividamento|holding|multiarea)\.html$/.test(route)){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,route.slice(1))));}if(files[route]&&req.method==='GET'){const f=files[route];res.setHeader('Content-Type',f.endsWith('.json')?'application/json; charset=utf-8':f.endsWith('.js')?'application/javascript; charset=utf-8':f.endsWith('.css')?'text/css; charset=utf-8':f.endsWith('.svg')?'image/svg+xml':f.endsWith('.webmanifest')?'application/manifest+json':'text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,f)));}throw new Fault(404,'Página não encontrada.');
 }catch(e){if(e.status===401&&req.url==='/' ){res.writeHead(302,{Location:'/login'});res.end();}else send(res,e.status||500,{error:e.status?e.message:'Falha temporária. Tente novamente.'});}});
-if(require.main===module)server.listen(process.env.PORT||4180,process.env.BIND_HOST||(native?'127.0.0.1':'0.0.0.0'),()=>console.log('Partelís iniciado'));
+if(require.main===module){
+ const listen=()=>server.listen(process.env.PORT||4180,process.env.BIND_HOST||(native?'127.0.0.1':'0.0.0.0'),()=>console.log('Partelís iniciado'));
+ if(!native)listen();
+ else require('./ops/native/reconciliation-migration.cjs').ensure().then(listen).catch(()=>{
+  console.error('Migração de conciliação indisponível; a nova versão não pode iniciar.');
+  process.exit(1);
+ });
+}
 module.exports={server};
 
 
