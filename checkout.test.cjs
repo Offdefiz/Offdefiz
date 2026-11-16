@@ -6,7 +6,17 @@ test('rejects unsafe payment addresses',()=>{for(const u of ['http://mpago.la/x'
 test('HTTP checkout routes serve page and enforce configured payment',async()=>{
  const {server}=require('./server.cjs'),{Readable}=require('node:stream');
  function request(url,method='GET',payload){return new Promise(resolve=>{const req=Readable.from(payload?[JSON.stringify(payload)]:[]);Object.assign(req,{url,method,headers:{},socket:{remoteAddress:'127.0.0.1'}});const headers={};const res={setHeader(k,v){headers[k]=v},removeHeader(k){delete headers[k]},writeHead(status,values){this.status=status;Object.assign(headers,values)},end(data){resolve({status:this.status||200,body:String(data||''),headers})}};server.emit('request',req,res);});}
- for(const path of ['/contratar?plano=solo','/checkout.css','/checkout.js'])assert.equal((await request(path)).status,200);
+ const notice='Seu acesso será enviado por e-mail em até um dia útil após a aprovação do pagamento.';
+ const landing=await request('/');
+ assert.equal(landing.status,200);
+ for(const [plan,name] of [['solo','Solo'],['escritorio','Escritório'],['equipe','Equipe']]){
+  assert.ok(landing.body.includes(`href="/contratar?plano=${plan}" aria-describedby="access-timing">Assinar ${name}</a>`));
+  const checkout=await request('/contratar?plano='+plan);
+  assert.equal(checkout.status,200);
+  assert.ok(checkout.body.includes(`<p id="access-timing" class="muted"><strong>${notice}</strong></p><button id="pay" aria-describedby="access-timing"`));
+ }
+ assert.ok(landing.body.includes(`id="access-timing"><strong>${notice}</strong>`));
+ for(const path of ['/checkout.css','/checkout.js'])assert.equal((await request(path)).status,200);
  assert.equal(JSON.parse((await request('/api/public/checkout')).body).plans.length,3);
  assert.equal((await request('/api/public/checkout','POST',{plan:'solo',method:'pix'})).status,503);
  process.env.PARTELIS_CHECKOUT_SOLO_PIX='https://mpago.la/test';
