@@ -2,6 +2,7 @@
 (function(w){
  'use strict';
  const PIXEL='DBU8DEBC77UB463C5FDG',KEY='pt_tt_pending',HASHES='pt_tt_hashes',SEEN='pt_tt_events';
+ const META_PIXEL='1462114395890964';
  let ready=false,currentView=null,lastView='',polling=false,attempts=0,timer=null;
  const allowed=()=>ready&&w.PartelisCookies?.allowed('marketing')===true;
  const read=key=>{try{return JSON.parse(w.sessionStorage.getItem(key)||'null');}catch{return null;}};
@@ -14,6 +15,12 @@
   const sent=read(SEEN)||[];
   if(eventId&&sent.includes(eventId))return false;
   if(eventId)w.ttq.track(name,params,{event_id:eventId});else w.ttq.track(name,params);
+  if(w.fbq&&['ViewContent','InitiateCheckout','Purchase','CompleteRegistration','Lead'].includes(name)){
+   const items=params.contents||[];
+   const meta={currency:params.currency||'BRL',content_type:'product',content_ids:items.map(x=>x.content_id),contents:items.map(x=>({id:x.content_id,quantity:x.quantity||1}))};
+   if(Number.isFinite(params.value))meta.value=params.value;
+   w.fbq('trackSingle',META_PIXEL,name,meta,...(eventId?[{eventID:eventId}]:[]));
+  }
   if(eventId)write(SEEN,[...sent,eventId].slice(-100));
   return true;
  }
@@ -89,11 +96,23 @@
     }else ttq.grantConsent();
 
     }else w.ttq.grantConsent();
+    if(!w.fbq){
+      const fbq=w.fbq=function(){if(fbq.callMethod)fbq.callMethod.apply(fbq,arguments);else fbq.queue.push(Array.from(arguments));};
+      fbq.push=fbq;fbq.loaded=true;fbq.version='2.0';fbq.queue=[];
+      const script=document.createElement('script');script.async=true;script.src='https://connect.facebook.net/en_US/fbevents.js';document.head.appendChild(script);
+    }
+    if(!w.__partelisMetaInitialized){
+      w.fbq('set','autoConfig',false,META_PIXEL);
+      w.fbq('consent','grant');
+      w.fbq('init',META_PIXEL);
+      w.fbq('trackSingle',META_PIXEL,'PageView');
+      w.__partelisMetaInitialized=true;
+    }else w.fbq('consent','grant');
     ready=true;
     if(currentView)view(currentView);
     checkOrder();
     return ()=>{
-      ready=false;w.clearTimeout(timer);w.ttq.revokeConsent();
+      ready=false;w.clearTimeout(timer);w.ttq.revokeConsent();w.fbq?.('consent','revoke');
       remove(HASHES);remove('pt_tt_external');
     };
   });
