@@ -8,7 +8,7 @@
  'use strict';
  const VERSION='2026-11-17.1',NAME='pt_cookie_consent',DAYS=180,MAX_AGE=DAYS*86400;
  const categories=['analytics','marketing'];
- let memory=null,listeners=[],registrations=[],win=null,doc=null,nodes=null,returnFocus=null;
+ let memory=null,listeners=[],registrations=[],win=null,doc=null,nodes=null;
  function normalize(v,now=Date.now()){
   if(!v||typeof v!=='object'||Array.isArray(v)||v.version!==VERSION
    ||typeof v.analytics!=='boolean'||typeof v.marketing!=='boolean'
@@ -49,60 +49,40 @@
   if(allowed(category)){try{const result=activate();item.cleanup=typeof result==='function'?result:null;item.active=true;}catch{}}
   return ()=>{registrations=registrations.filter(x=>x!==item);if(item.active){try{item.cleanup?.();}catch{}item.active=false;}};
  }
- function sync(v){if(nodes){nodes.analytics.checked=!!v.analytics;nodes.marketing.checked=!!v.marketing;}}
  function choose(prefs){
   if(!doc||!win)return null;
   const previous=preference(),v=record(prefs);
   doc.cookie=serialize(v,win.location.protocol==='https:');memory=v;
-  if(nodes){nodes.banner.hidden=true;sync(v);if(nodes.dialog.open)nodes.dialog.close();}
+  if(nodes)nodes.banner.hidden=true;
   notify();
   if((previous.analytics&&!v.analytics)||(previous.marketing&&!v.marketing))win.location.reload();
   return v;
  }
  function openPreferences(){
   if(!nodes)return;
-  returnFocus=doc.activeElement instanceof win.HTMLElement?doc.activeElement:null;
-  sync(preference());if(!nodes.dialog.open)nodes.dialog.showModal();nodes.close.focus();
+  nodes.banner.hidden=false;
+  nodes.accept.focus();
  }
  function render(){
   if(doc.getElementById('pt-cookie-banner'))return;
   const wrapper=doc.createElement('div');
   wrapper.innerHTML=[
    '<aside id="pt-cookie-banner" class="pt-cookie-banner" role="region" aria-labelledby="pt-cookie-title" aria-describedby="pt-cookie-desc" hidden>',
-   '<div class="pt-cookie-symbol" aria-hidden="true"><span></span><span></span></div>',
-   '<div class="pt-cookie-copy"><p class="pt-cookie-eyebrow">PRIVACIDADE NO PARTELÍS</p><h2 id="pt-cookie-title">Você no controle dos cookies.</h2>',
-   '<p id="pt-cookie-desc">Usamos cookies essenciais para preferências e acesso seguro. Com seu aceite de marketing, usamos o TikTok Pixel para medir visitas e campanhas. Você pode escolher e alterar suas opções quando quiser.</p>',
-   '<a href="/cookies">Conheça nossa Política de Cookies</a></div>',
-   '<div class="pt-cookie-actions"><button type="button" class="pt-cookie-button pt-cookie-primary" data-cookie-action="accept">Aceitar todos</button>',
-   '<button type="button" class="pt-cookie-button pt-cookie-secondary" data-cookie-action="reject">Rejeitar opcionais</button>',
-   '<button type="button" class="pt-cookie-button pt-cookie-text" data-cookie-action="customize">Personalizar</button></div></aside>',
-   '<dialog id="pt-cookie-dialog" class="pt-cookie-dialog" aria-labelledby="pt-cookie-dialog-title" aria-describedby="pt-cookie-dialog-desc">',
-   '<div class="pt-cookie-modal-head"><span class="pt-cookie-eyebrow">CENTRAL DE PRIVACIDADE</span><button type="button" class="pt-cookie-close" aria-label="Fechar preferências" data-cookie-action="close">×</button></div>',
-   '<h2 id="pt-cookie-dialog-title">Preferências de cookies</h2>',
-   '<p id="pt-cookie-dialog-desc">Escolha por finalidade. O TikTok Pixel só é ativado quando você aceita marketing. Você pode retirar o consentimento a qualquer momento.</p>',
-   '<div class="pt-cookie-category"><div><strong>Essenciais</strong><p>Guardam sua escolha e mantêm a sessão quando você entra na plataforma.</p></div><span class="pt-cookie-always">Sempre ativos</span></div>',
-   '<label class="pt-cookie-category" for="pt-cookie-analytics"><span><strong>Análise de uso</strong><small>Para conhecer visitas e desempenho. Nenhuma ferramenta instalada atualmente.</small></span><input id="pt-cookie-analytics" type="checkbox"></label>',
-   '<label class="pt-cookie-category" for="pt-cookie-marketing"><span><strong>Marketing</strong><small>TikTok Pixel: mede visitas e campanhas, somente com seu consentimento.</small></span><input id="pt-cookie-marketing" type="checkbox"></label>',
-   '<p class="pt-cookie-footnote">A recusa mantém o TikTok Pixel desativado. Ao retirar o aceite, interrompemos o rastreamento e recarregamos a página. Leia a <a href="/cookies">Política de Cookies</a> e o <a href="/privacidade">Aviso de Privacidade</a>.</p>',
-   '<div class="pt-cookie-modal-actions"><button type="button" class="pt-cookie-button pt-cookie-secondary" data-cookie-action="reject">Rejeitar opcionais</button>',
-   '<button type="button" class="pt-cookie-button pt-cookie-primary" data-cookie-action="save">Salvar preferências</button></div></dialog>'
+   '<div class="pt-cookie-copy"><h2 id="pt-cookie-title">Cookies</h2>',
+   '<p id="pt-cookie-desc">Usamos cookies para o funcionamento do site e, se você aceitar, para medir visitas e campanhas. <a href="/cookies">Saiba mais</a></p></div>',
+   '<div class="pt-cookie-actions"><button type="button" class="pt-cookie-button pt-cookie-primary" data-cookie-action="accept">Aceitar cookies</button>',
+   '<button type="button" class="pt-cookie-button pt-cookie-secondary" data-cookie-action="reject">Não aceitar</button></div></aside>'
   ].join('');
   while(wrapper.firstElementChild)doc.body.appendChild(wrapper.firstElementChild);
-  nodes={banner:doc.getElementById('pt-cookie-banner'),dialog:doc.getElementById('pt-cookie-dialog'),
-   close:doc.querySelector('.pt-cookie-close'),analytics:doc.getElementById('pt-cookie-analytics'),marketing:doc.getElementById('pt-cookie-marketing')};
+  nodes={banner:doc.getElementById('pt-cookie-banner'),accept:doc.querySelector('[data-cookie-action="accept"]')};
   doc.addEventListener('click',event=>{
    const button=event.target.closest?.('[data-cookie-action],[data-cookie-settings]');
    if(!button)return;
    if(button.hasAttribute('data-cookie-settings')){event.preventDefault();openPreferences();return;}
-   const action=button.dataset.cookieAction;
-   if(action==='accept')choose({analytics:true,marketing:true});
-   if(action==='reject')choose({analytics:false,marketing:false});
-   if(action==='customize')openPreferences();
-   if(action==='save')choose({analytics:nodes.analytics.checked,marketing:nodes.marketing.checked});
-   if(action==='close')nodes.dialog.close();
+   if(button.dataset.cookieAction==='accept')choose({analytics:true,marketing:true});
+   if(button.dataset.cookieAction==='reject')choose({analytics:false,marketing:false});
   });
-  nodes.dialog.addEventListener('close',()=>{if(returnFocus?.isConnected)returnFocus.focus();returnFocus=null;});
-  const current=stored();if(current)sync(current);else nodes.banner.hidden=false;
+  nodes.banner.hidden=!!stored();
  }
  function init(root){
   if(win)return;win=root;doc=root.document;
@@ -110,7 +90,7 @@
   else render();
   doc.addEventListener('visibilitychange',()=>{
    if(doc.visibilityState==='visible'){
-    memory=null;const current=stored();if(nodes){nodes.banner.hidden=!!current;sync(preference());}notify();
+    memory=null;const current=stored();if(nodes)nodes.banner.hidden=!!current;notify();
    }
   });
  }
