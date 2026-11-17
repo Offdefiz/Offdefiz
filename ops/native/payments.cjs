@@ -1,6 +1,12 @@
 'use strict';
 const {pool,transaction}=require('./db.cjs');
 const repo={
+ async publicStatus(requestId){
+  return (await pool.query(`SELECT o.id,o.status,o.plan,o.amount,
+   EXISTS(SELECT 1 FROM cj_memberships m JOIN native_users u ON u.id=m.user_id
+    WHERE m.workspace_id=o.workspace_id AND u.password_hash IS NOT NULL AND u.email_confirmed_at IS NOT NULL) AS registered
+   FROM cj_payment_orders o WHERE o.request_id=$1 AND o.created_at>now()-interval '7 days'`,[requestId])).rows[0];
+ },
  async reserve(p){const {rows:[order]}=await pool.query(`INSERT INTO cj_payment_orders(id,request_id,plan,method,amount,firm,name,email,source,status) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10) ON CONFLICT(request_id) DO UPDATE SET request_id=excluded.request_id RETURNING *`,[p.id,p.request_id,p.plan,p.method,p.amount,p.firm,p.name,p.email,p.source||'gateway',p.status||'creating']);return order;},
  async attach(id,p){await pool.query("UPDATE cj_payment_orders SET checkout_id=$2,url=$3,expires_at=$4,status=CASE WHEN status='creating' THEN 'waiting' ELSE status END,updated_at=now() WHERE id=$1",[id,p.checkout_id,p.url,p.expires_at]);},
  async find(id){return (await pool.query('SELECT * FROM cj_payment_orders WHERE id=$1',[id])).rows[0];},

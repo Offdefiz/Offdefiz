@@ -6,7 +6,7 @@
  if(root&&root.document){root.PartelisCookies=api;api.init(root);}
 })(typeof window!=='undefined'?window:null,function(){
  'use strict';
- const VERSION='2026-11-17.1',NAME='pt_cookie_consent',DAYS=180,MAX_AGE=DAYS*86400;
+ const VERSION='2026-11-17.2',NAME='pt_cookie_consent',DAYS=180,MAX_AGE=DAYS*86400;
  const categories=['analytics','marketing'];
  let memory=null,listeners=[],registrations=[],win=null,doc=null,nodes=null;
  function normalize(v,now=Date.now()){
