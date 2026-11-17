@@ -4,7 +4,7 @@ const Cookie=require('./cookie-consent.js');
 const {server}=require('./server.cjs');
 const ms=86400000;
 test('cookies opcionais começam desligados e a versão é invalidada corretamente',()=>{
- assert.equal(Cookie.VERSION,'2026-11-11.1');
+ assert.equal(Cookie.VERSION,'2026-11-17.1');
  assert.equal(Cookie.parseCookie(''),null);
  assert.equal(Cookie.parseCookie('pt_cookie_consent=malformado'),null);
  assert.equal(Cookie.allowed('necessary'),true);

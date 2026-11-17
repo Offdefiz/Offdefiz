@@ -1,4 +1,4 @@
-/* Partelís — gerenciador de cookies do site comercial. Não instala trackers. */
+/* Partelís — gerenciador de cookies do site comercial. Controla o consentimento de ferramentas opcionais. */
 (function(root,factory){
  'use strict';
  const api=factory();
@@ -6,7 +6,7 @@
  if(root&&root.document){root.PartelisCookies=api;api.init(root);}
 })(typeof window!=='undefined'?window:null,function(){
  'use strict';
- const VERSION='2026-11-11.1',NAME='pt_cookie_consent',DAYS=180,MAX_AGE=DAYS*86400;
+ const VERSION='2026-11-17.1',NAME='pt_cookie_consent',DAYS=180,MAX_AGE=DAYS*86400;
  const categories=['analytics','marketing'];
  let memory=null,listeners=[],registrations=[],win=null,doc=null,nodes=null,returnFocus=null;
  function normalize(v,now=Date.now()){
@@ -71,7 +71,7 @@
    '<aside id="pt-cookie-banner" class="pt-cookie-banner" role="region" aria-labelledby="pt-cookie-title" aria-describedby="pt-cookie-desc" hidden>',
    '<div class="pt-cookie-symbol" aria-hidden="true"><span></span><span></span></div>',
    '<div class="pt-cookie-copy"><p class="pt-cookie-eyebrow">PRIVACIDADE NO PARTELÍS</p><h2 id="pt-cookie-title">Você no controle dos cookies.</h2>',
-   '<p id="pt-cookie-desc">Usamos cookies essenciais para preferências e acesso seguro. Atualmente não utilizamos rastreadores de análise ou publicidade no site comercial. Você pode escolher e alterar suas opções quando quiser.</p>',
+   '<p id="pt-cookie-desc">Usamos cookies essenciais para preferências e acesso seguro. Com seu aceite de marketing, usamos o TikTok Pixel para medir visitas e campanhas. Você pode escolher e alterar suas opções quando quiser.</p>',
    '<a href="/cookies">Conheça nossa Política de Cookies</a></div>',
    '<div class="pt-cookie-actions"><button type="button" class="pt-cookie-button pt-cookie-primary" data-cookie-action="accept">Aceitar todos</button>',
    '<button type="button" class="pt-cookie-button pt-cookie-secondary" data-cookie-action="reject">Rejeitar opcionais</button>',
@@ -79,11 +79,11 @@
    '<dialog id="pt-cookie-dialog" class="pt-cookie-dialog" aria-labelledby="pt-cookie-dialog-title" aria-describedby="pt-cookie-dialog-desc">',
    '<div class="pt-cookie-modal-head"><span class="pt-cookie-eyebrow">CENTRAL DE PRIVACIDADE</span><button type="button" class="pt-cookie-close" aria-label="Fechar preferências" data-cookie-action="close">×</button></div>',
    '<h2 id="pt-cookie-dialog-title">Preferências de cookies</h2>',
-   '<p id="pt-cookie-dialog-desc">Escolha por finalidade. Nenhum rastreador opcional está instalado. Se novas ferramentas forem ativadas no futuro, solicitaremos uma nova decisão.</p>',
+   '<p id="pt-cookie-dialog-desc">Escolha por finalidade. O TikTok Pixel só é ativado quando você aceita marketing. Você pode retirar o consentimento a qualquer momento.</p>',
    '<div class="pt-cookie-category"><div><strong>Essenciais</strong><p>Guardam sua escolha e mantêm a sessão quando você entra na plataforma.</p></div><span class="pt-cookie-always">Sempre ativos</span></div>',
    '<label class="pt-cookie-category" for="pt-cookie-analytics"><span><strong>Análise de uso</strong><small>Para conhecer visitas e desempenho. Nenhuma ferramenta instalada atualmente.</small></span><input id="pt-cookie-analytics" type="checkbox"></label>',
-   '<label class="pt-cookie-category" for="pt-cookie-marketing"><span><strong>Marketing</strong><small>Para medir campanhas. Nenhum pixel publicitário instalado atualmente.</small></span><input id="pt-cookie-marketing" type="checkbox"></label>',
-   '<p class="pt-cookie-footnote">Essas escolhas não habilitam ferramentas ainda inexistentes. Antes de ativar novos fornecedores, atualizaremos a política e pediremos seu consentimento novamente. Leia a <a href="/cookies">Política de Cookies</a> e o <a href="/privacidade">Aviso de Privacidade</a>.</p>',
+   '<label class="pt-cookie-category" for="pt-cookie-marketing"><span><strong>Marketing</strong><small>TikTok Pixel: mede visitas e campanhas, somente com seu consentimento.</small></span><input id="pt-cookie-marketing" type="checkbox"></label>',
+   '<p class="pt-cookie-footnote">A recusa mantém o TikTok Pixel desativado. Ao retirar o aceite, interrompemos o rastreamento e recarregamos a página. Leia a <a href="/cookies">Política de Cookies</a> e o <a href="/privacidade">Aviso de Privacidade</a>.</p>',
    '<div class="pt-cookie-modal-actions"><button type="button" class="pt-cookie-button pt-cookie-secondary" data-cookie-action="reject">Rejeitar opcionais</button>',
    '<button type="button" class="pt-cookie-button pt-cookie-primary" data-cookie-action="save">Salvar preferências</button></div></dialog>'
   ].join('');
