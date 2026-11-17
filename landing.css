@@ -11,3 +11,13 @@ section[id]{scroll-margin-top:100px}.black-friday button:disabled{opacity:.65;cu
 @media(max-width:680px){.bf-banner{height:44px}.bf-banner .ticker-message{font-size:11px;letter-spacing:1.5px}.ticker-message b{margin:0 17px}.black-friday .topbar{height:72px;gap:10px}.black-friday .hero{padding-top:42px;gap:68px}.black-friday .hero h1{font-size:clamp(64px,18vw,92px);letter-spacing:-4px}.black-friday .hero-kicker{font-size:8px;letter-spacing:1.7px;margin-top:21px}.black-friday .hero-subtitle{font-size:18px}.black-friday .hero-copy>p{font-size:13px}.hero-offer strong{font-size:43px}.black-friday .hero-actions .btn{font-size:11px;padding:14px}.black-friday .visual{padding:20px;max-width:460px}.campaign-label{margin:-41px 0 20px;padding:15px;gap:12px}.campaign-label>span{font-size:10px}.campaign-label strong{font-size:24px;padding-left:13px}.campaign-label small{font-size:8px}.black-friday .visual-head strong{font-size:20px}.black-friday .visual-footer{font-size:8px}.black-friday .contact-grid{gap:35px}.black-friday .features h2,.black-friday .pricing-title h2{font-size:34px}.black-friday .plan{padding:28px}.black-friday .pricing-grid{gap:24px}.black-friday .plan.featured{margin:0}.black-friday .form-card{padding:25px 18px}.black-friday .footer div{flex-wrap:wrap;row-gap:10px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.ticker-track{animation:none;transform:none}.ticker-toggle{display:none}.btn{transition:none}.black-friday .btn:hover{transform:none}.ticker-link{overflow-x:auto}}
 
+
+/* Public sales contact: direct WhatsApp link, with room for cookie choices. */
+.whatsapp-float{position:fixed;right:max(24px,env(safe-area-inset-right));bottom:calc(24px + env(safe-area-inset-bottom,0px));z-index:9000;display:flex;align-items:center;justify-content:center;gap:10px;min-width:58px;min-height:58px;padding:14px 18px;border:1px solid #ffffff45;border-radius:999px;background:#128c4a;color:#fff;box-shadow:0 8px 28px #0005;font-size:14px;font-weight:700;line-height:1.2;transition:background .2s,transform .2s}
+.whatsapp-float svg{flex:none}
+.whatsapp-float:hover{background:#0d713b;transform:translateY(-2px)}
+.whatsapp-float:focus-visible{outline:3px solid #dbff73;outline-offset:5px}
+.black-friday footer{padding-bottom:110px}
+.black-friday .pt-cookie-banner{bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+@media(max-width:680px){.whatsapp-float{right:max(16px,env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom,0px));width:58px;height:58px;padding:14px}.whatsapp-float-label{display:none}.black-friday .pt-cookie-banner{bottom:calc(88px + env(safe-area-inset-bottom,0px))}}
+@media(prefers-reduced-motion:reduce){.whatsapp-float{transition:none}.whatsapp-float:hover{transform:none}}
