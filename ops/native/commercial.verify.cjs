@@ -36,7 +36,8 @@ async function run(){
   assert.match(sitemap.headers.get('content-type'),/application\/xml/);
   assert.match(await sitemap.text(),/<loc>https:\/\/partelis\.com\.br\/<\/loc>/);
   assert.match((await request('/demo')).headers.get('x-robots-tag'),/noindex/);
-  assert.match(await(await request('/demo')).text(),/window.CLOUD=false/);
+  assert.match(await(await request('/demo')).text(),/DEMONSTRAÇÃO GUIADA/);
+  assert.match(await(await request('/demo?modo=livre')).text(),/window.CLOUD=false/);
   assert.match(await(await request('/app')).text(),/window.CLOUD=true/);
   assert.equal((await request('/api/admin/commercial/list')).status,401);
   const secret=await provision(ownerEmail,'Proprietário - Teste');

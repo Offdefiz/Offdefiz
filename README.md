@@ -16,7 +16,7 @@ Partelís A1 — identidade oficial. Aplicativo piloto para testes com dados fic
 
 Configure SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY e PUBLIC_APP_URL conforme .env.example, usando variáveis do ambiente. Nenhuma chave administrativa é enviada ao navegador. Execute npm start. npm test verifica regras e proteção básica de rotas. Não há dependências npm para executar o servidor.
 
-Rotas: /login, / (autenticada), /demo (demonstração fictícia isolada no navegador), /apresentacao (peça animada de apresentação), /health. A aplicação autenticada usa cookies HttpOnly e renovação de sessão. Não há cadastro público pela interface. Só contas vinculadas ao escritório recebem dados.
+Rotas: /login, / (autenticada), /demo (demonstração guiada, sem cadastro), /demo?modo=livre (painel editável com base fictícia isolada no navegador), /apresentacao (peça animada de apresentação), /health. A aplicação autenticada usa cookies HttpOnly e renovação de sessão. Não há cadastro público pela interface. Só contas vinculadas ao escritório recebem dados.
 
 ## Dados e permissões
 

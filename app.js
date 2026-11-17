@@ -1,8 +1,9 @@
 /* Interface demonstrativa. As regras de negócio ficam em domain.js. */
 (async function(){
   'use strict';
+  const MENU_KEY=window.CLOUD?'cj-menu-collapsed':'partelis-demo-menu-collapsed';
   const C=window.Partelis||window.Caixa, I=window.CJInsights, KEY='partelis-prototipo-v3', ROLE='partelis-perfil-v3', LEGACY_KEY='caixa-juridico-prototipo-v2', LEGACY_ROLE='caixa-juridico-perfil-v2';
-  let state,storageError='',role='gestor',page='today',query='',filter='active',toastTimer;
+  let state,storageError='',role='gestor',page=window.CLOUD?'today':'funnel',query='',filter='active',toastTimer;
   let revision=0, mutating=false, syncing=false, stateEpoch=0, pendingRender=false;
   async function request(url,body){const res=await fetch(url,{method:body?'POST':'GET',headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined});const d=await res.json();if(res.status===401){location.href='/login';throw new Error('Entre para continuar.');}if(!res.ok)throw new Error(d.error||'Não foi possível salvar.');return d;}
   if(window.CLOUD){try{const d=await request('/api/state');state=C.validate(d.data);revision=d.revision;window.CJ_USER=d.user;window.CJ_THEME=d.theme;role=d.user.role;}catch(err){if(location.pathname!='/login'){document.body.innerHTML='<main class="login-shell"><section class="login-card"><h1>Acesso ao escritório</h1><p>'+String(err.message).replace(/[<>&]/g,'')+'</p><a href="/login">Voltar ao login</a></section></main>';}return;}}
@@ -61,6 +62,9 @@
   function updateMenu(){const mobile=matchMedia('(max-width:650px)').matches,expanded=mobile?$('#sidebar').classList.contains('open'):!document.body.classList.contains('sidebar-collapsed');document.querySelectorAll('[data-action="menu"]').forEach(b=>{b.setAttribute('aria-expanded',String(expanded));b.setAttribute('aria-label',expanded?'Recolher menu':'Abrir menu');});$('#sidebar').inert=mobile&&!expanded;document.body.classList.toggle('sidebar-open',mobile&&expanded);const toggle=document.querySelector('.crm-nav-toggle');if(toggle)toggle.title=expanded?'Recolher navegação':'Expandir navegação';}
   function navigate(p){page=access[role].includes(p)?p:'today';query='';filter='active';$('#sidebar').classList.remove('open');updateMenu();render();window.scrollTo({top:0});}
   function shell(){document.body.innerHTML='<div class="layout"><aside class="sidebar" id="sidebar"><button class="btn sidebar-close" data-action="menu" aria-label="Recolher menu">✕</button><div class="brand"><img class="brand-mark" src="/brand-symbol.svg" width="43" height="43" alt=""><div><b>Partelís</b><small>DO ATENDIMENTO À EXECUÇÃO</small></div></div><div class="workspace"><div class="eyebrow">'+(window.CLOUD?'ESCRITÓRIO':'ESCRITÓRIO DEMONSTRATIVO')+'</div><strong>'+e(window.CJ_THEME?.name||(window.CLOUD?'Meu escritório':'Escritório demonstrativo'))+'</strong></div><div class="eyebrow nav-title">NAVEGAÇÃO</div><nav id="nav" aria-label="Menu principal"></nav><div class="side-end">'+(window.CLOUD?'<a class="portal-launch" href="/juridico">⚖ Gestão processual <small>Áreas e processos</small></a>':'')+(window.CLOUD&&C.can(role,'contract')?'<a class="portal-launch" href="/contratos">▣ Preparação documental <small>Pré-validação</small></a>':'')+'<a class="portal-launch" href="/cliente/demo" target="_blank" rel="noopener" aria-label="Abrir demonstração do portal do cliente">◈ Portal do cliente <small>Ver demonstração</small></a><div class="profile" id="crm-account-slot"></div></div></aside><div class="shell"><header class="topbar"><div class="crumb">Escritório <span style="padding:0 8px">/</span><strong id="crumb"></strong></div><span class="mobile-brand"><img src="/brand-symbol.svg" alt="" width="29" height="29">Partelís</span><div class="top-actions"><button class="btn ghost mobile-menu" data-action="menu" aria-label="Abrir menu" aria-controls="sidebar" aria-expanded="true">'+icon('menu')+'</button>'+(!window.CLOUD?'<span class="demo-tag">DADOS FICTÍCIOS</span>':'')+'<label class="role-warning" for="roleSelect">Perfil</label><select class="profile-select" id="roleSelect" aria-label="Simular perfil">'+Object.entries(C.roles).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('')+'</select><button type="button" class="crm-top-account" data-ux-action="account" aria-label="Abrir menu da conta"><span class="crm-avatar-mini" data-crm-avatar>DF</span></button></div></header><main class="content" id="main"></main></div></div><dialog class="dialog" id="dialog" aria-labelledby="dialogTitle"></dialog><div class="toast" id="toast" role="status" aria-live="polite"></div>';
+    if(!window.CLOUD){
+      $('.shell > .topbar').insertAdjacentHTML('afterend','<aside class="demo-panel-bar" aria-label="Modo demonstração"><p><strong>Ambiente fictício.</strong> Use apenas dados de exemplo.</p><nav aria-label="Opções da demonstração"><a class="tour-text-link" href="/demo">Voltar à demo guiada</a><a class="tour-button tour-buy" href="/#planos">Ver planos e contratar</a></nav></aside>');
+    }
     $('#roleSelect').value=role;
     if(window.CLOUD){
       $('#roleSelect').disabled=true;$('#roleSelect').hidden=true;
@@ -236,7 +240,7 @@
     if(!generator)return notify('O módulo de propostas ainda está carregando. Atualize a página.',true);
     const settings=window.PartelisProposalSettings?.current()||window.CJ_THEME?.proposal||{};
     if(!settings.responsible||!settings.oab){notify('Configure o nome e a OAB do responsável em Configurações → Propostas comerciais.',true);return;}
-    const theme=window.CJ_THEME||(!window.CLOUD?JSON.parse(localStorage.getItem('cj-brand')||'{}'):{})||{};
+    const theme=window.CJ_THEME||(!window.CLOUD?JSON.parse(localStorage.getItem('partelis-demo-brand')||'{}'):{})||{};
     const office={name:theme.name||'Escritório demonstrativo'},debts=state.debts.filter(d=>d.clientId===c.id);
     const tab=window.open('about:blank','_blank');if(!tab)return notify('Permita a abertura de nova aba para gerar a proposta.',true);
     try{
@@ -261,7 +265,7 @@
   function reset(){if(window.CLOUD)return notify('A base compartilhada não é reiniciada pela demonstração.',true);form('Reiniciar demonstração','Apenas os registros desta demonstração neste navegador serão substituídos.','<div class="callout gold field full">Exporte uma cópia se quiser preservar seus testes. Esta ação não pode ser desfeita pela interface.</div>'+field('Digite REINICIAR para confirmar','confirmation','text','','pattern="REINICIAR"'),data=>{if(data.confirmation!=='REINICIAR')throw new Error('Digite REINICIAR.');const s=C.seed();try{localStorage.setItem(KEY,JSON.stringify(s));state=s;storageError='';}catch(_){throw new Error('O navegador não permitiu salvar.');}},'Reiniciar dados fictícios');}
   async function handleClick(ev){const el=ev.target.closest('[data-action]');if(!el)return;const a=el.dataset.action,id=el.dataset.id;try{
     if(a==='navigate')return navigate(id);
-    if(a==='menu'){if(matchMedia('(max-width:650px)').matches)$('#sidebar').classList.toggle('open');else{document.body.classList.toggle('sidebar-collapsed');try{localStorage.setItem('cj-menu-collapsed',String(document.body.classList.contains('sidebar-collapsed')));}catch(_){}}updateMenu();return;}
+    if(a==='menu'){if(matchMedia('(max-width:650px)').matches)$('#sidebar').classList.toggle('open');else{document.body.classList.toggle('sidebar-collapsed');try{localStorage.setItem(MENU_KEY,String(document.body.classList.contains('sidebar-collapsed')));}catch(_){}}updateMenu();return;}
     if(a==='filter'){filter=id;render();return;}
     if(a==='close')return $('#dialog').close();
     if(a==='gcal'||a==='ics'){
@@ -284,7 +288,7 @@
   window.addEventListener('storage',ev=>{if(ev.key===KEY){try{if(!ev.newValue){storageError='Os dados foram removidos em outra aba. Reinicie a demonstração em Sobre para continuar.';}else{state=C.validate(JSON.parse(ev.newValue));storageError='';}$('#dialog').close();render();notify('Dados atualizados por outra aba. Formulários abertos foram fechados.');}catch(_){storageError='Outra aba gravou dados incompatíveis. Reinicie em Sobre para continuar.';render();}}});
   window.addEventListener('caixa-theme-saved',ev=>{stateEpoch++;render();syncState();});
   shell();
-  try{document.body.classList.toggle('sidebar-collapsed',localStorage.getItem('cj-menu-collapsed')==='true');}catch(_){}
+  try{document.body.classList.toggle('sidebar-collapsed',localStorage.getItem(MENU_KEY)==='true');}catch(_){}
   updateMenu();window.addEventListener('resize',updateMenu);
   document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){$('#sidebar').classList.remove('open');updateMenu();}});
   async function syncState(){

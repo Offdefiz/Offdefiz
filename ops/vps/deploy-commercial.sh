@@ -127,7 +127,9 @@ grep -q 'Política de Cookies' "$CHECK_DIR/cookies.html" || error "Política de 
 curl -fsS --max-time 12 -o "$CHECK_DIR/cookie-consent.js" https://partelis.com.br/cookie-consent.js
 grep -q 'pt_cookie_consent' "$CHECK_DIR/cookie-consent.js" || error "Controlador de cookies ausente em produção."
 curl -fsS --max-time 12 -o "$CHECK_DIR/demo.html" https://partelis.com.br/demo
-grep -q 'window.CLOUD=false' "$CHECK_DIR/demo.html" || error "Demonstração não está isolada."
+grep -q 'DEMONSTRAÇÃO GUIADA' "$CHECK_DIR/demo.html" || error "Demonstração guiada indisponível."
+curl -fsS --max-time 12 -o "$CHECK_DIR/demo-livre.html" 'https://partelis.com.br/demo?modo=livre'
+grep -q 'window.CLOUD=false' "$CHECK_DIR/demo-livre.html" || error "Painel da demonstração não está isolado."
 curl -fsS --max-time 12 -o "$CHECK_DIR/app.html" https://partelis.com.br/app
 grep -q 'window.CLOUD=true' "$CHECK_DIR/app.html" || error "Aplicativo real não está separado."
 SWAPPED=0
