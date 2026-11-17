@@ -61,39 +61,33 @@ jobs:
     needs: verify
     runs-on: ubuntu-24.04
     environment: production
+    timeout-minutes: 12
     steps:
-      - name: Preparar credenciais de SSH com host validado
+      - name: Confirmar revisão publicada pela sincronização da VPS
         env:
-          DEPLOY_KEY: ${{ secrets.PARTELIS_DEPLOY_KEY }}
-          HOST_KEY: ${{ secrets.PARTELIS_VPS_HOST_KEY }}
-          VPS_HOST: ${{ secrets.PARTELIS_VPS_HOST }}
-          VPS_PORT: ${{ secrets.PARTELIS_VPS_PORT }}
+          EXPECTED_REVISION: ${{ needs.verify.outputs.revision }}
         run: |
           set -euo pipefail
-          missing=0
-          for variable in DEPLOY_KEY HOST_KEY VPS_HOST VPS_PORT; do
-            if [[ -z "${!variable}" ]]; then
-              echo "::error::Credencial de produção ausente: $variable. Configure os segredos PARTELIS_* no ambiente production."
-              missing=1
+          # The existing VPS systemd timer pulls main every five minutes.
+          # Its deploy routine runs tests, encrypted backup and rollback locally.
+          # Do not require a second SSH access path from GitHub.
+          for attempt in $(seq 1 44); do
+            if curl --fail --silent --show-error --max-time 10 \
+              https://partelis.com.br/health -o /tmp/partelis-health.json; then
+              if EXPECTED_REVISION="$EXPECTED_REVISION" node -e '
+                const fs = require("node:fs");
+                const health = JSON.parse(fs.readFileSync("/tmp/partelis-health.json", "utf8"));
+                process.exit(health.status === "ok" && health.configured === true &&
+                  health.revision === process.env.EXPECTED_REVISION ? 0 : 1);
+              '; then
+                echo "Revisão $EXPECTED_REVISION confirmada em produção."
+                echo "### Publicação confirmada pela VPS" >> "$GITHUB_STEP_SUMMARY"
+                echo "Revisão: $EXPECTED_REVISION" >> "$GITHUB_STEP_SUMMARY"
+                exit 0
+              fi
             fi
+            echo "Aguardando a sincronização da VPS (tentativa $attempt/44)."
+            sleep 15
           done
-          (( missing == 0 ))
-          [[ "$VPS_PORT" =~ ^[0-9]{1,5}$ ]]
-          install -d -m 0700 "$HOME/.ssh"
-          printf '%s\n' "$DEPLOY_KEY" > "$HOME/.ssh/id_ed25519"
-          chmod 0600 "$HOME/.ssh/id_ed25519"
-          printf '%s\n' "$HOST_KEY" > "$HOME/.ssh/known_hosts"
-          chmod 0600 "$HOME/.ssh/known_hosts"
-          ssh-keygen -F "$VPS_HOST" -f "$HOME/.ssh/known_hosts" >/dev/null || \
-            ssh-keygen -F "[$VPS_HOST]:$VPS_PORT" -f "$HOME/.ssh/known_hosts" >/dev/null
-      - name: Deploy com backup, healthcheck e rollback pela rotina existente
-        env:
-          VPS_HOST: ${{ secrets.PARTELIS_VPS_HOST }}
-          VPS_PORT: ${{ secrets.PARTELIS_VPS_PORT }}
-          REVISION: ${{ needs.verify.outputs.revision }}
-        run: |
-          set -euo pipefail
-          ssh -p "$VPS_PORT" -o BatchMode=yes -o StrictHostKeyChecking=yes \
-            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
-            "partelis-deploy@$VPS_HOST" \
-            "sudo -n /usr/local/sbin/partelis-deploy-commercial '$REVISION'"
+          echo "::error::A VPS não confirmou a revisão esperada. Verifique partelis-sync-main.service."
+          exit 1

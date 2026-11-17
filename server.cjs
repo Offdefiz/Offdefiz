@@ -143,7 +143,12 @@ if(route==='/api/admin/deal'&&req.method==='POST'){if(!String(p.name||'').trim()
 if(route==='/api/admin/deal-status'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.id||''))||!allowedStage.includes(p.stage))throw new Fault(400,'Etapa inválida.');await adminDb('cj_admin_deals',{method:'PATCH',query:'?id=eq.'+encodeURIComponent(p.id),body:{stage:p.stage},prefer:'return=minimal'});return send(res,200,{ok:true});}
 if(route==='/api/admin/feedback-status'&&req.method==='POST'){if(!/^[0-9a-f-]{36}$/i.test(String(p.id||''))||!['open','reviewing','resolved'].includes(p.status))throw new Fault(400,'Status inválido.');await adminDb('cj_beta_feedback',{method:'PATCH',query:'?id=eq.'+encodeURIComponent(p.id),body:{status:p.status},prefer:'return=minimal'});return send(res,200,{ok:true});}
 throw new Fault(404,'Recurso indisponível.');}
-if(route==='/health')return send(res,200,{status:'ok',configured:!!native&&await native.health()});
+if(route==='/health'){
+ // Production checks out a detached, immutable commit. Expose only its hash.
+ let revision=null;
+ try{const head=fs.readFileSync(path.join(__dirname,'.git','HEAD'),'utf8').trim();if(/^[a-f0-9]{40}$/.test(head))revision=head;}catch{}
+ return send(res,200,{status:'ok',configured:!!native&&await native.health(),revision});
+}
 if(route==='/auth/login'&&req.method==='POST'){limit(req);const p=await body(req);const d=await store('/auth/v1/token?grant_type=password',{method:'POST',body:{email:p.email,password:p.password}});session(res,d,secureRequest(req));return send(res,200,{ok:true});}
 if(route==='/auth/signup'&&req.method==='POST')throw new Fault(403,'Novas contas são criadas por convite aprovado pelo Partelís.');
 if(route==='/auth/logout'&&req.method==='POST'){const token=cookies(req).cj_access;if(token||native)await store('/auth/v1/logout',{token,method:'POST',...(native?{body:{refresh_token:cookies(req).cj_refresh}}:{})}).catch(()=>{});res.setHeader('Set-Cookie',['cj_access=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/','cj_refresh=; Max-Age=0; HttpOnly; SameSite=Lax; Path=/']);return send(res,200,{ok:true});}
