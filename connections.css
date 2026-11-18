@@ -14,3 +14,5 @@
 .digital-card[data-theme=escuro]{background:#18171d;color:white}.digital-card[data-theme=escuro] .subtitle,.digital-card[data-theme=escuro] .notice{color:#cfcbd5}
 .digital-card[data-theme=claro]{background:#fff;color:var(--ink)}.digital-card .tags span{color:#4a2574}.digital-card .card-buttons{margin:25px 0}.digital-card #download-vcard{width:100%;margin:6px 0 18px}
 @media(max-width:620px){.card-link-row .row-fields{grid-template-columns:1fr}.card-link-row .row-fields .wide{grid-column:auto}.public-layout{display:flex;flex-direction:column}.public-layout .panel{width:100%}}
+
+.qr-wrap{margin-top:18px;display:grid;justify-items:start;gap:12px}.qr-wrap p{margin:0}.qr-wrap #qr-target{padding:12px;background:#fff;border:1px solid var(--line);border-radius:12px}.qr-wrap #qr-target img{display:block;max-width:180px}.qr-wrap #qr-target canvas{max-width:180px}
