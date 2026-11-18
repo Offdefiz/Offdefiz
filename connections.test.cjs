@@ -1,6 +1,6 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict');
-const {validateProfile,validateRequest,service,slugOk}=require('./ops/native/connections.cjs');
+const {validateProfile,validateLinks,validateRequest,service,slugOk}=require('./ops/native/connections.cjs');
 const {server}=require('./server.cjs');
 const good={slug:'silva-advocacia',professional_name:'Marina Silva',oab_registration:'OAB/MG 123456',city:'Belo Horizonte',state:'MG',areas:['Cível','Família'],presentation:'Atuação em Belo Horizonte.',published:true,ethical_attestation:true};
 test('perfil exige declaração para publicar e campos éticos objetivos',()=>{
@@ -10,6 +10,22 @@ test('perfil exige declaração para publicar e campos éticos objetivos',()=>{
  assert.throws(()=>validateProfile({...good,areas:['Cível','Cível']}),/Revise/);
  assert.throws(()=>validateProfile({...good,oab_registration:'não informada'}),/Revise/);
  assert.ok(slugOk('silva-advocacia'));assert.equal(slugOk('---'),false);
+});
+test('cartão Linktree mantém botões ordenados, temas e bloqueia links inseguros',()=>{
+ const buttons=[
+  {type:'whatsapp',label:'WhatsApp',url:'https://wa.me/5531999999999'},
+  {type:'instagram',label:'Instagram',url:'https://www.instagram.com/advogada'},
+  {type:'site',label:'Site do escritório',url:'https://exemplo.com.br'},
+  {type:'email',label:'E-mail',url:'mailto:contato@exemplo.com.br'}
+ ];
+ const card=validateProfile({...good,links:buttons,theme:'escuro'});
+ assert.equal(card.links.length,4);assert.equal(card.theme,'escuro');
+ assert.deepEqual(card.links.map(b=>b.type),['whatsapp','instagram','site','email']);
+ assert.throws(()=>validateLinks([{type:'site',label:'Clique aqui',url:'javascript:alert(1)'}]),/inválido|seguros/);
+ assert.throws(()=>validateLinks([{type:'site',label:'Clique aqui',url:'https://localhost/admin'}]),/seguros/);
+ assert.throws(()=>validateLinks([{type:'whatsapp',label:'Contato',url:'https://evil.com/'}]),/corresponde/);
+ assert.throws(()=>validateLinks(Array.from({length:9},()=>buttons[0])),/oito/);
+ assert.throws(()=>validateProfile({...good,theme:'premium'}),/Revise/);
 });
 test('solicitação não aceita relato sensível, sem consentimento ou assunto arbitrário',()=>{
  assert.deepEqual(validateRequest({name:'Ana Lima',email:'ANA@example.com',subject:'Cível',consent:true}),{name:'Ana Lima',email:'ana@example.com',phone:'',subject:'Cível'});
@@ -40,12 +56,13 @@ test.after(()=>server.close());
 test('landing anuncia piloto sem prometer intermediação e páginas não são indexáveis',async()=>{
  const html=await(await fetch(origin+'/')).text();
  assert.match(html,/id="conexoes"/);assert.match(html,/Funcionalidade em desenvolvimento/);
- assert.match(html,/Sem distribuição automática de casos/);
+ assert.match(html,/link na bio/);assert.match(html,/até oito botões/);
  const page=await fetch(origin+'/profissional/silva-advocacia');
  assert.equal(page.status,200);assert.match(page.headers.get('x-robots-tag'),/noindex/);
- assert.match(await page.text(),/não indica, recomenda ou classifica advogados/);
+ const publicHtml=await page.text();assert.match(publicHtml,/não indica, recomenda ou classifica advogados/);assert.match(publicHtml,/public-links/);assert.match(publicHtml,/download-vcard/);
  assert.equal((await fetch(origin+'/connections.js')).status,200);
  assert.equal((await fetch(origin+'/connections.css')).status,200);
+ const editor=await fetch(origin+'/conexoes');assert.equal(editor.status,401);
 });
 test('solicitações não ficam abertas sem banco e origem confiável',async()=>{
  const r=await fetch(origin+'/api/public/conexoes/silva-advocacia/solicitacoes',{method:'POST',headers:{Origin:'https://terceiro.example','Content-Type':'application/json'},body:'{}'});
