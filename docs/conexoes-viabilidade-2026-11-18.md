@@ -1,0 +1,68 @@
+# Partelís Conexões — estudo de viabilidade e decisões (18/11/2026)
+
+## Resumo executivo
+**Recomendação:** começar como ferramenta SaaS B2B de **perfil profissional individual, link compartilhável e solicitação de contato direto**. Não começar como marketplace de leads ou contratação intermediada. O objetivo é aumentar o valor percebido do Partelís e converter contatos em atendimentos administrados pelo escritório.
+
+A primeira versão implementada neste branch NÃO oferece diretório público, pesquisa por especialidade, distribuição automática, ranqueamento, avaliação pública, pagamento de honorários, agendamento de consultas nem promessas de clientes. **Não está publicada nem aprovada juridicamente.** A publicação de cada perfil é opt-in, e a landing descreve um piloto.
+
+## Viabilidade regulatória: hipóteses e limites
+1. O Provimento OAB 205/2021 permite marketing jurídico informativo e uso de ferramentas tecnológicas de comunicação, com limites de sobriedade, vedação de captação indevida e mercantilização; chatbot não pode substituir o julgamento profissional. Fonte oficial: https://www.oab.org.br/leisnormas/legislacao/provimentos/205-2021
+2. O acórdão do Conselho Federal, consulta 49.0000.2025.001346-3, de 12/11/2025, é um sinal especialmente relevante de risco para plataformas que intermedeiam escolha de advogados e escritórios virtuais impessoais: https://www.oab.org.br/jurisprudencia/detementa/22176?search=publicidade&title=49-0000-2025-001346-3
+3. O Estatuto da Advocacia, Lei 8.906/1994, e o Código de Ética devem integrar parecer específico antes do lançamento comercial.
+4. **Não há conclusão de licitude definitiva** para a solução: exigir parecer de advogado especializado em ética profissional e, se pertinente, consulta ao TED da seccional. O nome e a OAB são autodeclarados; a plataforma não confirma inscrição ativa. Não exibir selo de “verificado”.
+5. Mitigações: publicação voluntária, conteúdo informativo, ausência de ranking, leilão ou compra de leads, sem cobrança por caso ou honorários, sem indicação de profissionais, sem respostas jurídicas automáticas, sem alegações de resultados.
+
+## Comparação com plataformas de outros setores
+| Plataforma | Setor | Modelo observado | Aplicação segura ao Partelís | O que não copiar |
+| --- | --- | --- | --- | --- |
+| Doctoralia Pro | Medicina e fisioterapia | Perfil no marketplace, agendamento, ferramentas de gestão e planos recorrentes; página oficial consultada mostra planos anuais parcelados Starter R$429, Plus R$529 e VIP R$679 (valores sujeitos a mudança) | Perfil próprio + painel + comunicação | Marketplace com ranqueamento/impulsionamento de advogados sem parecer |
+| Zocdoc | Saúde | Cobra taxa única por agendamento de descoberta; agendamentos de pacientes que já buscavam o profissional são gratuitos | Distinguir contato originado por link próprio de descoberta paga, para **analytics**, não para cobrar por caso | Cobrança por conexão/agendamento jurídico |
+| GetNinjas | Serviços gerais | Sistema aproxima pedido e profissional por região; profissional usa moedas para liberar contato e orçar | UX de solicitação curta, status do atendimento | Venda de contatos e distribuição algorítmica |
+| Workana | Desenvolvimento, design, freelancing | Projetos, propostas, contratação e comissão progressiva de 20%, 10% e 5% do freelancer conforme relacionamento; taxa de serviço do cliente de 4,5% | Perfil, proposta e CRM pós-contato | Comissão sobre honorários e contratação intermediada |
+| Sharetribe (software) | Marketplace genérico | Plataforma de duas pontas, descoberta e transações | Referência de modelagem de perfis e estados | Código legado não mantido e licença restritiva; não incorporar |
+
+Fontes primárias:
+- Doctoralia: https://pro.doctoralia.com.br/preco
+- Zocdoc: https://www.zocdoc.com/provider-help/en/articles/10859404-understanding-zocdoc-pricing-and-billing
+- GetNinjas: https://www.getninjas.com.br/central-de-ajuda/cliente/pedidos-sou-cliente/como-os-profissionais-sao-selecionados
+- Workana: https://help.workana.com/hc/pt/articles/360041235874-Como-%C3%A9-calculada-a-comiss%C3%A3o-na-Workana
+- Workana planos: https://help.workana.com/hc/pt/articles/360048765794-O-que-s%C3%A3o-os-planos-para-clientes
+
+## Modelo de negócio e validação
+- **Produto:** Partelís SaaS por escritório. O perfil e a caixa de solicitações são um diferencial de aquisição/retensão do software, não uma corretora de casos.
+- **Receita:** assinatura recorrente já existente. Inicialmente incluir a funcionalidade em piloto sem taxa por lead, sem comissão e sem plano separado; testar disposição a pagar antes de alterar preços.
+- **Economia:** custo de operação inclui infraestrutura, suporte, moderação, antifraude, LGPD e aquisição de assinantes; não confundir faturamento com margem.
+- **Hipóteses de teste (não projeções):** convidar 10 escritórios; ativação = perfis completos/publicados ÷ convidados; valor = perfis que receberam contato legítimo; retenção = escritórios ativos após 30 dias; conversão SaaS = interessados que viraram assinantes. Avaliar sinais com entrevistas, não declarar causalidade com amostra pequena.
+- **Risco de marketplace bilateral:** captar público leigo e advogados simultaneamente é caro; primeiro vender software a advogados que compartilham seus próprios links. Um diretório público exige nova decisão de negócio e jurídica.
+
+## GitHub de terceiros: pesquisa de inspiração, não código incorporado
+- https://github.com/calcom/cal.com — UX de disponibilidade, tipos de evento, convites e agendamento; repositório grande, dependências e licenciamento precisam de revisão antes de incorporar.
+- https://github.com/formbricks/formbricks — formulários, consentimento e pesquisa; licença mista com partes AGPL e comerciais, revisar arquivos antes de reutilizar.
+- https://github.com/documenso/documenso — trilhas de assinatura e documentos; AGPL-3.0, risco de obrigações de redistribuição em SaaS.
+- https://github.com/medusajs/medusa — arquitetura modular e API; núcleo MIT, partes Enterprise separadas; foco e-commerce, não é base direta para a advocacia.
+- https://github.com/sharetribe/sharetribe — fluxos de marketplace; Sharetribe Go não é mais mantido e usa Community Public Licence, não adotar como base do Partelís.
+
+**Decisão técnica:** usar código próprio em Node.js e PostgreSQL do Partelís; nenhuma dependência, cópia de código ou licença de terceiros foi adicionada.
+
+## Escopo implementado no branch
+- Migração PostgreSQL: `ops/native/migrations/2026-11-18-conexoes.sql`.
+- Serviço de dados multi-tenant: `ops/native/connections.cjs`.
+- Gestor: `/conexoes` para editar perfil, optar por publicar e administrar solicitações.
+- Público: `/profissional/:slug`, somente via link compartilhado, sem indexação de busca no piloto.
+- API: `/api/conexoes`, `/api/conexoes/perfil`, `/api/conexoes/solicitacoes`, `/api/conexoes/solicitacoes/status`, `/api/public/conexoes/:slug` e POST `/api/public/conexoes/:slug/solicitacoes`.
+- Solicitação exige consentimento, sem campo de narrativa de caso ou upload de documentos. Formulário informa que contato não constitui contratação.
+- Landing: anúncio explícito de funcionalidade em piloto, não oferta de marketplace já ativo.
+
+## Pré-requisitos antes de publicar
+1. **Parecer jurídico de ética OAB e revisão LGPD** (bases legais, papéis controlador/operador, retenção, direitos do titular, incidentes, canal de contato).
+2. Revisão de segurança e privacidade: CSRF/origin, rate limiting distribuído por IP, CAPTCHA ou antifraude, prevenção de spam, retenção/exclusão de solicitações, logs de auditoria, backups, verificação manual da inscrição OAB e bloqueio de perfis abusivos.
+3. Executar migração no PostgreSQL real em janela controlada; validar rollback/backup. Não há execução automática desta migração.
+4. Executar `npm run build`, `npm test`, `npm run test:deploy`, testes de integração em staging com banco real e análise de acessibilidade.
+5. Publicar somente após aceite de produto e compliance; acompanhar leads legítimos, abuso, suporte, ativação e cancelamentos.
+
+## Memória de projeto / pauta contínua de estudo SaaS
+Este arquivo é a **memória técnica persistente no repositório**, não uma alteração manual da Memória do ChatGPT.
+
+Pesquisar e revisar a cada ciclo: (a) ICP e JTBD de advogado autônomo; (b) ativação e onboarding; (c) funil visita→cadastro→ativação→pagamento; (d) CAC, LTV, payback, margem, MRR, churn, retenção por coorte; (e) precificação por escritório, limites e empacotamento; (f) multi-tenancy, autorização e isolamento; (g) LGPD e sigilo profissional; (h) SEO informativo e aquisição ética; (i) observabilidade, segurança, backups e SLA; (j) integrações agenda e CRM; (k) OAB/provimentos/acórdãos novos; (l) testes A/B com amostra suficiente.
+
+**Próximo incremento sugerido:** conversão opcional de solicitação em atendimento no CRM por ação explícita do gestor, com deduplicação e trilha de consentimento. Não sincronizar dados externos automaticamente.
