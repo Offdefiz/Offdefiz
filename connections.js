@@ -37,7 +37,8 @@ if(page==='admin'){
  function showLink(){
   const box=$('share-box');
   box.hidden=!profile?.published;
-  if(!box.hidden){const link=location.origin+'/profissional/'+encodeURIComponent(profile.slug);$('share-link').href=link;$('share-link').textContent=link;}
+  if(!box.hidden){const link=location.origin+'/profissional/'+encodeURIComponent(profile.slug);$('share-link').href=link;$('share-link').textContent=link;
+   const target=$('qr-target');target.replaceChildren();if(typeof QRCode!=='undefined')new QRCode(target,{text:link,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});}
  }
  function renderPreview(){
   const name=$('professional_name').value.trim()||'Seu nome profissional';
@@ -97,6 +98,10 @@ if(page==='admin'){
    const result=await api('/api/conexoes/perfil',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(fields)});
    profile=result.profile;links=profile.links.map(x=>({...x}));renderEditor();renderPreview();setText('profile-status',profile.published?'Perfil publicado. Compartilhe seu link.':'Rascunho salvo. Seu perfil não está público.');showLink();
   }catch(err){setText('profile-status',err.message);}finally{button.disabled=false;}
+ });
+ $('download-qr').addEventListener('click',()=>{
+  const canvas=$('qr-target').querySelector('canvas');if(!canvas){setText('profile-status','Não foi possível gerar o QR Code.');return;}
+  const anchor=document.createElement('a');anchor.href=canvas.toDataURL('image/png');anchor.download='cartao-profissional-partelis.png';document.body.append(anchor);anchor.click();anchor.remove();
  });
  $('copy-link').addEventListener('click',async()=>{
   try{await navigator.clipboard.writeText($('share-link').href);setText('profile-status','Link copiado.');}
