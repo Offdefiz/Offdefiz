@@ -28,6 +28,7 @@ jobs:
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-10-cnj-inbox.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-15-pagbank.sql
           psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-16-commercial-reconciliation.sql
+          psql -v ON_ERROR_STOP=1 -f ops/native/migrations/2026-11-18-conexoes.sql
           npm install --no-save --package-lock=false --ignore-scripts pg@8.13.1
       - name: Existing behavior and seven independent offices
         run: |
