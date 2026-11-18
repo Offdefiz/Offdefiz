@@ -19,14 +19,14 @@ A primeira versão implementada neste branch NÃO oferece diretório público, p
 | Zocdoc | Saúde | Cobra taxa única por agendamento de descoberta; agendamentos de pacientes que já buscavam o profissional são gratuitos | Distinguir contato originado por link próprio de descoberta paga, para **analytics**, não para cobrar por caso | Cobrança por conexão/agendamento jurídico |
 | GetNinjas | Serviços gerais | Sistema aproxima pedido e profissional por região; profissional usa moedas para liberar contato e orçar | UX de solicitação curta, status do atendimento | Venda de contatos e distribuição algorítmica |
 | Workana | Desenvolvimento, design, freelancing | Projetos, propostas, contratação e comissão progressiva de 20%, 10% e 5% do freelancer conforme relacionamento; taxa de serviço do cliente de 4,5% | Perfil, proposta e CRM pós-contato | Comissão sobre honorários e contratação intermediada |
-| Sharetribe (software) | Marketplace genérico | Plataforma de duas pontas, descoberta e transações | Referência de modelagem de perfis e estados | Código legado não mantido e licença restritiva; não incorporar |
+| Zenklub | Psicologia e saúde mental | Plataforma de busca, perfis, agenda e sessões; também oferta B2B a empresas | Gestão da relação profissional-cliente e UX de perfis | Algoritmo de ordenação, teleatendimento e cobrança por sessão |\n| 99Freelas | Desenvolvimento e freelancing | Projetos e propostas; página comercial informa taxa de 5% a 20% e planos premium; termos publicados exibem faixa divergente, confirmar antes de usar valores | Clareza de perfis e fluxo de solicitações | Taxa por contratação, destaque pago e leilão de propostas |\n| Sharetribe (software) | Marketplace genérico | Plataforma de duas pontas, descoberta e transações | Referência de modelagem de perfis e estados | Código legado não mantido e licença restritiva; não incorporar |
 
 Fontes primárias:
 - Doctoralia: https://pro.doctoralia.com.br/preco
 - Zocdoc: https://www.zocdoc.com/provider-help/en/articles/10859404-understanding-zocdoc-pricing-and-billing
 - GetNinjas: https://www.getninjas.com.br/central-de-ajuda/cliente/pedidos-sou-cliente/como-os-profissionais-sao-selecionados
 - Workana: https://help.workana.com/hc/pt/articles/360041235874-Como-%C3%A9-calculada-a-comiss%C3%A3o-na-Workana
-- Workana planos: https://help.workana.com/hc/pt/articles/360048765794-O-que-s%C3%A3o-os-planos-para-clientes
+- Workana planos: https://help.workana.com/hc/pt/articles/360048765794-O-que-s%C3%A3o-os-planos-para-clientes\n- Zenklub termos: https://webflow.zenklub.com.br/termos\n- Zenklub B2B: https://zenklub.com.br/empresas\n- 99Freelas: https://www.99freelas.com.br/como-funciona/?for=freelancer e https://www.99freelas.com.br/termos
 
 ## Modelo de negócio e validação
 - **Produto:** Partelís SaaS por escritório. O perfil e a caixa de solicitações são um diferencial de aquisição/retensão do software, não uma corretora de casos.
@@ -36,7 +36,7 @@ Fontes primárias:
 - **Risco de marketplace bilateral:** captar público leigo e advogados simultaneamente é caro; primeiro vender software a advogados que compartilham seus próprios links. Um diretório público exige nova decisão de negócio e jurídica.
 
 ## GitHub de terceiros: pesquisa de inspiração, não código incorporado
-- https://github.com/calcom/cal.com — UX de disponibilidade, tipos de evento, convites e agendamento; repositório grande, dependências e licenciamento precisam de revisão antes de incorporar.
+- https://github.com/calcom/cal.com — UX de disponibilidade, tipos de evento, convites e agendamento; repositório grande, AGPL-3.0 conforme FAQ oficial, com edição Enterprise sob regras adicionais; não incorporar sem avaliação jurídica. Referência: https://cal.com/pt-BR/faq
 - https://github.com/formbricks/formbricks — formulários, consentimento e pesquisa; licença mista com partes AGPL e comerciais, revisar arquivos antes de reutilizar.
 - https://github.com/documenso/documenso — trilhas de assinatura e documentos; AGPL-3.0, risco de obrigações de redistribuição em SaaS.
 - https://github.com/medusajs/medusa — arquitetura modular e API; núcleo MIT, partes Enterprise separadas; foco e-commerce, não é base direta para a advocacia.
