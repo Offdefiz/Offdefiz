@@ -18,3 +18,101 @@
 .qr-wrap{margin-top:18px;display:grid;justify-items:start;gap:12px}.qr-wrap p{margin:0}.qr-wrap #qr-target{padding:12px;background:#fff;border:1px solid var(--line);border-radius:12px}.qr-wrap #qr-target img{display:block;max-width:180px}.qr-wrap #qr-target canvas{max-width:180px}
 
 .layout:has(#inbox-panel[hidden]),.public-layout:has(#contact-panel[hidden]){grid-template-columns:minmax(0,1fr);max-width:760px;margin-inline:auto}
+
+/* The editor and public page use the same glass surfaces as the sales page. */
+body[data-connections] {
+  --purple: #e9dcff;
+  --violet: #b88cff;
+  --ink: #f6efff;
+  --muted: #cebfde;
+  --line: #a27bc347;
+  color-scheme: dark;
+  min-height: 100dvh;
+  background: radial-gradient(ellipse at 78% 0, #3a2254 0, transparent 55%), #100b17;
+}
+[hidden] { display: none !important; }
+.header { background: #130b20d9; border-color: var(--line); }
+.header nav a { color: var(--ink); text-underline-offset: 4px; }
+.intro { margin: clamp(32px, 6vw, 64px) 0 30px; }
+.intro p { max-width: 66ch; }
+.kicker { color: #d2adff; }
+.panel { background: #1e142be8; border-color: var(--line); box-shadow: 0 24px 58px #08050e70; }
+.layout:has(#inbox-panel[hidden]) {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
+  max-width: none;
+  align-items: start;
+}
+.card-editor-side { min-width: 0; }
+.preview-heading { margin: 0 0 14px; }
+.preview-heading h2, .preview-heading p { margin: 0; }
+.preview-heading p { color: var(--muted); }
+input, textarea, select { background: #160e21; border-color: #a889c563; color: var(--ink); }
+input::placeholder, textarea::placeholder { color: #b4a3c5; }
+.prefix { border-color: #a889c563; }
+.card-link-row, .share, .row-actions button { background: #2a1b3b; }
+.button { background: #b78bfa; color: #22103a; }
+.button.secondary { background: #34234b; color: #f4e8ff; }
+.button:focus-visible, .card-button:focus-visible, .header a:focus-visible { outline: 2px solid #f1dfff; outline-offset: 4px; }
+.message { color: #e4ceff; }
+.public-layout { margin: clamp(20px, 6vw, 58px) auto; }
+.digital-card {
+  border: 1px solid #b893e66b;
+  border-radius: clamp(24px, 5vw, 36px);
+  padding: clamp(24px, 5vw, 42px);
+  text-align: left;
+  overflow-wrap: anywhere;
+}
+.digital-card[data-theme=violeta] {
+  background: radial-gradient(ellipse at 100% 0, #603b88 0, transparent 65%), linear-gradient(153deg,#2f1946,#1a1025 76%);
+}
+.digital-card[data-theme=escuro] { background: linear-gradient(145deg, #292530, #16131e 75%); }
+.digital-card[data-theme=claro] {
+  color-scheme: light;
+  background: #fcf7ff;
+  color: #2a1740;
+}
+.digital-card[data-theme=claro] :is(.subtitle,.notice,.card-location) { color: #5c4771; }
+.digital-card :is(h1,h2) {
+  font-size: clamp(25px, 6.5vw, 40px);
+  font-weight: 780;
+  line-height: 1.08;
+  letter-spacing: -.035em;
+  margin: 0 0 8px;
+}
+.digital-card .card-avatar {
+  margin: 0 0 20px;
+  width: 62px;
+  height: 62px;
+  border-radius: 19px;
+  color: #f9f2ff;
+  background: linear-gradient(145deg,#8d59ff,#543180);
+  box-shadow: 0 8px 26px #10062266;
+  font-size: 25px;
+}
+.digital-card .subtitle, .card-location { margin: 3px 0; font-size: 14px; }
+.card-location { opacity: .85; }
+.digital-card .tags { justify-content: flex-start; margin: 17px 0; }
+.digital-card .tags span { background: #d7b9ff24; color: #efe0ff; border: 1px solid #b994dd55; }
+.digital-card[data-theme=claro] .tags span { color: #513671; }
+.digital-card .description { margin: 16px 0; }
+.digital-card :is(.description,.card-location,.tags,.card-buttons):empty { display: none; }
+.digital-card .card-buttons { margin: 22px 0 14px; gap: 9px; }
+.digital-card .card-button {
+  padding: 12px 15px;
+  border-color: #bda0df60;
+  background: #d9bbff14;
+  color: inherit;
+  text-align: left;
+}
+.digital-card a.card-button { display: flex; justify-content: space-between; gap: 12px; }
+.digital-card a.card-button::after { content: '↗'; flex: none; }
+.digital-card .notice { margin: 20px 0 0; padding-top: 15px; border-color: #bda0df45; }
+.digital-card #download-vcard { margin: 0; text-align: left; font-size: 13px; }
+@media(max-width: 780px) {
+  .layout:has(#inbox-panel[hidden]) { grid-template-columns: 1fr; }
+  .card-editor-side { width: min(100%, 530px); margin-inline: auto; }
+}
+@media(prefers-reduced-motion: reduce) {
+  .card-button { transition: none; }
+  .card-button:hover { transform: none; }
+}

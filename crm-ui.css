@@ -363,3 +363,19 @@ body.office-ui.crm-ready.dark :is(.section-desc,.bottom-note,.hint){color:var(--
 .crm-ready .side-end{padding-top:12px}.crm-ready .side-end>.profile{border-top:0;padding-top:0}
 @media(min-width:651px){.office-ui.crm-ready.sidebar-collapsed .side-end{display:block}.office-ui.crm-ready.sidebar-collapsed .profile{padding:0}.office-ui.crm-ready.sidebar-collapsed .crm-account-trigger{justify-content:center;padding:4px 0}}
 
+
+.crm-card-shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px 22px;
+  margin: 0 0 20px;
+  padding: 14px 18px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  color: var(--ink);
+  background: var(--surface);
+}
+.crm-card-shortcut p { margin: 3px 0 0; }
+.crm-card-shortcut .btn { text-decoration: none; }

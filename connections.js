@@ -10,6 +10,17 @@ const $=id=>document.getElementById(id);
 const setText=(id,value)=>{$(id).textContent=value||'';};
 const slugFromPath=()=>decodeURIComponent(location.pathname.split('/').pop()||'');
 const linkTypes={whatsapp:'WhatsApp',instagram:'Instagram',linkedin:'LinkedIn',youtube:'YouTube',site:'Site profissional',agenda:'Agendamento',artigo:'Artigo',imprensa:'Imprensa',email:'E-mail',outro:'Outro link'};
+function cardInitials(name){
+ return name.trim().split(/\s+/).slice(0,2).map(word=>word[0]).join('').toUpperCase();
+}
+function renderAreas(container,areas){
+ container.replaceChildren();
+ for(const area of areas){
+  const tag=document.createElement('span');
+  tag.textContent=area;
+  container.append(tag);
+ }
+}
 const safeCardUrl=value=>{try{const u=new URL(value);return u.protocol==='https:'||u.protocol==='mailto:'?u.href:null;}catch{return null;}};
 function cardButton(item,preview=false){
  const el=document.createElement(preview?'div':'a');el.className='card-button';el.textContent=item.label||linkTypes[item.type]||'Link';
@@ -42,9 +53,12 @@ if(page==='admin'){
    const target=$('qr-target');target.replaceChildren();if(typeof QRCode!=='undefined')new QRCode(target,{text:link,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});}
  }
  function renderPreview(){
-  const name=$('professional_name').value.trim()||'Seu nome profissional';
+  const enteredName=$('professional_name').value.trim();
+  const name=enteredName||'Seu nome profissional';
   setText('preview-name',name);setText('preview-oab',$('oab_registration').value.trim()||'OAB/UF');
-  setText('preview-avatar',name[0].toUpperCase());setText('preview-bio',$('presentation').value.trim());
+  setText('preview-avatar',cardInitials(enteredName)||'•');setText('preview-bio',$('presentation').value.trim());
+  setText('preview-location',[$('city').value.trim(),$('state').value.trim().toUpperCase()].filter(Boolean).join(' · '));
+  renderAreas($('preview-areas'),[...document.querySelectorAll('[name=areas]:checked')].map(el=>el.value));
   $('card-preview').dataset.theme=$('theme').value;
   const target=$('preview-links');target.replaceChildren();
   for(const link of links){if(link.label.trim())target.append(cardButton(link,true));}
@@ -86,7 +100,7 @@ if(page==='admin'){
   });
  }
  $('add-card-link').addEventListener('click',()=>{if(links.length>=8)return;links.push({type:'site',label:'Meu site',url:'https://'});renderEditor();renderPreview();});
- for(const id of ['professional_name','oab_registration','presentation','theme'])$(id).addEventListener('input',renderPreview);
+ $('profile-form').addEventListener('input',renderPreview);
  $('profile-form').addEventListener('submit',async e=>{
   e.preventDefault();
   const button=$('save-profile');button.disabled=true;setText('profile-status','Salvando…');
@@ -140,10 +154,9 @@ if(page==='public'){
    setText('public-name',profile.professional_name);setText('public-oab',profile.oab_registration);
    setText('public-location',profile.city+' · '+profile.state);setText('public-presentation',profile.presentation);
    document.title=profile.professional_name+' · Perfil profissional | Partelís';
-   const tags=$('public-areas');tags.replaceChildren();
-   for(const area of profile.areas||[]){const el=document.createElement('span');el.textContent=area;tags.append(el);}
+   renderAreas($('public-areas'),profile.areas||[]);
    $('digital-card').dataset.theme=profile.theme||'violeta';
-   setText('public-avatar',(profile.professional_name||'A').charAt(0).toUpperCase());
+   setText('public-avatar',cardInitials(profile.professional_name||'A'));
    const linksContainer=$('public-links');linksContainer.replaceChildren();
    for(const link of profile.links||[]){const button=cardButton(link);if(button)linksContainer.append(button);}
    const vcard=$('download-vcard');vcard.hidden=false;

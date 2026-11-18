@@ -8,7 +8,8 @@ document.querySelector('#loginForm').onsubmit=async e=>{
   try{
     const r=await fetch('/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(Object.fromEntries(new FormData(e.target)))});
     const d=await r.json();if(!r.ok)throw Error(d.error||'Não foi possível entrar.');
-    location.replace('/app');
+    const destination=new URLSearchParams(location.search).get('destino');
+    location.replace(destination==='cartao'?'/conexoes':'/app');
   }catch(err){error.textContent=err.message}
   finally{button.disabled=false}
 };
