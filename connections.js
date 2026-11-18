@@ -9,7 +9,7 @@ async function api(url,options){
 const $=id=>document.getElementById(id);
 const setText=(id,value)=>{$(id).textContent=value||'';};
 const slugFromPath=()=>decodeURIComponent(location.pathname.split('/').pop()||'');
-const linkTypes={whatsapp:'WhatsApp',instagram:'Instagram',linkedin:'LinkedIn',youtube:'YouTube',site:'Site profissional',agenda:'Agendamento',email:'E-mail',outro:'Outro link'};
+const linkTypes={whatsapp:'WhatsApp',instagram:'Instagram',linkedin:'LinkedIn',youtube:'YouTube',site:'Site profissional',agenda:'Agendamento',artigo:'Artigo',imprensa:'Imprensa',email:'E-mail',outro:'Outro link'};
 const safeCardUrl=value=>{try{const u=new URL(value);return u.protocol==='https:'||u.protocol==='mailto:'?u.href:null;}catch{return null;}};
 function cardButton(item,preview=false){
  const el=document.createElement(preview?'div':'a');el.className='card-button';el.textContent=item.label||linkTypes[item.type]||'Link';
@@ -31,13 +31,14 @@ if(page==='admin'){
     $('theme').value=profile.theme||'violeta';
     showLink();
    }
-   renderEditor();renderPreview();await loadInbox();
+   renderEditor();renderPreview();
+   if(data.contactEnabled){$('inbox-panel').hidden=false;await loadInbox();}
   }catch(err){setText('profile-status',err.message);}
  }
  function showLink(){
   const box=$('share-box');
   box.hidden=!profile?.published;
-  if(!box.hidden){const link=location.origin+'/profissional/'+encodeURIComponent(profile.slug);$('share-link').href=link;$('share-link').textContent=link;
+  if(!box.hidden){const link=location.origin+'/adv/'+encodeURIComponent(profile.slug);$('share-link').href=link;$('share-link').textContent=link;
    const target=$('qr-target');target.replaceChildren();if(typeof QRCode!=='undefined')new QRCode(target,{text:link,width:180,height:180,correctLevel:QRCode.CorrectLevel.M});}
  }
  function renderPreview(){
@@ -135,7 +136,7 @@ if(page==='public'){
  const slug=slugFromPath();
  (async()=>{
   try{
-   const {profile}=await api('/api/public/conexoes/'+encodeURIComponent(slug));
+   const {profile,contactEnabled}=await api('/api/public/conexoes/'+encodeURIComponent(slug));
    setText('public-name',profile.professional_name);setText('public-oab',profile.oab_registration);
    setText('public-location',profile.city+' · '+profile.state);setText('public-presentation',profile.presentation);
    document.title=profile.professional_name+' · Perfil profissional | Partelís';
@@ -147,7 +148,7 @@ if(page==='public'){
    for(const link of profile.links||[]){const button=cardButton(link);if(button)linksContainer.append(button);}
    const vcard=$('download-vcard');vcard.hidden=false;
    vcard.addEventListener('click',()=>{
-    const escapeV=v=>String(v||'').replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/[;,]/g,m=>'\\'+m);
+    const escapeV=v=>String(v||'').replace(/\\/g,'\\\\').replace(/\r\n|[\r\n]/g,'\\n').replace(/[;,]/g,m=>'\\'+m);
     const content=['BEGIN:VCARD','VERSION:3.0','FN:'+escapeV(profile.professional_name),
      'ORG:'+escapeV(profile.professional_name),'NOTE:'+escapeV(profile.oab_registration),
      'URL:'+location.href,'END:VCARD'].join('\r\n');
@@ -156,7 +157,7 @@ if(page==='public'){
     anchor.href=objectUrl;anchor.download='contato-profissional.vcf';document.body.append(anchor);anchor.click();anchor.remove();
     setTimeout(()=>URL.revokeObjectURL(objectUrl),1000);
    });
-   $('contact-panel').hidden=false;
+   $('contact-panel').hidden=!contactEnabled;
   }catch{setText('public-name','Perfil indisponível');setText('public-location','O endereço pode estar incorreto ou o perfil não está publicado.');}
  })();
  $('contact-form').addEventListener('submit',async e=>{

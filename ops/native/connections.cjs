@@ -8,7 +8,7 @@ const states=new Set('AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ R
 const emailOk=v=>v.length<=254&&/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(v);
 const uuidOk=v=>typeof v==='string'&&/^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(v);
 const themes=new Set(['violeta','claro','escuro']);
-const linkTypes=new Set(['whatsapp','instagram','linkedin','youtube','site','agenda','email','outro']);
+const linkTypes=new Set(['whatsapp','instagram','linkedin','youtube','site','agenda','artigo','imprensa','email','outro']);
 function validateLinks(input){
  if(!Array.isArray(input)||input.length>8)throw fail(400,'Adicione no máximo oito botões ao cartão.');
  return input.map((item)=>{
@@ -19,7 +19,9 @@ function validateLinks(input){
   let url;
   try{url=new URL(value);}catch{throw fail(400,'Endereço de botão inválido.');}
   if(type==='email'){
-   if(url.protocol!=='mailto:'||!emailOk(decodeURIComponent(url.pathname))||url.search||url.hash)
+   let address;
+   try{address=decodeURIComponent(url.pathname);}catch{throw fail(400,'Endereço de e-mail inválido.');}
+   if(url.protocol!=='mailto:'||!emailOk(address)||url.search||url.hash)
     throw fail(400,'O botão de e-mail deve conter mailto:email@dominio.com.');
   }else{
    const host=url.hostname.toLowerCase();

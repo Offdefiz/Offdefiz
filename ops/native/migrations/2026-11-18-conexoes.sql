@@ -1,6 +1,7 @@
 -- Partelís Conexões: perfis individuais de escritórios, compartilhados por link.
--- Executar manualmente no PostgreSQL local ANTES de publicar o código.
+-- Aplicada pela publicação na VPS e, se necessário, na inicialização.
 BEGIN;
+SELECT pg_advisory_xact_lock(hashtext('partelis-cartao-profissional-20261118'));
 CREATE TABLE IF NOT EXISTS cj_connection_profiles (
  workspace_id uuid PRIMARY KEY REFERENCES cj_workspaces(id) ON DELETE CASCADE,
  slug varchar(55) NOT NULL UNIQUE,

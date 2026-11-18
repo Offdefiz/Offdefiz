@@ -95,13 +95,14 @@ if(route==='/api/public/leads'&&req.method==='POST'){
   return send(res,201,answer);
 }
 // Partelís Conexões: comunicação direta, sem marketplace de distribuição de casos.
+const contactEnabled=process.env.PARTELIS_CONNECTION_CONTACT_ENABLED==='true';
 const connectionMatch=route.match(/^\/api\/public\/conexoes\/([a-z0-9-]+)(\/solicitacoes)?$/);
 if(connectionMatch){
  if(!native)throw new Fault(503,'Perfis profissionais indisponíveis neste ambiente.');
  const service=require('./ops/native/connections.cjs').service();
  const slug=connectionMatch[1];
- if(req.method==='GET'&&!connectionMatch[2])return send(res,200,{profile:await service.publicProfile(slug)});
- if(req.method==='POST'&&connectionMatch[2]){limit(req);return send(res,201,await service.request(slug,await body(req)));}
+ if(req.method==='GET'&&!connectionMatch[2])return send(res,200,{profile:await service.publicProfile(slug),contactEnabled});
+ if(req.method==='POST'&&connectionMatch[2]){if(!contactEnabled)throw new Fault(404,'Formulário indisponível.');limit(req);return send(res,201,await service.request(slug,await body(req)));}
  throw new Fault(405,'Método não permitido.');
 }
 if(route==='/api/conexoes'||route==='/api/conexoes/perfil'||route==='/api/conexoes/solicitacoes'||route==='/api/conexoes/solicitacoes/status'){
@@ -109,8 +110,9 @@ if(route==='/api/conexoes'||route==='/api/conexoes/perfil'||route==='/api/conexo
  const who=await identity(req,res);
  if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Apenas gestores podem administrar contatos externos.');
  const service=require('./ops/native/connections.cjs').service(),workspace=who.membership.workspace_id;
- if(route==='/api/conexoes'&&req.method==='GET')return send(res,200,{profile:await service.ownProfile(workspace)});
+ if(route==='/api/conexoes'&&req.method==='GET')return send(res,200,{profile:await service.ownProfile(workspace),contactEnabled});
  if(route==='/api/conexoes/perfil'&&req.method==='POST'){limit(req);return send(res,200,{profile:await service.saveProfile(workspace,await body(req))});}
+ if(route.startsWith('/api/conexoes/solicitacoes')&&!contactEnabled)throw new Fault(404,'Solicitações indisponíveis.');
  if(route==='/api/conexoes/solicitacoes'&&req.method==='GET')return send(res,200,{requests:await service.inbox(workspace)});
  if(route==='/api/conexoes/solicitacoes/status'&&req.method==='POST'){limit(req);return send(res,200,{request:await service.setStatus(workspace,await body(req))});}
  throw new Fault(405,'Método não permitido.');
@@ -272,11 +274,12 @@ if(p.practice!==undefined){
  const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{theme:{...row.theme,name:p.name.trim(),accent:p.accent,...(proposal?{proposal}:{}),...(practice?{practice}:{})},revision:row.revision+1}});if(!changed.length)throw new Fault(409,'Recarregue antes de alterar a marca.');return send(res,200,{theme:changed[0].theme,revision:changed[0].revision});}
 throw new Fault(404,'Recurso indisponível.');}
 if(route==='/conexoes'&&req.method==='GET'){
- await identity(req,res);
+ const who=await identity(req,res);
+ if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Apenas gestores podem editar o cartão profissional.');
  res.setHeader('Content-Type','text/html; charset=utf-8');
  return res.end(fs.readFileSync(path.join(__dirname,'connections-admin.html')));
 }
-if(/^\/profissional\/[a-z0-9-]{3,55}$/.test(route)&&req.method==='GET'){
+if(/^\/(?:adv|profissional)\/[a-z0-9-]{3,55}$/.test(route)&&req.method==='GET'){
  res.setHeader('Content-Type','text/html; charset=utf-8');
  return res.end(fs.readFileSync(path.join(__dirname,'connections-public.html')));
 }
@@ -308,8 +311,10 @@ const files={'/vendor/qrcode.min.js':'vendor/qrcode.min.js','/connections.css':'
 if(require.main===module){
  const listen=()=>server.listen(process.env.PORT||4180,process.env.BIND_HOST||(native?'127.0.0.1':'0.0.0.0'),()=>console.log('Partelís iniciado'));
  if(!native)listen();
- else require('./ops/native/reconciliation-migration.cjs').ensure().then(listen).catch(()=>{
-  console.error('Migração de conciliação indisponível; a nova versão não pode iniciar.');
+ else require('./ops/native/reconciliation-migration.cjs').ensure()
+  .then(()=>require('./ops/native/connections-migration.cjs').ensure())
+  .then(listen).catch(()=>{
+  console.error('Migração do banco indisponível; a nova versão não pode iniciar.');
   process.exit(1);
  });
 }
