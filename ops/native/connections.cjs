@@ -25,14 +25,14 @@ function validateLinks(input){
    const host=url.hostname.toLowerCase();
    if(url.protocol!=='https:'||url.username||url.password||url.port||
     !host.includes('.')||host==='localhost'||host.endsWith('.local')||
-    /^\\d+\\.\\d+\\.\\d+\\.\\d+$/.test(host)||host.includes('..')||
-    /[\\s<>]/.test(value))throw fail(400,'Use links HTTPS públicos e seguros.');
+    /^\d+\.\d+\.\d+\.\d+$/.test(host)||host.includes('..')||
+    /[\s<>]/.test(value))throw fail(400,'Use links HTTPS públicos e seguros.');
    const allowed={
     whatsapp:['wa.me','api.whatsapp.com'],instagram:['instagram.com','www.instagram.com'],
     linkedin:['linkedin.com','www.linkedin.com'],youtube:['youtube.com','www.youtube.com','youtu.be']
    };
    if(allowed[type]&&!allowed[type].includes(host))throw fail(400,'O endereço não corresponde ao tipo de botão.');
-   if(type==='whatsapp'&&!(/^\\/\\d{10,15}$/.test(url.pathname)&&host==='wa.me'||host==='api.whatsapp.com'&&url.pathname==='/send'&&/^\\d{10,15}$/.test(url.searchParams.get('phone')||'')))
+   if(type==='whatsapp'&&!(/^\/\d{10,15}$/.test(url.pathname)&&host==='wa.me'||host==='api.whatsapp.com'&&url.pathname==='/send'&&/^\d{10,15}$/.test(url.searchParams.get('phone')||'')))
     throw fail(400,'Informe um link de WhatsApp com telefone internacional.');
   }
   return {type,label,url:url.href};
