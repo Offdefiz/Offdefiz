@@ -10,11 +10,38 @@ test('painel demonstrativo usa modo local e login real continua separado',async(
   assert.match(await(await fetch(origin+'/app')).text(),/window.CLOUD=true/);
   assert.match(await(await fetch(origin+'/login')).text(),/autocomplete="current-password"/);
 });
-test('landing mantém planos em destaque e leva à demo sem cadastro',async()=>{
+test('landing mantém planos em destaque e mostra telas sem exigir demonstração',async()=>{
   const landing=await(await fetch(origin+'/')).text();
-  assert.match(landing,/<div class="hero-actions"><a class="btn" href="#planos">Ver planos<\/a><a class="btn btn-outline" href="\/demo">Ver o Partelís por dentro<\/a>/);
+  assert.match(landing,/<div class="hero-actions"><a class="btn" href="#planos">Ver planos<\/a><a class="btn btn-outline" href="#por-dentro">Ver telas do sistema<\/a>/);
+  assert.match(landing,/id="por-dentro"/);
+  assert.match(landing,/href="\/demo">Prefere testar\?/);
   assert.match(landing,/id="planos"/);
   assert.match(landing,/href="\/contratar\?plano=solo"/);
+});
+test('landing publica somente as capturas WebP previstas e o estilo da vitrine',async()=>{
+  const markup=await (await fetch(origin+'/')).text();
+  const css=await fetch(origin+'/product-showcase.css?v=1');
+  assert.equal(css.status,200);
+  assert.match(css.headers.get('content-type'),/^text\/css/);
+  const linked=[...new Set(markup.match(/\/telas\/[a-z-]+-v1\.webp/g))];
+  assert.equal(linked.length,5);
+  let imageBytes=0;
+  for(const route of linked){
+    const res=await fetch(origin+route);
+    assert.equal(res.status,200,route);
+    assert.equal(res.headers.get('content-type'),'image/webp',route);
+    assert.match(res.headers.get('cache-control'),/^public,/);
+    const bytes=Buffer.from(await res.arrayBuffer());
+    assert.equal(bytes.toString('ascii',0,4),'RIFF');
+    assert.equal(bytes.toString('ascii',8,12),'WEBP');
+    assert.equal(Number(res.headers.get('content-length')),bytes.length);
+    imageBytes+=bytes.length;
+  }
+  assert.ok(imageBytes<175000,'As cinco variantes devem somar menos de 175 kB');
+  const head=await fetch(origin+linked[0],{method:'HEAD'});
+  assert.equal(head.headers.get('content-type'),'image/webp');
+  assert.equal((await head.arrayBuffer()).byteLength,0);
+  assert.equal((await fetch(origin+'/telas/nao-publicado.webp')).status,404);
 });
 test('demo guiada acompanha um caso fictício do atendimento às parcelas',async()=>{
   const steps=[

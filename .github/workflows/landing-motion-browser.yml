@@ -8,6 +8,8 @@ on:
       - 'landing-motion.css'
       - 'landing-motion.js'
       - 'landing-motion.browser.test.cjs'
+      - 'product-showcase.css'
+      - 'telas/*.webp'
       - '.github/workflows/landing-motion-browser.yml'
   push:
     branches: [main]
@@ -17,6 +19,8 @@ on:
       - 'landing-motion.css'
       - 'landing-motion.js'
       - 'landing-motion.browser.test.cjs'
+      - 'product-showcase.css'
+      - 'telas/*.webp'
 permissions:
   contents: read
 jobs:
@@ -32,7 +36,7 @@ jobs:
         run: npm install --no-save --ignore-scripts playwright@1.56.1
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
-      - name: Test responsive motion and contrast
+      - name: Test responsive motion, showcase and contrast
         run: node --test landing-motion.browser.test.cjs
       - name: Save screenshots
         if: always()
