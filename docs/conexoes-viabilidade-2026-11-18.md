@@ -66,3 +66,25 @@ Este arquivo é a **memória técnica persistente no repositório**, não uma al
 Pesquisar e revisar a cada ciclo: (a) ICP e JTBD de advogado autônomo; (b) ativação e onboarding; (c) funil visita→cadastro→ativação→pagamento; (d) CAC, LTV, payback, margem, MRR, churn, retenção por coorte; (e) precificação por escritório, limites e empacotamento; (f) multi-tenancy, autorização e isolamento; (g) LGPD e sigilo profissional; (h) SEO informativo e aquisição ética; (i) observabilidade, segurança, backups e SLA; (j) integrações agenda e CRM; (k) OAB/provimentos/acórdãos novos; (l) testes A/B com amostra suficiente.
 
 **Próximo incremento sugerido:** conversão opcional de solicitação em atendimento no CRM por ação explícita do gestor, com deduplicação e trilha de consentimento. Não sincronizar dados externos automaticamente.
+
+## Adendo — correção de escopo: cartão profissional estilo Linktree
+**Pedido confirmado:** o recurso principal é um **link na bio / cartão digital do advogado**, e não um marketplace de clientes. O fluxo de solicitação de contato existente é complementar.
+
+### Pesquisa específica de produto e viabilidade
+- **Linktree** (https://linktr.ee): agrega links e redes sociais em uma página única; freemium e assinaturas; principal referência de UX e compartilhamento.
+- **Beacons** (https://beacons.ai): link-in-bio, personalização, analytics e monetização; adaptar apenas layout, gestão de links e análise agregada, não venda de serviços jurídicos.
+- **Carrd** (https://carrd.co): landing pages de uma página, personalização e domínio próprio; referência para flexibilidade de apresentação.
+- **Taplink** (https://taplink.at): página de links, botões, formulários e mensagens; referência para onboarding simples.
+- **Doctoralia** (https://pro.doctoralia.com.br): perfil profissional de saúde e agendamento; referência de apresentação de credenciais e canais, não de indicação jurídica.
+- **GitHub LittleLink** (https://github.com/sethcottle/littlelink): estrutura leve de links com botões de marcas, referência visual e de acessibilidade; verificar licença e marca antes de copiar qualquer trecho.
+- **GitHub LinkStack** (https://github.com/LinkStackOrg/LinkStack): solução self-hosted de links, painel e temas; inspiração funcional, não adotar integralmente.
+- **GitHub BioDrop** (https://github.com/EddieHubCommunity/BioDrop): projeto comunitário de perfil e links, atualmente arquivado; referência histórica, não base de produção.
+- **GitHub Dub** (https://github.com/dubinc/dub.link): gestão de links e métricas; verificar licenciamento e custos antes de eventual integração.
+
+**Modelo de negócio:** cartão como parte da assinatura recorrente do SaaS; ativação em 5 minutos, link compartilhável e retenção por uso. Testar inclusão no plano Solo versus diferenciação de plano superior somente com dados de adoção e entrevistas. Evitar precificação por leads, honorários ou indicações. O usuário é o advogado, e o destinatário é qualquer pessoa que receba o link, não um mercado de dois lados.
+
+**OAB:** o Anexo Único do Provimento 205/2021 prevê expressamente cartão de visita eletrônico e QR Code, com nome e inscrição OAB; o art. 4º, §3º, admite contatos e redes sociais, e a orientação da OAB admite link para WhatsApp com sobriedade e sem captação indevida. Fontes: https://www.oab.org.br/leisnormas/legislacao/provimentos/205-2021 e https://www.oab.org.br/publicacoes/download?LivroId=0000010367 . A autorização genérica não dispensa análise do conteúdo individual publicado.
+
+**MVP adicionado ao branch:** até oito botões ordenáveis, tipos WhatsApp/Instagram/LinkedIn/YouTube/site/agenda/e-mail/outro, validação HTTPS e mailto, três temas, prévia no editor, cartão responsivo e exportação de contato vCard, além do formulário já existente. Sem upload de fotos ou arquivos e sem dependências externas. QR Code gerado localmente, estatísticas de cliques com privacidade, domínio próprio e foto opcional ficam para evolução após validação técnica e jurídica.
+
+**Pauta de pesquisa SaaS persistida no repositório:** acompanhar ativação do cartão, porcentagem de cartões publicados, compartilhamento voluntário, retenção de 30/90 dias, uso de botões, impacto no churn, custo de suporte, custo por workspace, funil de assinatura, segurança de URLs externas, SEO ético, acessibilidade, gestão de temas, limites de planos e compliance OAB/LGPD.
