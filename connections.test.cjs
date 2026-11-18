@@ -61,6 +61,7 @@ test('landing anuncia piloto sem prometer intermediação e páginas não são i
  assert.equal(page.status,200);assert.match(page.headers.get('x-robots-tag'),/noindex/);
  const publicHtml=await page.text();assert.match(publicHtml,/não indica, recomenda ou classifica advogados/);assert.match(publicHtml,/public-links/);assert.match(publicHtml,/download-vcard/);
  assert.equal((await fetch(origin+'/connections.js')).status,200);
+ assert.equal((await fetch(origin+'/vendor/qrcode.min.js')).status,200);
  assert.equal((await fetch(origin+'/connections.css')).status,200);
  const editor=await fetch(origin+'/conexoes');assert.equal(editor.status,401);
 });
