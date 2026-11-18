@@ -56,7 +56,7 @@ test.after(()=>server.close());
 test('landing divulga cartão profissional e páginas não são indexáveis',async()=>{
  const html=await(await fetch(origin+'/')).text();
  assert.match(html,/id="conexoes"/);assert.match(html,/Entrar para criar meu cartão/);
- assert.match(html,/colocar na bio/);assert.match(html,/até oito links/i);
+ assert.match(html,/coloque na bio/i);assert.match(html,/até oito links/i);
  const page=await fetch(origin+'/adv/silva-advocacia');
  assert.equal(page.status,200);assert.match(page.headers.get('x-robots-tag'),/noindex/);
  const publicHtml=await page.text();assert.match(publicHtml,/informações deste perfil são declaradas pelo profissional/);assert.match(publicHtml,/public-links/);assert.match(publicHtml,/download-vcard/);
