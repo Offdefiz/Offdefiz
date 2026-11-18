@@ -94,6 +94,29 @@ if(route==='/api/public/leads'&&req.method==='POST'){
   const answer=await commercial.createLead(p);
   return send(res,201,answer);
 }
+// Partelís Conexões: comunicação direta, sem marketplace de distribuição de casos.
+const contactEnabled=process.env.PARTELIS_CONNECTION_CONTACT_ENABLED==='true';
+const connectionMatch=route.match(/^\/api\/public\/conexoes\/([a-z0-9-]+)(\/solicitacoes)?$/);
+if(connectionMatch){
+ if(!native)throw new Fault(503,'Perfis profissionais indisponíveis neste ambiente.');
+ const service=require('./ops/native/connections.cjs').service();
+ const slug=connectionMatch[1];
+ if(req.method==='GET'&&!connectionMatch[2])return send(res,200,{profile:await service.publicProfile(slug),contactEnabled});
+ if(req.method==='POST'&&connectionMatch[2]){if(!contactEnabled)throw new Fault(404,'Formulário indisponível.');limit(req);return send(res,201,await service.request(slug,await body(req)));}
+ throw new Fault(405,'Método não permitido.');
+}
+if(route==='/api/conexoes'||route==='/api/conexoes/perfil'||route==='/api/conexoes/solicitacoes'||route==='/api/conexoes/solicitacoes/status'){
+ if(!native)throw new Fault(503,'Conexões requer PostgreSQL.');
+ const who=await identity(req,res);
+ if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Apenas gestores podem administrar contatos externos.');
+ const service=require('./ops/native/connections.cjs').service(),workspace=who.membership.workspace_id;
+ if(route==='/api/conexoes'&&req.method==='GET')return send(res,200,{profile:await service.ownProfile(workspace),contactEnabled});
+ if(route==='/api/conexoes/perfil'&&req.method==='POST'){limit(req);return send(res,200,{profile:await service.saveProfile(workspace,await body(req))});}
+ if(route.startsWith('/api/conexoes/solicitacoes')&&!contactEnabled)throw new Fault(404,'Solicitações indisponíveis.');
+ if(route==='/api/conexoes/solicitacoes'&&req.method==='GET')return send(res,200,{requests:await service.inbox(workspace)});
+ if(route==='/api/conexoes/solicitacoes/status'&&req.method==='POST'){limit(req);return send(res,200,{request:await service.setStatus(workspace,await body(req))});}
+ throw new Fault(405,'Método não permitido.');
+}
 if(route==='/admin/comercial'&&req.method==='GET'){
   await owner(req,res);
   res.setHeader('Content-Type','text/html; charset=utf-8');
@@ -250,6 +273,16 @@ if(p.practice!==undefined){
  }
  const changed=await store(base+'&revision=eq.'+row.revision,{token:who.token,method:'PATCH',prefer:'return=representation',body:{theme:{...row.theme,name:p.name.trim(),accent:p.accent,...(proposal?{proposal}:{}),...(practice?{practice}:{})},revision:row.revision+1}});if(!changed.length)throw new Fault(409,'Recarregue antes de alterar a marca.');return send(res,200,{theme:changed[0].theme,revision:changed[0].revision});}
 throw new Fault(404,'Recurso indisponível.');}
+if(route==='/conexoes'&&req.method==='GET'){
+ const who=await identity(req,res);
+ if(!['gestor','socio_admin'].includes(who.membership.role))throw new Fault(403,'Apenas gestores podem editar o cartão profissional.');
+ res.setHeader('Content-Type','text/html; charset=utf-8');
+ return res.end(fs.readFileSync(path.join(__dirname,'connections-admin.html')));
+}
+if(/^\/(?:adv|profissional)\/[a-z0-9-]{3,55}$/.test(route)&&req.method==='GET'){
+ res.setHeader('Content-Type','text/html; charset=utf-8');
+ return res.end(fs.readFileSync(path.join(__dirname,'connections-public.html')));
+}
 if(route==='/'||route==='/contato'||route==='/contratar'){
   res.setHeader('Content-Type','text/html; charset=utf-8');
   return res.end(fs.readFileSync(path.join(__dirname,'landing.html')));
@@ -273,13 +306,15 @@ if((req.method==='GET'||req.method==='HEAD')&&showcaseImages.has(route)){
   res.writeHead(200,{'Content-Type':'image/webp','Content-Length':image.length,'Cache-Control':'public, max-age=86400'});
   return res.end(req.method==='HEAD'?undefined:image);
 }
-const files={'/product-showcase.css':'product-showcase.css','/demo-tour.css':'demo-tour.css','/marketing.js':'marketing.js','/checkout.css':'checkout.css','/checkout.js':'checkout.js','/landing.css':'landing.css','/landing.js':'landing.js','/landing-motion.css':'landing-motion.css','/landing-motion.js':'landing-motion.js','/cookie-consent.css':'cookie-consent.css','/cookie-consent.js':'cookie-consent.js','/admin-commercial.js':'admin-commercial.js','/legal-service-catalog.js':'legal-service-catalog.js','/proposal-engine.js':'proposal-engine.js','/proposal-settings.js':'proposal-settings.js','/conhecer':'onboarding-quiz.html','/crm-ui.css':'crm-ui.css','/crm-experience.js':'crm-experience.js','/release-notes.json':'release-notes.json','/onboarding.js':'onboarding.js','/admin.js':'admin.js','/feedback.js':'feedback.js','/favicon.svg':'favicon.svg','/brand-symbol.svg':'brand-symbol.svg','/brand-horizontal.svg':'brand-horizontal.svg','/brand-horizontal-white.svg':'brand-horizontal-white.svg','/manifest.webmanifest':'manifest.webmanifest','/partelis.css':'partelis.css','/liquid-glass.css':'liquid-glass.css','/identidade':'brand-video.html','/cliente/demo':'cliente.html','/cliente.js':'cliente.js','/cliente.css':'cliente.css','/cliente.webmanifest':'cliente.webmanifest','/style.css':'style.css','/modern.css':'modern.css','/domain.js':'domain.js','/app.js':'app.js','/enhancements.js':'enhancements.js','/insights.js':'insights.js','/login':'login.html','/ops-admin.js':'ops-admin.js','/presence.js':'presence.js','/juridico.js':'juridico.js','/contracts-preflight.js':'contracts-preflight.js','/login.js':'login.js','/conta':'account.html','/account.js':'account.js','/apresentacao':'presentation.html','/presentation.js':'presentation.js'};if(req.method==='GET'&&/^\/templates\/proposta_(?:passivo_bancario|acao_revisional|superendividamento|holding|multiarea)\.html$/.test(route)){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,route.slice(1))));}if(files[route]&&req.method==='GET'){const f=files[route];res.setHeader('Content-Type',f.endsWith('.json')?'application/json; charset=utf-8':f.endsWith('.js')?'application/javascript; charset=utf-8':f.endsWith('.css')?'text/css; charset=utf-8':f.endsWith('.svg')?'image/svg+xml':f.endsWith('.webmanifest')?'application/manifest+json':'text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,f)));}throw new Fault(404,'Página não encontrada.');
+const files={'/vendor/qrcode.min.js':'vendor/qrcode.min.js','/connections.css':'connections.css','/connections.js':'connections.js','/product-showcase.css':'product-showcase.css','/demo-tour.css':'demo-tour.css','/marketing.js':'marketing.js','/checkout.css':'checkout.css','/checkout.js':'checkout.js','/landing.css':'landing.css','/landing.js':'landing.js','/landing-motion.css':'landing-motion.css','/landing-motion.js':'landing-motion.js','/cookie-consent.css':'cookie-consent.css','/cookie-consent.js':'cookie-consent.js','/admin-commercial.js':'admin-commercial.js','/legal-service-catalog.js':'legal-service-catalog.js','/proposal-engine.js':'proposal-engine.js','/proposal-settings.js':'proposal-settings.js','/conhecer':'onboarding-quiz.html','/crm-ui.css':'crm-ui.css','/crm-experience.js':'crm-experience.js','/release-notes.json':'release-notes.json','/onboarding.js':'onboarding.js','/admin.js':'admin.js','/feedback.js':'feedback.js','/favicon.svg':'favicon.svg','/brand-symbol.svg':'brand-symbol.svg','/brand-horizontal.svg':'brand-horizontal.svg','/brand-horizontal-white.svg':'brand-horizontal-white.svg','/manifest.webmanifest':'manifest.webmanifest','/partelis.css':'partelis.css','/liquid-glass.css':'liquid-glass.css','/identidade':'brand-video.html','/cliente/demo':'cliente.html','/cliente.js':'cliente.js','/cliente.css':'cliente.css','/cliente.webmanifest':'cliente.webmanifest','/style.css':'style.css','/modern.css':'modern.css','/domain.js':'domain.js','/app.js':'app.js','/enhancements.js':'enhancements.js','/insights.js':'insights.js','/login':'login.html','/ops-admin.js':'ops-admin.js','/presence.js':'presence.js','/juridico.js':'juridico.js','/contracts-preflight.js':'contracts-preflight.js','/login.js':'login.js','/conta':'account.html','/account.js':'account.js','/apresentacao':'presentation.html','/presentation.js':'presentation.js'};if(req.method==='GET'&&/^\/templates\/proposta_(?:passivo_bancario|acao_revisional|superendividamento|holding|multiarea)\.html$/.test(route)){res.setHeader('Content-Type','text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,route.slice(1))));}if(files[route]&&req.method==='GET'){const f=files[route];res.setHeader('Content-Type',f.endsWith('.json')?'application/json; charset=utf-8':f.endsWith('.js')?'application/javascript; charset=utf-8':f.endsWith('.css')?'text/css; charset=utf-8':f.endsWith('.svg')?'image/svg+xml':f.endsWith('.webmanifest')?'application/manifest+json':'text/html; charset=utf-8');return res.end(fs.readFileSync(path.join(__dirname,f)));}throw new Fault(404,'Página não encontrada.');
 }catch(e){if(e.status===401&&req.url==='/' ){res.writeHead(302,{Location:'/login'});res.end();}else send(res,e.status||500,{error:e.status?e.message:'Falha temporária. Tente novamente.'});}});
 if(require.main===module){
  const listen=()=>server.listen(process.env.PORT||4180,process.env.BIND_HOST||(native?'127.0.0.1':'0.0.0.0'),()=>console.log('Partelís iniciado'));
  if(!native)listen();
- else require('./ops/native/reconciliation-migration.cjs').ensure().then(listen).catch(()=>{
-  console.error('Migração de conciliação indisponível; a nova versão não pode iniciar.');
+ else require('./ops/native/reconciliation-migration.cjs').ensure()
+  .then(()=>require('./ops/native/connections-migration.cjs').ensure())
+  .then(listen).catch(()=>{
+  console.error('Migração do banco indisponível; a nova versão não pode iniciar.');
   process.exit(1);
  });
 }
