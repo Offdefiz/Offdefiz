@@ -40,6 +40,22 @@ function validateLinks(input){
   return {type,label,url:url.href};
  });
 }
+function validateDetails(input){
+ if(input===undefined)return null;
+ if(!input||typeof input!=='object'||Array.isArray(input))throw fail(400,'Confira os dados do cartão.');
+ const headline=clean(input.headline,90),intro=clean(input.intro,160);
+ const photo=input.photo||'';
+ if(headline.length>90||intro.length>160)throw fail(400,'Confira o tamanho do subtítulo e da frase de abertura.');
+ if(photo&&(typeof photo!=='string'||photo.length>160000||
+  !/^data:image\/jpeg;base64,\/[A-Za-z0-9+/]+={0,2}$/.test(photo)))
+  throw fail(400,'Use uma foto JPEG de até 120 KB após a compactação.');
+ if(photo){
+  const bytes=Buffer.from(photo.slice('data:image/jpeg;base64,'.length),'base64');
+  if(bytes.length<4||bytes[0]!==255||bytes[1]!==216||bytes[2]!==255||bytes.at(-2)!==255||bytes.at(-1)!==217)
+   throw fail(400,'A foto enviada não é um JPEG válido.');
+ }
+ return {headline,intro,photo};
+}
 function validateProfile(input){
  const slug=clean(input.slug,55).toLowerCase(),name=clean(input.professional_name,100),
   oab=clean(input.oab_registration,35).toUpperCase(),city=clean(input.city,100),
@@ -47,11 +63,11 @@ function validateProfile(input){
  const areas=Array.isArray(input.areas)?input.areas.map(v=>clean(v,50)):[];
  if(!slugOk(slug)||name.length<3||name.length>100||!/^OAB\/[A-Z]{2}\s*\d{3,9}$/.test(oab)||
   city.length<2||city.length>100||!states.has(state)||areas.length>5||
-  areas.some(v=>!subjects.has(v))||new Set(areas).size!==areas.length||presentation.length>400||!themes.has(theme))
+  areas.some(v=>!v||v.length>50||/[\u0000-\u001f\u007f]/.test(v))||new Set(areas).size!==areas.length||presentation.length>400||!themes.has(theme))
   throw fail(400,'Revise endereço do perfil, nome, OAB/UF, localidade e áreas de atuação.');
  if(input.published===true&&input.ethical_attestation!==true)
   throw fail(400,'Confirme a declaração de responsabilidade ética antes de publicar.');
- return {slug,name,oab,city,state,areas,presentation,theme,links,published:input.published===true,attested:input.ethical_attestation===true};
+ return {slug,name,oab,city,state,areas,presentation,theme,links,details:validateDetails(input.card_details),published:input.published===true,attested:input.ethical_attestation===true};
 }
 function validateRequest(input){
  if(clean(input.website||'',200))return null; // honeypot
@@ -64,27 +80,27 @@ function validateRequest(input){
 }
 function service(db=pool){
  async function ownProfile(workspace){
-  const r=await db.query('SELECT slug,professional_name,oab_registration,city,state,areas,presentation,theme,links,published,updated_at FROM cj_connection_profiles WHERE workspace_id=$1',[workspace]);
+  const r=await db.query('SELECT slug,professional_name,oab_registration,city,state,areas,presentation,theme,links,card_details,published,updated_at FROM cj_connection_profiles WHERE workspace_id=$1',[workspace]);
   return r.rows[0]||null;
  }
  async function saveProfile(workspace,input){
   const p=validateProfile(input);
   try{
-   const r=await db.query(`INSERT INTO cj_connection_profiles(workspace_id,slug,professional_name,oab_registration,city,state,areas,presentation,theme,links,published,ethical_attestation_at)
-     VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10::jsonb,$11,CASE WHEN $12 THEN now() ELSE NULL END)
+   const r=await db.query(`INSERT INTO cj_connection_profiles(workspace_id,slug,professional_name,oab_registration,city,state,areas,presentation,theme,links,published,ethical_attestation_at,card_details)
+     VALUES($1,$2,$3,$4,$5,$6,$7::jsonb,$8,$9,$10::jsonb,$11,CASE WHEN $12 THEN now() ELSE NULL END,coalesce($13::jsonb,'{}'::jsonb))
      ON CONFLICT(workspace_id) DO UPDATE SET slug=excluded.slug,professional_name=excluded.professional_name,
      oab_registration=excluded.oab_registration,city=excluded.city,state=excluded.state,areas=excluded.areas,
      presentation=excluded.presentation,theme=excluded.theme,links=excluded.links,published=excluded.published,
      ethical_attestation_at=CASE WHEN $12 THEN coalesce(cj_connection_profiles.ethical_attestation_at,now()) ELSE cj_connection_profiles.ethical_attestation_at END,
-     updated_at=now()
-     RETURNING slug,professional_name,oab_registration,city,state,areas,presentation,theme,links,published,updated_at`,
-     [workspace,p.slug,p.name,p.oab,p.city,p.state,JSON.stringify(p.areas),p.presentation,p.theme,JSON.stringify(p.links),p.published,p.attested]);
+     card_details=coalesce($13::jsonb,cj_connection_profiles.card_details),updated_at=now()
+     RETURNING slug,professional_name,oab_registration,city,state,areas,presentation,theme,links,card_details,published,updated_at`,
+     [workspace,p.slug,p.name,p.oab,p.city,p.state,JSON.stringify(p.areas),p.presentation,p.theme,JSON.stringify(p.links),p.published,p.attested,p.details&&JSON.stringify(p.details)]);
    return r.rows[0];
   }catch(e){if(e.code==='23505')throw fail(409,'Esse endereço já pertence a outro perfil. Escolha outro.');throw e;}
  }
  async function publicProfile(slug){
   if(!slugOk(slug))throw fail(404,'Perfil não encontrado.');
-  const r=await db.query('SELECT slug,professional_name,oab_registration,city,state,areas,presentation,theme,links FROM cj_connection_profiles WHERE slug=$1 AND published=true',[slug]);
+  const r=await db.query('SELECT slug,professional_name,oab_registration,city,state,areas,presentation,theme,links,card_details FROM cj_connection_profiles WHERE slug=$1 AND published=true',[slug]);
   if(!r.rows[0])throw fail(404,'Perfil não encontrado.');
   return r.rows[0];
  }

@@ -6,7 +6,7 @@ const {pool} = require('./db.cjs');
 
 async function ensure() {
  const {rows:[{ready}]} = await pool.query(
-  "SELECT to_regclass('cj_connection_profiles') IS NOT NULL AND to_regclass('cj_connection_requests') IS NOT NULL AS ready"
+  "SELECT EXISTS (SELECT 1 FROM pg_attribute WHERE attrelid=to_regclass('cj_connection_profiles') AND attname='card_details' AND NOT attisdropped) AND to_regclass('cj_connection_requests') IS NOT NULL AS ready"
  );
  if (ready) return;
  const sql = readFileSync(join(__dirname, 'migrations', '2026-11-18-conexoes.sql'), 'utf8');

@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Cartão profissional · Partelís</title>
-<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/connections.css?v=2"></head>
+<link rel="icon" href="/favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/connections.css?v=3"></head>
 <body data-connections="admin"><header class="header"><div class="container header-row"><a href="/app" class="brand"><img src="/brand-horizontal-white.svg" alt="Partelís" width="144"></a><nav><a href="/app">Voltar ao escritório</a><a href="/conta">Minha conta</a></nav></div></header>
 <main class="container"><div class="intro"><span class="kicker">CARTÃO PROFISSIONAL PARTELÍS</span><h1>Seu cartão profissional</h1><p>Crie um cartão digital no estilo link na bio: nome, OAB, apresentação, botões de redes sociais, WhatsApp, site, agenda, artigos e reportagens. Compartilhe um único link com seus contatos.</p></div>
 <div class="layout"><section class="panel"><h2>Identificação e links</h2><p class="muted">A publicação é voluntária. Você responde pela veracidade das informações e pela observância das normas da OAB.</p>
@@ -9,25 +9,20 @@
 <div class="field"><label for="professional_name">Nome profissional *</label><input id="professional_name" name="professional_name" maxlength="100" minlength="3" required autocomplete="name"></div>
 <div class="field"><label for="oab_registration">Inscrição OAB/UF *</label><input id="oab_registration" name="oab_registration" maxlength="35" required placeholder="OAB/MG 123456"></div>
 <div class="two"><div class="field"><label for="city">Cidade *</label><input id="city" name="city" maxlength="100" required></div><div class="field"><label for="state">UF *</label><input id="state" name="state" maxlength="2" required placeholder="MG"></div></div>
-<fieldset><legend>Áreas de atuação (até cinco)</legend><div class="checks">
-<label><input type="checkbox" name="areas" value="Cível"> Cível</label><label><input type="checkbox" name="areas" value="Família"> Família</label><label><input type="checkbox" name="areas" value="Trabalhista"> Trabalhista</label><label><input type="checkbox" name="areas" value="Consumidor"> Consumidor</label><label><input type="checkbox" name="areas" value="Empresarial"> Empresarial</label><label><input type="checkbox" name="areas" value="Previdenciário"> Previdenciário</label><label><input type="checkbox" name="areas" value="Outro"> Outro</label>
-</div></fieldset>
-<div class="field"><label for="presentation">Apresentação informativa (até 400 caracteres)</label><textarea id="presentation" name="presentation" rows="4" maxlength="400" placeholder="Informe sua formação, atuação e localização, sem prometer resultados."></textarea></div>
-<div class="card-editor"><h2>Botões do cartão</h2><p class="muted">Adicione até oito links para seus canais profissionais. Organize a ordem com as setas. Não inclua ofertas, preços ou promessas de resultados.</p>
+<div class="field"><label for="profile-photo">Foto profissional</label><input id="profile-photo" type="file" accept="image/jpeg,image/png,image/webp"><button type="button" id="remove-photo" class="button secondary" hidden>Remover foto</button><p class="muted" id="photo-status" role="status">A foto fica visível após publicar o cartão.</p></div>
+<div class="field"><label for="headline">Subtítulo profissional</label><input id="headline" name="headline" maxlength="90" placeholder="Ex.: Advocacia cível e contratual"></div>
+<div class="field"><label for="intro">Frase de abertura</label><input id="intro" name="intro" maxlength="160" placeholder="Uma frase curta sobre sua atuação"></div>
+<div class="field"><label for="areas">Áreas de atuação</label><textarea id="areas" rows="3" placeholder="Contratos&#10;Direito do consumidor" aria-describedby="areas-hint"></textarea><small class="muted" id="areas-hint">Uma por linha. Até cinco áreas com 50 caracteres cada.</small></div>
+<div class="field"><label for="presentation">Sobre (até 400 caracteres)</label><textarea id="presentation" name="presentation" rows="4" maxlength="400" placeholder="Informe sua formação e atuação."></textarea></div>
+<div class="card-editor"><h2>Botões do cartão</h2><p class="muted">Adicione até oito links. WhatsApp ou e-mail aparecem em Entrar em contato. Agendamento, artigos e imprensa têm espaços próprios. Use as setas para ajustar a ordem.</p>
 <div id="card-links-editor" class="card-links-editor"></div><button type="button" class="button secondary" id="add-card-link">+ Adicionar botão</button></div>
-<div class="field"><label for="theme">Aparência do cartão</label><select id="theme" name="theme"><option value="violeta">Violeta Partelís</option><option value="claro">Clássico claro</option><option value="escuro">Elegante escuro</option></select></div>
-
 <label class="checkline"><input type="checkbox" id="ethical_attestation" name="ethical_attestation"> Declaro que os dados são verdadeiros, que sou responsável pela divulgação e que observarei as regras éticas da OAB.</label>
 <label class="checkline"><input type="checkbox" id="published" name="published"> Publicar meu perfil para acesso por link direto</label>
 <button class="button" id="save-profile" type="submit">Salvar perfil</button><p class="message" id="profile-status" role="status"></p></form>
 </section>
 <aside class="card-editor-side" aria-label="Prévia e compartilhamento">
 <div class="preview-heading"><h2>Prévia do cartão</h2><p>Veja como seu perfil aparece antes de publicar.</p></div>
-<section class="panel digital-card" id="card-preview" data-theme="violeta" aria-labelledby="preview-name">
- <div class="card-avatar" id="preview-avatar" aria-hidden="true"></div>
- <h2 id="preview-name"></h2><p id="preview-oab" class="subtitle"></p><p id="preview-location" class="card-location"></p>
- <div id="preview-areas" class="tags"></div><p id="preview-bio" class="description"></p><div id="preview-links" class="card-buttons"></div>
-</section>
+<section class="professional-card" id="card-preview" aria-label="Prévia do cartão"></section>
 <div id="share-box" class="share" hidden><strong>Seu link profissional</strong><a id="share-link" target="_blank" rel="noopener"></a><button type="button" class="button secondary" id="copy-link">Copiar link</button><div class="qr-wrap"><p class="muted">QR Code para compartilhar seu cartão</p><div id="qr-target" aria-label="QR Code do cartão profissional"></div><button type="button" class="button secondary" id="download-qr">Baixar QR Code (PNG)</button></div></div>
 </aside><section class="panel" id="inbox-panel" hidden><h2>Solicitações recebidas</h2><p class="muted">A pessoa escolheu seu perfil e autorizou o contato. Não envie mensagens não solicitadas.</p><p id="inbox-status" class="message" role="status"></p><div id="inbox" class="inbox"></div></section></div>
-</main><script src="/vendor/qrcode.min.js" defer></script><script src="/connections.js?v=2" defer></script></body></html>
+</main><script src="/vendor/qrcode.min.js" defer></script><script src="/connections.js?v=3" defer></script></body></html>

@@ -27,6 +27,14 @@ test('cartão Linktree mantém botões ordenados, temas e bloqueia links insegur
  assert.throws(()=>validateLinks(Array.from({length:9},()=>buttons[0])),/oito/);
  assert.throws(()=>validateProfile({...good,theme:'premium'}),/Revise/);
 });
+test('preserva cartões antigos e valida a configuração editorial',()=>{
+ assert.equal(validateProfile(good).details,null);
+ const profile=validateProfile({...good,areas:['Contratos','Direito do consumidor'],card_details:{headline:'Advocacia cível',intro:'Contratos e relações de consumo'}});
+ assert.deepEqual(profile.areas,['Contratos','Direito do consumidor']);
+ assert.equal(profile.details.headline,'Advocacia cível');
+ assert.throws(()=>validateProfile({...good,card_details:{photo:'data:image/svg+xml;base64,AA=='}}),/JPEG/);
+ assert.throws(()=>validateProfile({...good,card_details:{intro:'x'.repeat(161)}}),/frase/);
+});
 test('solicitação não aceita relato sensível, sem consentimento ou assunto arbitrário',()=>{
  assert.deepEqual(validateRequest({name:'Ana Lima',email:'ANA@example.com',subject:'Cível',consent:true}),{name:'Ana Lima',email:'ana@example.com',phone:'',subject:'Cível'});
  assert.throws(()=>validateRequest({name:'Ana Lima',email:'ana@example.com',subject:'Cível',consent:false}),/autorize/);
@@ -59,7 +67,8 @@ test('landing divulga cartão profissional e páginas não são indexáveis',asy
  assert.match(html,/coloque na bio/i);assert.match(html,/até oito links/i);
  const page=await fetch(origin+'/adv/silva-advocacia');
  assert.equal(page.status,200);assert.match(page.headers.get('x-robots-tag'),/noindex/);
- const publicHtml=await page.text();assert.match(publicHtml,/informações deste perfil são declaradas pelo profissional/);assert.match(publicHtml,/public-links/);assert.match(publicHtml,/download-vcard/);
+ const publicHtml=await page.text();assert.match(publicHtml,/class="professional-card"/);assert.match(publicHtml,/connections\.js\?v=3/);
+ assert.doesNotMatch(publicHtml,/profile-form/);
  assert.equal((await fetch(origin+'/connections.js')).status,200);
  assert.equal((await fetch(origin+'/vendor/qrcode.min.js')).status,200);
  assert.equal((await fetch(origin+'/connections.css')).status,200);
