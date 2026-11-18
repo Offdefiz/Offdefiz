@@ -43,9 +43,9 @@ test('Landing Partelís: desktop, mobile, contraste e movimento reduzido', async
             headerBlur: get('.site-header').backdropFilter,
           };
         });
-        assert.match(styles.featuredBackground,/83,\\s*42,\\s*116/,'Plano em destaque deve continuar escuro');
-        assert.match(styles.featuredText,/255,\\s*255,\\s*255/,'Texto do plano em destaque deve continuar branco');
-        assert.match(styles.contactBackground,/79,\\s*45,\\s*105/,'Caixa de contato deve continuar escura');
+        assert.match(styles.featuredBackground,/83,\s*42,\s*116/,'Plano em destaque deve continuar escuro');
+        assert.match(styles.featuredText,/255,\s*255,\s*255/,'Texto do plano em destaque deve continuar branco');
+        assert.match(styles.contactBackground,/79,\s*45,\s*105/,'Caixa de contato deve continuar escura');
         assert.notEqual(styles.headerBlur,'none','Header deve ter desfoque');
         const feature = page.locator('.feature-grid article').first();
         await feature.scrollIntoViewIfNeeded();
