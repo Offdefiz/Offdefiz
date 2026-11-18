@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS cj_connection_profiles (
  state char(2) NOT NULL,
  areas jsonb NOT NULL DEFAULT '[]'::jsonb,
  presentation varchar(400) NOT NULL DEFAULT '',
+ theme varchar(12) NOT NULL DEFAULT 'violeta' CHECK (theme IN ('violeta','claro','escuro')),
+ links jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(links)='array'),
  published boolean NOT NULL DEFAULT false,
  ethical_attestation_at timestamptz,
  created_at timestamptz NOT NULL DEFAULT now(),
