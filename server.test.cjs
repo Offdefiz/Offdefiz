@@ -24,7 +24,7 @@ test('landing publica somente as capturas WebP previstas e o estilo da vitrine',
   assert.equal(css.status,200);
   assert.match(css.headers.get('content-type'),/^text\/css/);
   const linked=[...new Set(markup.match(/\/telas\/[a-z-]+-v[12]\.webp/g))];
-  assert.deepEqual(linked,['/telas/dashboard-v1.webp','/telas/indicadores-v2.webp','/telas/proposta-v2.webp','/telas/cartao-profissional-v1.webp']);
+  assert.deepEqual(linked,['/telas/dashboard-v1.webp','/telas/indicadores-v2.webp','/telas/proposta-v2.webp','/telas/cartao-profissional-v2.webp']);
   let imageBytes=0;
   for(const route of linked){
     const res=await fetch(origin+route);

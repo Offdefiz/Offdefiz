@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS cj_connection_profiles (
  CONSTRAINT cj_connection_areas_array CHECK (jsonb_typeof(areas)='array'),
  CONSTRAINT cj_connection_published_attested CHECK (NOT published OR ethical_attestation_at IS NOT NULL)
 );
+ALTER TABLE cj_connection_profiles ADD COLUMN IF NOT EXISTS card_details jsonb NOT NULL DEFAULT '{}'::jsonb;
 CREATE TABLE IF NOT EXISTS cj_connection_requests (
  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
  workspace_id uuid NOT NULL REFERENCES cj_workspaces(id) ON DELETE CASCADE,
