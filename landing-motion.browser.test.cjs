@@ -74,7 +74,7 @@ test('Landing Partelís: desktop, mobile, contraste e movimento reduzido', async
         await page.screenshot({path:'motion-mobile.png',fullPage:true});
       } finally { await context.close(); }
     });
-    await t.test('vitrine de telas: carrega no site sem login e adapta os recortes', async () => {
+    await t.test('vitrine de telas: carrega no site sem login e mantém o contexto das telas', async () => {
       for (const width of [1365,390,320]) {
         const mobile=width<=540;
         const page=await browser.newPage({viewport:{width,height:900},hasTouch:mobile});
@@ -88,11 +88,13 @@ test('Landing Partelís: desktop, mobile, contraste e movimento reduzido', async
           const cards=page.locator('.product-story');
           assert.equal(await cards.count(),2);
           for (const [index,key] of ['indicadores','proposta'].entries()) {
-            const img=cards.nth(index).locator('img');
+            const img=cards.nth(index).locator('.product-window img');
             await img.scrollIntoViewIfNeeded();
             await img.evaluate(el=>el.decode());
-            assert.equal(await img.evaluate(el=>new URL(el.currentSrc).pathname),'/telas/'+key+(mobile?'-mobile':'')+'-v1.webp');
+            assert.equal(await img.evaluate(el=>new URL(el.currentSrc).pathname),'/telas/'+key+'-v2.webp');
             assert.equal(await img.getAttribute('loading'),'lazy');
+            assert.equal(await img.evaluate(el=>el.naturalWidth),1152);
+            assert.equal(await img.evaluate(el=>el.naturalHeight),key==='indicadores'?740:1160);
           }
           const widthCheck=await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1);
           assert.ok(widthCheck, 'Vitrine não deve transbordar em '+width+'px');
@@ -101,7 +103,7 @@ test('Landing Partelís: desktop, mobile, contraste e movimento reduzido', async
             page.getByRole('link',{name:/Ampliar a tela de criação de proposta/}).click(),
           ]);
           await zoom.waitForLoadState();
-          assert.ok(zoom.url().endsWith('/telas/proposta-v1.webp'));
+          assert.ok(zoom.url().endsWith('/telas/proposta-v2.webp'));
           await zoom.close();
           const gallery=page.locator('#por-dentro');
           assert.equal(await gallery.getByRole('link',{name:'Ver planos',exact:true}).getAttribute('href'),'#planos');
@@ -114,7 +116,7 @@ test('Landing Partelís: desktop, mobile, contraste e movimento reduzido', async
         const page=await context.newPage();
         await page.goto(origin+'/#por-dentro',{waitUntil:'load'});
         assert.equal(await page.getByRole('link',{name:'Ver telas do sistema'}).getAttribute('href'),'#por-dentro');
-        await page.waitForFunction(()=>document.querySelector('.product-story img')?.naturalWidth>0);
+        await page.waitForFunction(()=>document.querySelector('.product-story .product-window img')?.naturalWidth>0);
       } finally { await context.close(); }
     });
     await t.test('acessibilidade: prefers-reduced-motion desativa efeitos', async () => {

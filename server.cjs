@@ -1,8 +1,7 @@
 const http=require('node:http'),fs=require('node:fs'),path=require('node:path'),C=require('./domain.js');
 const {renderDemoTour}=require('./demo-tour.cjs');
 const showcaseImages=new Set([
-  '/telas/dashboard-v1.webp','/telas/indicadores-v1.webp','/telas/indicadores-mobile-v1.webp',
-  '/telas/proposta-v1.webp','/telas/proposta-mobile-v1.webp'
+  '/telas/dashboard-v1.webp','/telas/indicadores-v2.webp','/telas/proposta-v2.webp'
 ]);
 // A implantação comercial utiliza exclusivamente PostgreSQL local da VPS.
 const native=process.env.PARTELIS_STORAGE==='postgres'?require('./ops/native/store.cjs'):null;

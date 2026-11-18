@@ -20,11 +20,11 @@ test('landing mantém planos em destaque e mostra telas sem exigir demonstraçã
 });
 test('landing publica somente as capturas WebP previstas e o estilo da vitrine',async()=>{
   const markup=await (await fetch(origin+'/')).text();
-  const css=await fetch(origin+'/product-showcase.css?v=1');
+  const css=await fetch(origin+'/product-showcase.css?v=2');
   assert.equal(css.status,200);
   assert.match(css.headers.get('content-type'),/^text\/css/);
-  const linked=[...new Set(markup.match(/\/telas\/[a-z-]+-v1\.webp/g))];
-  assert.equal(linked.length,5);
+  const linked=[...new Set(markup.match(/\/telas\/[a-z-]+-v[12]\.webp/g))];
+  assert.deepEqual(linked,['/telas/dashboard-v1.webp','/telas/indicadores-v2.webp','/telas/proposta-v2.webp']);
   let imageBytes=0;
   for(const route of linked){
     const res=await fetch(origin+route);
@@ -37,7 +37,7 @@ test('landing publica somente as capturas WebP previstas e o estilo da vitrine',
     assert.equal(Number(res.headers.get('content-length')),bytes.length);
     imageBytes+=bytes.length;
   }
-  assert.ok(imageBytes<175000,'As cinco variantes devem somar menos de 175 kB');
+  assert.ok(imageBytes<230000,'As três capturas devem somar menos de 230 kB');
   const head=await fetch(origin+linked[0],{method:'HEAD'});
   assert.equal(head.headers.get('content-type'),'image/webp');
   assert.equal((await head.arrayBuffer()).byteLength,0);
