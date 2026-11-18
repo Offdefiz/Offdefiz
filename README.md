@@ -65,3 +65,8 @@ Página pública de documentação para criação de vídeos: `/identidade`. CSS
 ## Novo módulo: Área do Cliente (protótipo)
 
 Abrir `/cliente/demo` para a experiência responsiva de acompanhamento do cliente: casos e etapas, eventos informativos, honorários/parcelas fictícios, mensagens locais não enviadas e preferências de boletim. O escritório é personalizável dentro de uma identidade Partelís A1 estável; demonstração usa dois clientes e dois escritórios fictícios. O link também está na sidebar do aplicativo. **Nenhuma conexão com os dados reais da tabela `cj_state` foi adicionada.** O login real de clientes, RLS, upload de documentos e troca real de mensagens ainda não existem. Antes do lançamento ver `portal-architecture.md`.
+
+
+### Capturas da página comercial
+
+A seção **Partelís por dentro** usa imagens WebP do próprio produto em `telas/`, sem sessão ou consulta ao banco. Para atualizar uma captura, abra `/demo?modo=livre` em um perfil limpo e use somente dados fictícios. Capture **Hoje** para o painel e os gráficos, e **Propostas → Nova proposta** para o editor. Os recortes para celular foram capturados na interface responsiva. Ao trocar imagens, atualize dimensões, nomes versionados, lista de rotas públicas e verificação de build. Não inclua capturas de escritórios reais.
