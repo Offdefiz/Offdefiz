@@ -13,6 +13,7 @@ Uma plataforma pensada para organizar a rotina de um escritório em um só lugar
 
 **Em poucas palavras:** ajuda o escritório a acompanhar o trabalho e as informações da operação sem depender de controles espalhados.
 
+- [Acessar a plataforma Partelís](https://partelis.com.br)
 - [Ver o código e a estrutura do projeto](https://github.com/Offdefiz/Offdefiz)
 - [Consultar a documentação técnica da Partelís](docs/README-PARTELIS.md)
 
