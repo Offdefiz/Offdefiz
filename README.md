@@ -14,6 +14,7 @@ Uma plataforma pensada para organizar a rotina de um escritório em um só lugar
 **Em poucas palavras:** ajuda o escritório a acompanhar o trabalho e as informações da operação sem depender de controles espalhados.
 
 - [Ver o código e a estrutura do projeto](https://github.com/Offdefiz/Offdefiz)
+- [Consultar a documentação técnica da Partelís](docs/README-PARTELIS.md)
 
 ### 2. NoteJuris — estudos e análise de documentos jurídicos
 Uma aplicação para organizar matérias e conteúdos jurídicos, com recursos de estudo, fichamentos, linhas do tempo, fluxogramas e flashcards. Também possui recursos de leitura e análise estruturada de documentos jurídicos.
