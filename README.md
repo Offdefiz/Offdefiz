@@ -55,4 +55,4 @@ Se você é profissional de tecnologia, pode explorar os repositórios, consulta
 **Daniel Felipe**  
 Projetos digitais • Direito • Negócios • Tecnologia
 
-[LinkedIn](https://www.linkedin.com/) · [GitHub](https://github.com/Offdefiz)
+[GitHub](https://github.com/Offdefiz)
